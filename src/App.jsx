@@ -2053,7 +2053,7 @@ SOLO JSON sin backticks ni texto extra:
 }`;
 
     try {
-      const r = await fetch("https://api.anthropic.com/v1/messages", {
+      const r = await fetch("/.netlify/functions/ai", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages: [{ role: "user", content: prompt }] })
       });
@@ -2112,7 +2112,7 @@ SOLO JSON sin backticks ni texto extra:
           { type: "text", text: `Analizá este informe médico. ${ctx}\n\nUsá los rangos de referencia correctos para ${sexLabel}.\n\nProporcioná:\n1. 📋 RESUMEN: Qué tipo de análisis es\n2. 🔬 VALORES CLAVE: Indicá NORMAL ✅, BAJO ⚠️ o ALTO 🔴 con rango de referencia para ${sexLabel}.\n3. 💪 IMPACTO FITNESS: Cómo afectan el entrenamiento y recuperación\n4. 🥗 NUTRICIÓN: Ajustes a la dieta según los valores\n5. ⚠️ ALERTAS: Valores que requieran atención médica\n\n⚕️ Advertí que esto no reemplaza consulta médica.` }
         ]
       }];
-      const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages }) });
+      const res = await fetch("/.netlify/functions/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages }) });
       const data = await res.json();
       const text = data.content?.find(b => b.type === "text")?.text || "No se pudo analizar.";
       setFiles(f => f.map(fi => fi.id === fileEntry.id ? { ...fi, analysis: text } : fi));
@@ -2340,7 +2340,7 @@ INSTRUCCIONES:
 SOLO JSON sin backticks:
 {"dayFocus":"string","warmup":"descripción específica","exercises":[{"machine":"nombre","muscle":"músculo","sets":3,"reps":"8-12","rest":"60 seg","weight_suggestion":"20-25 kg","tip":""}],"finisher":{"name":"","desc":""},"cooldown":"string","duration":"string","musclesWorked":[""],"dailyTip":{"category":"Nutrición|Técnica|Recuperación|Motivación","title":"","content":""},"caloriesBurned":"","intensity":""}`;
     try {
-      const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, messages: [{ role: "user", content: prompt }] }) });
+      const r = await fetch("/.netlify/functions/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, messages: [{ role: "user", content: prompt }] }) });
       const d = await r.json();
       const t = d.content?.find(b => b.type === "text")?.text || "";
       const p = JSON.parse(t.replace(/```json|```/g, "").trim());
@@ -2401,7 +2401,7 @@ SOLO JSON sin backticks:
 ]`;
 
     try {
-      const r = await fetch("https://api.anthropic.com/v1/messages", {
+      const r = await fetch("/.netlify/functions/ai", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 500, messages: [{ role: "user", content: prompt }] })
       });
@@ -2532,7 +2532,7 @@ SOLO JSON sin backticks:
               <div style={{ ...card, padding: 14, marginBottom: 12, background: (tipColor[tip.category] || "#e84a2e") + "0a", borderColor: (tipColor[tip.category] || "#e84a2e") + "2a" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}>
                   <Pill color={tipColor[tip.category] || "#e84a2e"}>{tip.category}</Pill>
-                  <button onClick={async () => { try { const r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 300, messages: [{ role: "user", content: `Consejo para ${goalInfo?.label}, ${bodyInfo?.sublabel}, ${user.weight}kg, meta ${daily}g proteína. SOLO JSON: {"category":"Nutrición|Técnica|Recuperación|Motivación","title":"...","content":"..."}` }] }) }); const d = await r.json(); setTip(JSON.parse(d.content?.find(b => b.type === "text")?.text?.replace(/```json|```/g,"").trim()||"{}")); } catch {} }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.25)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans',sans-serif" }}>↻</button>
+                  <button onClick={async () => { try { const r = await fetch("/.netlify/functions/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 300, messages: [{ role: "user", content: `Consejo para ${goalInfo?.label}, ${bodyInfo?.sublabel}, ${user.weight}kg, meta ${daily}g proteína. SOLO JSON: {"category":"Nutrición|Técnica|Recuperación|Motivación","title":"...","content":"..."}` }] }) }); const d = await r.json(); setTip(JSON.parse(d.content?.find(b => b.type === "text")?.text?.replace(/```json|```/g,"").trim()||"{}")); } catch {} }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.25)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans',sans-serif" }}>↻</button>
                 </div>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{tip.title}</div>
                 <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.6 }}>{tip.content}</div>

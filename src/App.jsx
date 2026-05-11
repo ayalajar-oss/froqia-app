@@ -25,6 +25,7 @@ export default function App() {
         },
         compras_items: [{
   nombre: "Plan Mensual FROQIA",
+  descripcion: "Plan Mensual FROQIA - Entrenamiento con IA",
   cantidad: 1,
   precio_total: 75000,
   categoria: "909",

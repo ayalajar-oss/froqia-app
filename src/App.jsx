@@ -10,33 +10,43 @@ export default function App() {
     setMensaje('Creando pedido...')
     
     try {
-      const payload = {
-        public_key: "97589912831ce10a6fb54a22de05bc4d",
-        monto_total: "75000",
-        tipo_pedido: "VENTA-COMERCIO",
-        id_pedido_comercio: "TEST" + Date.now(),
-        comprador: {
-          nombre: "Test User",
-          email: "test@froqia.com",
-          documento: "1234567",
-          tipo_documento: "CI",
-          ciudad: 1,
-          telefono: "+595971111111"
-        },
-        compras_items: [{
-  nombre: "Plan Mensual FROQIA",
-  descripcion: "Plan Mensual FROQIA - Entrenamiento con IA",
-  cantidad: 1,
-  precio_total: 75000,
-  categoria: "909",
-  id_producto: 1,
-  ciudad: 1,
-  vendedor_direccion: "Asuncion Paraguay",
-  public_key: "97589912831ce10a6fb54a22de05bc4d"
-}],
-        fecha_maxima_pago: new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 19).replace('T', ' '),
-        forma_pago: 9
-      }
+   const payload = {
+  public_key: "97589912831ce10a6fb54a22de05bc4d",
+  monto_total: 75000,
+  tipo_pedido: "VENTA-COMERCIO",
+  id_pedido_comercio: "TEST" + Date.now(),
+  descripcion_resumen: "Plan Mensual FROQIA",
+  forma_pago: 9,
+  comprador: {
+    nombre: "Test User",
+    email: "test@froqia.com",
+    documento: "1234567",
+    tipo_documento: "CI",
+    ciudad: 1,
+    telefono: "+595971111111",
+    ruc: "",
+    direccion: "",
+    coordenadas: "",
+    razon_social: "",
+    direccion_referencia: null
+  },
+  compras_items: [{
+    nombre: "Plan Mensual FROQIA",
+    descripcion: "Plan Mensual FROQIA - Entrenamiento con IA",
+    cantidad: 1,
+    precio_total: 75000,
+    categoria: "909",
+    id_producto: 1,
+    ciudad: "1",
+    public_key: "97589912831ce10a6fb54a22de05bc4d",
+    url_imagen: "",
+    vendedor_telefono: "",
+    vendedor_direccion: "",
+    vendedor_direccion_referencia: "",
+    vendedor_direccion_coordenadas: ""
+  }],
+  fecha_maxima_pago: "2026-05-18 12:00:00"
+}
 
       const response = await fetch('/.netlify/functions/pagopar', {
         method: 'POST',

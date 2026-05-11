@@ -30,7 +30,8 @@ export default function App() {
   categoria: "909",
   id_producto: 1,
   ciudad: 1,
-  vendedor_direccion: "Asuncion Paraguay"
+  vendedor_direccion: "Asuncion Paraguay",
+  public_key: "97589912831ce10a6fb54a22de05bc4d"
 }],
         fecha_maxima_pago: new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 19).replace('T', ' '),
         forma_pago: 9

@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const PRIVATE_KEY = "34c7c327e58cdb13e2e197dcda305fee";
 
 function generarTokenPaso1(idPedido, montoTotal) {
-  const monto = parseFloat(montoTotal).toFixed(2);
+  const monto = String(parseFloat(montoTotal));
   const stringToHash = PRIVATE_KEY + idPedido + monto;
   return crypto.createHash('sha1').update(stringToHash).digest('hex');
 }

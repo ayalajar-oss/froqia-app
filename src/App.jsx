@@ -24,12 +24,14 @@ export default function App() {
           telefono: "+595971111111"
         },
         compras_items: [{
-          nombre: "Plan Mensual FROQIA",
-          cantidad: 1,
-          precio_total: "75000",
-          categoria: "909",
-          id_producto: 1
-        }],
+  nombre: "Plan Mensual FROQIA",
+  cantidad: 1,
+  precio_total: 75000,
+  categoria: "909",
+  id_producto: 1,
+  ciudad: 1,
+  vendedor_direccion: "Asuncion Paraguay"
+}],
         fecha_maxima_pago: new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 19).replace('T', ' '),
         forma_pago: 9
       }

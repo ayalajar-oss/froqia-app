@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const PRIVATE_KEY = "34c7c327e58cdb13e2e197dcda305fee";
+const PRIVATE_KEY = "9186345beb9c478b0a295800eb006daf";
 
 function generarTokenPaso1(idPedido, montoTotal) {
   const monto = String(parseFloat(montoTotal));

@@ -11,7 +11,7 @@ export default function App() {
     
     try {
    const payload = {
-  public_key: "97589912831ce10a6fb54a22de05bc4d",
+  public_key: "ee939b5cf36d53c02decb7666ab82fd2",
   monto_total: 75000,
   tipo_pedido: "VENTA-COMERCIO",
   id_pedido_comercio: "TEST" + Date.now(),

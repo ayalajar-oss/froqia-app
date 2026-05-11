@@ -2590,7 +2590,26 @@ SOLO JSON sin backticks:
         )}
 
         {/* NUTRICIÓN */}
-        {tab === "nutrition" && <div style={{ paddingTop: 16 }}><h3 style={{ margin: "0 0 16px", fontSize: 18, fontWeight: 800 }}>🥗 Nutrición & Proteína</h3><ProteinCalculator user={user} /></div>}
+        {tab === "nutrition" && (
+          <div style={{ paddingTop: 16 }}>
+            <h3 style={{ margin: "0 0 16px", fontSize: 18, fontWeight: 800 }}>🥗 Nutrición & Proteína</h3>
+            {!isPremium ? (
+              <div style={{ textAlign: "center", padding: "40px 20px", background: "rgba(232,74,46,0.08)", borderRadius: 16, border: "1px solid rgba(232,74,46,0.2)" }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>🔒</div>
+                <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 800 }}>Plan Nutricional Personalizado</h3>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, margin: "0 0 20px", lineHeight: 1.5 }}>
+                  Calculá tu meta de proteína, armá tu plan diario y accedé a la tabla interactiva de alimentos. Disponible en planes de pago.
+                </p>
+                <button onClick={() => setTab("upgrade")} style={{ background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 12, padding: "13px 28px", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 20px rgba(232,74,46,0.35)" }}>
+                  ⭐ Ver planes de suscripción
+                </button>
+                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginTop: 12 }}>Desde ₲ 75.000/mes</p>
+              </div>
+            ) : (
+              <ProteinCalculator user={user} />
+            )}
+          </div>
+        )}
 
         {/* MÉDICO */}
         {tab === "medical" && <div style={{ paddingTop: 16 }}><h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800 }}>🧪 Análisis Médico</h3><p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, margin: "0 0 16px" }}>Subí tus hemogramas e informes. La IA los analiza y ajusta tu plan.</p><MedicalFiles user={user} isPremium={isPremium} onUpgrade={() => setTab("upgrade")} /></div>}
@@ -2676,7 +2695,7 @@ SOLO JSON sin backticks:
 
       {/* Bottom nav */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 520, background: "rgba(8,8,9,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-around", padding: "10px 0 18px" }}>
-        {[["home", "🏠".tabHome], ["nutrition", "🥗".tabNutrition], ["medical", "🧪".tabMedical], ["history", "📊".tabHistory], ["profile", "👤".tabProfile]].map(([id, icon, label]) => (
+        {[["home", "🏠", "Inicio"], ["nutrition", "🥗", "Nutrición"], ["medical", "🧪", "Médico"], ["history", "📊", "Historial"], ["profile", "👤", "Perfil"]].map(([id, icon, label]) => (
           <button key={id} onClick={() => setTab(id)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: tab === id ? "#e8a090" : "rgba(255,255,255,0.3)", fontFamily: "'DM Sans',sans-serif" }}>
             <span style={{ fontSize: 20 }}>{icon}</span>
             <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>
@@ -2851,26 +2870,50 @@ function UpgradeCheckout({ plan, user, onSuccess, onCancel }) {
 }
 
 
+// Helper para llamar a la función de Supabase
+async function supabaseCall(action, data) {
+  const r = await fetch("/.netlify/functions/supabase", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, data })
+  });
+  return r.json();
+}
+
 export default function App() {
-  const [screen, setScreen] = useState("tutorial");
+  const [screen, setScreen] = useState("loading");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [userData, setUserData] = useState(null);
   const [suscripcion, setSuscripcion] = useState(null);
   const [fullUser, setFullUser] = useState(null);
 
-  // Detectar si PagoPar redirigió de vuelta con un hash
+  // Al cargar — verificar si hay sesión guardada
   useEffect(() => {
+    const saved = localStorage.getItem("froqia_session");
+    if (saved) {
+      try {
+        const { user, perfil, suscripcion: sus } = JSON.parse(saved);
+        if (user && perfil && sus) {
+          setFullUser(perfil);
+          setSuscripcion(sus);
+          setScreen("app");
+          return;
+        }
+      } catch {}
+    }
+
+    // Detectar si PagoPar redirigió de vuelta con un hash
     const path = window.location.pathname;
-    // PagoPar redirige a /ELHASH — si el path tiene algo que no sea "/" es un hash de PagoPar
     if (path && path !== "/" && path !== "/index.html") {
       const hash = path.replace("/", "");
       if (hash && hash.length > 8) {
-        // Es un hash de PagoPar — mostrar pantalla de éxito
         setScreen("pagopar-success");
-        // Limpiar la URL sin recargar
         window.history.replaceState({}, "", "/");
+        return;
       }
     }
+
+    setScreen("tutorial");
   }, []);
 
   if (screen === "pagopar-success") {
@@ -2901,18 +2944,56 @@ export default function App() {
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
       `}</style>
+      {screen === "loading" && (
+        <div style={{ minHeight: "100vh", background: "#080809", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ textAlign: "center", color: "#fff" }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🐸</div>
+            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Cargando FROQIA...</div>
+          </div>
+        </div>
+      )}
       {screen === "tutorial" && <TutorialScreen onFinish={() => setScreen("landing")} />}
       {screen === "landing" && <LandingScreen onSelectPlan={p => { setSelectedPlan(p); setScreen("register"); }} onTutorial={() => setScreen("tutorial")} />}
       {screen === "register" && selectedPlan && <RegisterScreen plan={selectedPlan} onBack={() => setScreen("landing")} onContinue={d => { setUserData(d); setScreen("checkout"); }} />}
       {screen === "checkout" && selectedPlan && userData && <CheckoutScreen plan={selectedPlan} userData={userData} onBack={() => setScreen("register")} onSuccess={r => { setSuscripcion(r); setScreen("onboarding"); }} />}
-      {screen === "onboarding" && userData && <OnboardingScreen userData={userData} onComplete={u => { setFullUser(u); setScreen("app"); }} />}
+      {screen === "onboarding" && userData && <OnboardingScreen userData={userData} onComplete={async u => {
+        setFullUser(u);
+        // Guardar sesión local
+        localStorage.setItem("froqia_session", JSON.stringify({
+          user: { email: userData.email },
+          perfil: u,
+          suscripcion
+        }));
+        // Guardar en Supabase (en segundo plano)
+        try {
+          await supabaseCall("updatePerfil", {
+            user_id: userData.email, // usamos email como ID temporario hasta tener auth completo
+            perfil: { ...u, email: userData.email, plan_id: suscripcion?.plan?.id || "trial" }
+          });
+        } catch {}
+        setScreen("app");
+      }} />}
       {screen === "app" && fullUser && suscripcion && (
         <MainApp
           user={fullUser}
           suscripcion={suscripcion}
-         
-          onUpgradePlan={(newPlan) => setSuscripcion(prev => ({ ...prev, plan: newPlan, trialExpiry: null }))}
-          onLogout={() => { setScreen("landing"); setFullUser(null); setSuscripcion(null); setUserData(null); }}
+          onUpgradePlan={(newPlan) => {
+            setSuscripcion(prev => ({ ...prev, plan: newPlan, trialExpiry: null }));
+            // Actualizar sesión local
+            const saved = localStorage.getItem("froqia_session");
+            if (saved) {
+              const s = JSON.parse(saved);
+              s.suscripcion = { ...s.suscripcion, plan: newPlan, trialExpiry: null };
+              localStorage.setItem("froqia_session", JSON.stringify(s));
+            }
+          }}
+          onLogout={() => {
+            localStorage.removeItem("froqia_session");
+            setScreen("landing");
+            setFullUser(null);
+            setSuscripcion(null);
+            setUserData(null);
+          }}
         />
       )}
     </>

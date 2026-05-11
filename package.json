@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "npm exec -- vite build"
   },
   "dependencies": {
     "react": "^19.0.0",

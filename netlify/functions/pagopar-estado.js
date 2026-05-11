@@ -1,7 +1,6 @@
 const crypto = require('crypto');
-const PRIVATE_KEY = "34c7c327e58cdb13e2e197dcda305fee";
-const PUBLIC_KEY = "97589912831ce10a6fb54a22de05bc4d";
-
+const PRIVATE_KEY = "9186345beb9c478b0a295800eb006daf";
+const PUBLIC_KEY = "ee939b5cf36d53c02decb7666ab82fd2";
 exports.handler = async (event) => {
   const headers = {
     "Access-Control-Allow-Origin": "*",

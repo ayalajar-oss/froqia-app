@@ -729,14 +729,66 @@ function RegisterScreen({ plan, onBack, onContinue }) {
   const [phone, setPhone] = useState("");
   const [nombre, setNombre] = useState("");
   const [cedula, setCedula] = useState("");
+  const [password, setPassword] = useState("");
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleLogin = async () => {
+    if (!loginEmail || !loginPassword) return setError("Completá email y contraseña");
+    setLoading(true);
+    setError("");
+    try {
+      const res = await supabaseCall("login", { email: loginEmail, password: loginPassword });
+      if (res.error) return setError(res.error);
+      if (res.user && res.perfil) {
+        onContinue({ 
+          ...res.perfil, 
+          email: loginEmail, 
+          _supabaseUser: res.user,
+          _session: res.session,
+          _loginExistente: true 
+        });
+      } else if (res.user) {
+        // Usuario existe pero sin perfil — necesita onboarding
+        onContinue({ nombre: res.user.user_metadata?.nombre || "", email: loginEmail, _supabaseUser: res.user, _session: res.session });
+      }
+    } catch(e) {
+      setError("Error de conexión");
+    }
+    setLoading(false);
+  };
+
+  const handleSubmit = async () => {
     if (!nombre.trim()) return setError("Ingresá tu nombre completo");
     if (!cedula.trim()) return setError("Ingresá tu número de cédula");
     if (method === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setError("Email inválido");
     if (method === "phone" && phone.replace(/\D/g, "").length < 9) return setError("Teléfono inválido");
-    onContinue({ nombre, cedula, email: method === "email" ? email : "", phone: method === "phone" ? phone : "", method });
+    if (!password || password.length < 6) return setError("La contraseña debe tener al menos 6 caracteres");
+    
+    setLoading(true);
+    setError("");
+    
+    try {
+      // Registrar en Supabase Auth
+      const emailFinal = method === "email" ? email : `${phone.replace(/\D/g, "")}@froqia.com`;
+      const res = await supabaseCall("register", { email: emailFinal, password, nombre });
+      if (res.error) return setError(res.error);
+      
+      onContinue({ 
+        nombre, cedula, 
+        email: emailFinal, 
+        phone: method === "phone" ? phone : "", 
+        method,
+        _supabaseUser: res.user,
+        _session: res.session
+      });
+    } catch(e) {
+      setError("Error de conexión");
+    }
+    setLoading(false);
   };
 
   return (
@@ -750,23 +802,48 @@ function RegisterScreen({ plan, onBack, onContinue }) {
         </div>
         <div style={{ fontWeight: 900, fontSize: 18, color: "#fff" }}>{plan.precioLabel}</div>
       </div>
-      <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 4px" }}>Crear tu cuenta</h2>
-      <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, margin: "0 0 20px" }}>{plan.trial ? "7 días completos gratis. Cancelás cuando querás." : "Ingresá tus datos para suscribirte."}</p>
-      <div style={{ display: "flex", gap: 6, marginBottom: 16, background: "rgba(255,255,255,0.04)", borderRadius: 11, padding: 4 }}>
-        {[["email", "📧 Email"], ["phone", "📱 Teléfono"]].map(([v, l]) => (
-          <button key={v} onClick={() => setMethod(v)} style={{ flex: 1, padding: "9px 0", border: "none", borderRadius: 8, cursor: "pointer", background: method === v ? "#e84a2e" : "transparent", color: method === v ? "#fff" : "rgba(255,255,255,0.4)", fontWeight: 700, fontSize: 13, fontFamily: "'DM Sans',sans-serif" }}>{l}</button>
-        ))}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <Input label="Nombre completo" value={nombre} onChange={setNombre} placeholder="Ej: Carlos González" />
-        <Input label="Número de cédula" value={cedula} onChange={setCedula} placeholder="Ej: 5234567" />
-        {method === "email" ? <Input label="Correo electrónico" type="email" value={email} onChange={setEmail} placeholder="tu@correo.com" prefix="✉" /> : <Input label="Teléfono" type="tel" value={phone} onChange={setPhone} placeholder="+595 971 123 456" prefix="📱" />}
-      </div>
-      {error && <div style={{ marginTop: 12, padding: "10px 13px", background: "rgba(232,74,46,0.1)", border: "1px solid rgba(232,74,46,0.3)", borderRadius: 10, color: "#e8a090", fontSize: 13 }}>⚠️ {error}</div>}
-      <Btn onClick={handleSubmit} variant={plan.trial ? "trial" : "primary"} style={{ width: "100%", marginTop: 20, padding: 15, fontSize: 15 }}>
-        {plan.trial ? "🎁 Crear cuenta gratuita →" : "Continuar al pago →"}
-      </Btn>
-      <TermsInRegister />
+
+      {showLogin ? (
+        <>
+          <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 4px" }}>Iniciar sesión</h2>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, margin: "0 0 20px" }}>Ya tenés cuenta en FROQIA</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Input label="Email" type="email" value={loginEmail} onChange={setLoginEmail} placeholder="tu@correo.com" />
+            <Input label="Contraseña" type="password" value={loginPassword} onChange={setLoginPassword} placeholder="Tu contraseña" />
+          </div>
+          {error && <div style={{ marginTop: 12, padding: "10px 13px", background: "rgba(232,74,46,0.1)", border: "1px solid rgba(232,74,46,0.3)", borderRadius: 10, color: "#e8a090", fontSize: 13 }}>⚠️ {error}</div>}
+          <Btn onClick={handleLogin} disabled={loading} variant="primary" style={{ width: "100%", marginTop: 20, padding: 15, fontSize: 15 }}>
+            {loading ? "Entrando..." : "🚀 Entrar →"}
+          </Btn>
+          <button onClick={() => { setShowLogin(false); setError(""); }} style={{ width: "100%", marginTop: 12, background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 13 }}>
+            ← Crear cuenta nueva
+          </button>
+        </>
+      ) : (
+        <>
+          <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 4px" }}>Crear tu cuenta</h2>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, margin: "0 0 20px" }}>{plan.trial ? "7 días completos gratis. Cancelás cuando querás." : "Ingresá tus datos para suscribirte."}</p>
+          <div style={{ display: "flex", gap: 6, marginBottom: 16, background: "rgba(255,255,255,0.04)", borderRadius: 11, padding: 4 }}>
+            {[["email", "📧 Email"], ["phone", "📱 Teléfono"]].map(([v, l]) => (
+              <button key={v} onClick={() => setMethod(v)} style={{ flex: 1, padding: "9px 0", border: "none", borderRadius: 8, cursor: "pointer", background: method === v ? "#e84a2e" : "transparent", color: method === v ? "#fff" : "rgba(255,255,255,0.4)", fontWeight: 700, fontSize: 13, fontFamily: "'DM Sans',sans-serif" }}>{l}</button>
+            ))}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Input label="Nombre completo" value={nombre} onChange={setNombre} placeholder="Ej: Carlos González" />
+            <Input label="Número de cédula" value={cedula} onChange={setCedula} placeholder="Ej: 5234567" />
+            {method === "email" ? <Input label="Correo electrónico" type="email" value={email} onChange={setEmail} placeholder="tu@correo.com" prefix="✉" /> : <Input label="Teléfono" type="tel" value={phone} onChange={setPhone} placeholder="+595 971 123 456" prefix="📱" />}
+            <Input label="Contraseña" type="password" value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres" />
+          </div>
+          {error && <div style={{ marginTop: 12, padding: "10px 13px", background: "rgba(232,74,46,0.1)", border: "1px solid rgba(232,74,46,0.3)", borderRadius: 10, color: "#e8a090", fontSize: 13 }}>⚠️ {error}</div>}
+          <Btn onClick={handleSubmit} disabled={loading} variant={plan.trial ? "trial" : "primary"} style={{ width: "100%", marginTop: 20, padding: 15, fontSize: 15 }}>
+            {loading ? "Creando cuenta..." : plan.trial ? "🎁 Crear cuenta gratuita →" : "Continuar al pago →"}
+          </Btn>
+          <button onClick={() => { setShowLogin(true); setError(""); }} style={{ width: "100%", marginTop: 12, background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 13 }}>
+            ¿Ya tenés cuenta? Iniciar sesión
+          </button>
+          <TermsInRegister />
+        </>
+      )}
     </div>
   );
 }
@@ -2968,23 +3045,52 @@ export default function App() {
       )}
       {screen === "tutorial" && <TutorialScreen onFinish={() => setScreen("landing")} />}
       {screen === "landing" && <LandingScreen onSelectPlan={p => { setSelectedPlan(p); setScreen("register"); }} onTutorial={() => setScreen("tutorial")} />}
-      {screen === "register" && selectedPlan && <RegisterScreen plan={selectedPlan} onBack={() => setScreen("landing")} onContinue={d => { setUserData(d); setScreen("checkout"); }} />}
+      {screen === "register" && selectedPlan && <RegisterScreen plan={selectedPlan} onBack={() => setScreen("landing")} onContinue={async d => { 
+        setUserData(d); 
+        // Si es login existente con perfil completo → ir directo a la app
+        if (d._loginExistente && d.peso) {
+          setFullUser(d);
+          setSuscripcion({ plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 7 * 24 * 60 * 60 * 1000 });
+          localStorage.setItem("froqia_session", JSON.stringify({
+            user: { email: d.email, id: d._supabaseUser?.id },
+            perfil: d,
+            suscripcion: { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 7 * 24 * 60 * 60 * 1000 }
+          }));
+          setScreen("app");
+        } else {
+          setScreen("checkout");
+        }
+      }} />}
       {screen === "checkout" && selectedPlan && userData && <CheckoutScreen plan={selectedPlan} userData={userData} onBack={() => setScreen("register")} onSuccess={r => { setSuscripcion(r); setScreen("onboarding"); }} />}
       {screen === "onboarding" && userData && <OnboardingScreen userData={userData} onComplete={async u => {
-        setFullUser(u);
+        const fullProfile = { ...u };
+        setFullUser(fullProfile);
+        
+        const supabaseUser = userData._supabaseUser;
+        const session = userData._session;
+        
         // Guardar sesión local
         localStorage.setItem("froqia_session", JSON.stringify({
-          user: { email: userData.email },
-          perfil: u,
+          user: { email: userData.email, id: supabaseUser?.id },
+          perfil: fullProfile,
           suscripcion
         }));
-        // Guardar en Supabase (en segundo plano)
-        try {
-          await supabaseCall("updatePerfil", {
-            user_id: userData.email, // usamos email como ID temporario hasta tener auth completo
-            perfil: { ...u, email: userData.email, plan_id: suscripcion?.plan?.id || "trial" }
-          });
-        } catch {}
+        
+        // Guardar en Supabase
+        if (supabaseUser?.id) {
+          try {
+            await supabaseCall("updatePerfil", {
+              user_id: supabaseUser.id,
+              perfil: { 
+                ...fullProfile, 
+                email: userData.email,
+                nombre: userData.nombre,
+                plan_id: suscripcion?.plan?.id || "trial",
+                plan_expiry: suscripcion?.trialExpiry ? new Date(suscripcion.trialExpiry).toISOString() : null
+              }
+            });
+          } catch {}
+        }
         setScreen("app");
       }} />}
       {screen === "app" && fullUser && suscripcion && (
@@ -3013,3 +3119,4 @@ export default function App() {
     </>
   );
 }
+

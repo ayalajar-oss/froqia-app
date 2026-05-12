@@ -20,38 +20,72 @@ exports.handler = async (event) => {
   try {
     const { action, data } = JSON.parse(event.body || "{}");
 
+    // REGISTRO
+    if (action === "register") {
+      const { email, password, nombre } = data;
+      const { data: authData, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: { data: { nombre } }
+      });
+      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ 
+        user: authData.user, 
+        session: authData.session 
+      })};
+    }
+
+    // LOGIN
+    if (action === "login") {
+      const { email, password } = data;
+      const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
+      
+      // Obtener perfil
+      const { data: perfil } = await supabase
+        .from("perfiles")
+        .select("*")
+        .eq("id", authData.user.id)
+        .single();
+
+      return { statusCode: 200, headers, body: JSON.stringify({ 
+        user: authData.user, 
+        session: authData.session,
+        perfil 
+      })};
+    }
+
     // Obtener perfil
     if (action === "getPerfil") {
-      const { email } = data;
+      const { user_id } = data;
       const { data: perfil, error } = await supabase
         .from("perfiles")
         .select("*")
-        .eq("email", email)
+        .eq("id", user_id)
         .single();
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ perfil }) };
     }
 
-    // Guardar/actualizar perfil completo
+    // Guardar/actualizar perfil
     if (action === "updatePerfil") {
-      const { email, perfil } = data;
+      const { user_id, perfil } = data;
       const { error } = await supabase
         .from("perfiles")
         .upsert({
+          id: user_id,
           ...perfil,
-          email,
           updated_at: new Date().toISOString()
-        }, { onConflict: "email" });
+        });
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
     }
 
     // Guardar rutina completada
     if (action === "saveRutina") {
-      const { email, nombre, ejercicios, calorias, grupo_muscular } = data;
-      
-      // Guardar en tabla rutinas
+      const { user_id, nombre, ejercicios, calorias, grupo_muscular } = data;
       const { error } = await supabase.from("rutinas").insert({
+        user_id,
         nombre,
         ejercicios,
         calorias,
@@ -59,44 +93,33 @@ exports.handler = async (event) => {
         fecha: new Date().toISOString().split("T")[0]
       });
       
-      // Actualizar último entrenamiento en perfil
-      await supabase
-        .from("perfiles")
-        .update({ 
-          ultimo_entrenamiento: new Date().toISOString().split("T")[0],
-          updated_at: new Date().toISOString()
-        })
-        .eq("email", email);
+      // Actualizar último entrenamiento
+      await supabase.from("perfiles")
+        .update({ ultimo_entrenamiento: new Date().toISOString().split("T")[0] })
+        .eq("id", user_id);
 
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
     }
 
-    // Obtener historial de rutinas
+    // Obtener rutinas
     if (action === "getRutinas") {
-      const { email } = data;
-      
-      // Primero obtener user_id desde email
-      const { data: perfil } = await supabase
-        .from("perfiles")
-        .select("id")
-        .eq("email", email)
-        .single();
-
+      const { user_id } = data;
       const { data: rutinas, error } = await supabase
         .from("rutinas")
         .select("*")
+        .eq("user_id", user_id)
         .order("fecha", { ascending: false })
         .limit(30);
-
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ rutinas }) };
     }
 
     // Guardar progreso de peso
     if (action === "saveProgreso") {
-      const { email, peso, notas } = data;
+      const { user_id, peso, notas } = data;
       const { error } = await supabase.from("progreso").insert({
+        user_id,
         peso,
         notas,
         fecha: new Date().toISOString().split("T")[0]
@@ -105,12 +128,13 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
     }
 
-    // Obtener progreso de peso
+    // Obtener progreso
     if (action === "getProgreso") {
-      const { email } = data;
+      const { user_id } = data;
       const { data: progreso, error } = await supabase
         .from("progreso")
         .select("*")
+        .eq("user_id", user_id)
         .order("fecha", { ascending: false })
         .limit(30);
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };

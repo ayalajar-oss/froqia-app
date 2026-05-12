@@ -449,7 +449,7 @@ function ExerciseVideo({ machine, onClose }) {
             {/* YouTube embed */}
             <div style={{ position: "relative", paddingBottom: "56.25%", borderRadius: 14, overflow: "hidden", background: "#000", marginBottom: 16 }}>
               <iframe
-                src={`https://www.youtube.com/embed/${machine.videoId}?autoplay=0&rel=0&modestbranding=1`}
+                src={`https://www.youtube.com/embed/${machine.videoId}?autoplay=0&rel=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=es&hl=es`}
                 title={machine.name}
                 style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
                 frameBorder="0"
@@ -2887,16 +2887,30 @@ export default function App() {
   const [suscripcion, setSuscripcion] = useState(null);
   const [fullUser, setFullUser] = useState(null);
 
-  // Al cargar — verificar si hay sesión guardada
+  // Al cargar — verificar si hay sesión guardada y sincronizar con Supabase
   useEffect(() => {
     const saved = localStorage.getItem("froqia_session");
     if (saved) {
       try {
         const { user, perfil, suscripcion: sus } = JSON.parse(saved);
         if (user && perfil && sus) {
+          // Cargar desde local primero (rápido)
           setFullUser(perfil);
           setSuscripcion(sus);
           setScreen("app");
+          
+          // Sincronizar con Supabase en segundo plano
+          supabaseCall("getPerfil", { email: user.email }).then(res => {
+            if (res.perfil) {
+              setFullUser(res.perfil);
+              // Actualizar localStorage con datos frescos
+              localStorage.setItem("froqia_session", JSON.stringify({
+                user,
+                perfil: res.perfil,
+                suscripcion: sus
+              }));
+            }
+          }).catch(() => {});
           return;
         }
       } catch {}
@@ -2999,4 +3013,3 @@ export default function App() {
     </>
   );
 }
-

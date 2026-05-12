@@ -1,4 +1,3 @@
-// Netlify Function - supabase proxy
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
@@ -21,77 +20,107 @@ exports.handler = async (event) => {
   try {
     const { action, data } = JSON.parse(event.body || "{}");
 
-    // Registro de usuario
-    if (action === "register") {
-      const { email, password, perfil } = data;
-      const { data: authData, error } = await supabase.auth.signUp({ email, password });
-      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
-      
-      // Guardar perfil
-      await supabase.from("perfiles").upsert({
-        id: authData.user.id,
-        email,
-        ...perfil
-      });
-      
-      return { statusCode: 200, headers, body: JSON.stringify({ user: authData.user, session: authData.session }) };
-    }
-
-    // Login
-    if (action === "login") {
-      const { email, password } = data;
-      const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
-      
-      // Obtener perfil
-      const { data: perfil } = await supabase.from("perfiles").select("*").eq("id", authData.user.id).single();
-      
-      return { statusCode: 200, headers, body: JSON.stringify({ user: authData.user, session: authData.session, perfil }) };
-    }
-
     // Obtener perfil
     if (action === "getPerfil") {
-      const { user_id } = data;
-      const { data: perfil, error } = await supabase.from("perfiles").select("*").eq("id", user_id).single();
+      const { email } = data;
+      const { data: perfil, error } = await supabase
+        .from("perfiles")
+        .select("*")
+        .eq("email", email)
+        .single();
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ perfil }) };
     }
 
-    // Actualizar perfil
+    // Guardar/actualizar perfil completo
     if (action === "updatePerfil") {
-      const { user_id, perfil } = data;
-      const { error } = await supabase.from("perfiles").upsert({ id: user_id, ...perfil, updated_at: new Date().toISOString() });
+      const { email, perfil } = data;
+      const { error } = await supabase
+        .from("perfiles")
+        .upsert({
+          ...perfil,
+          email,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "email" });
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
-    }
-
-    // Guardar progreso
-    if (action === "saveProgreso") {
-      const { user_id, peso, notas } = data;
-      const { error } = await supabase.from("progreso").insert({ user_id, peso, notas });
-      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
-      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
-    }
-
-    // Obtener progreso
-    if (action === "getProgreso") {
-      const { user_id } = data;
-      const { data: progreso, error } = await supabase.from("progreso").select("*").eq("user_id", user_id).order("fecha", { ascending: false }).limit(30);
-      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
-      return { statusCode: 200, headers, body: JSON.stringify({ progreso }) };
     }
 
     // Guardar rutina completada
     if (action === "saveRutina") {
-      const { user_id, nombre, ejercicios, calorias } = data;
-      const { error } = await supabase.from("rutinas").insert({ user_id, nombre, ejercicios, calorias });
+      const { email, nombre, ejercicios, calorias, grupo_muscular } = data;
+      
+      // Guardar en tabla rutinas
+      const { error } = await supabase.from("rutinas").insert({
+        nombre,
+        ejercicios,
+        calorias,
+        grupo_muscular,
+        fecha: new Date().toISOString().split("T")[0]
+      });
+      
+      // Actualizar último entrenamiento en perfil
+      await supabase
+        .from("perfiles")
+        .update({ 
+          ultimo_entrenamiento: new Date().toISOString().split("T")[0],
+          updated_at: new Date().toISOString()
+        })
+        .eq("email", email);
+
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
     }
 
-    return { statusCode: 400, headers, body: JSON.stringify({ error: "Acción no reconocida" }) };
+    // Obtener historial de rutinas
+    if (action === "getRutinas") {
+      const { email } = data;
+      
+      // Primero obtener user_id desde email
+      const { data: perfil } = await supabase
+        .from("perfiles")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      const { data: rutinas, error } = await supabase
+        .from("rutinas")
+        .select("*")
+        .order("fecha", { ascending: false })
+        .limit(30);
+
+      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ rutinas }) };
+    }
+
+    // Guardar progreso de peso
+    if (action === "saveProgreso") {
+      const { email, peso, notas } = data;
+      const { error } = await supabase.from("progreso").insert({
+        peso,
+        notas,
+        fecha: new Date().toISOString().split("T")[0]
+      });
+      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    }
+
+    // Obtener progreso de peso
+    if (action === "getProgreso") {
+      const { email } = data;
+      const { data: progreso, error } = await supabase
+        .from("progreso")
+        .select("*")
+        .order("fecha", { ascending: false })
+        .limit(30);
+      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ progreso }) };
+    }
+
+    return { statusCode: 400, headers, body: JSON.stringify({ error: "Acción no reconocida: " + action }) };
 
   } catch (err) {
+    console.error("Error:", err.message);
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 };

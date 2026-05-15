@@ -742,8 +742,13 @@ function RegisterScreen({ plan, onBack, onContinue }) {
     setError("");
     try {
       const res = await supabaseCall("login", { email: loginEmail, password: loginPassword });
-      if (res.error) return setError(res.error);
+      if (res.error) { 
+        setError(res.error); 
+        setLoading(false);
+        return; 
+      }
       if (res.user && res.perfil) {
+        setLoading(false);
         onContinue({ 
           ...res.perfil, 
           email: loginEmail, 
@@ -752,9 +757,27 @@ function RegisterScreen({ plan, onBack, onContinue }) {
           _loginExistente: true 
         });
       } else if (res.user) {
-        // Usuario existe pero sin perfil — necesita onboarding
-        onContinue({ nombre: res.user.user_metadata?.nombre || "", email: loginEmail, _supabaseUser: res.user, _session: res.session });
+  setLoading(false);
+  // Buscar perfil en localStorage como fallback
+  const savedRaw = localStorage.getItem("froqia_session");
+  if (savedRaw) {
+    try {
+      const saved = JSON.parse(savedRaw);
+      if (saved.perfil && saved.user?.email === loginEmail) {
+        onContinue({ 
+          ...saved.perfil, 
+          email: loginEmail, 
+          _supabaseUser: res.user,
+          _session: res.session,
+          _loginExistente: true 
+        });
+        return;
       }
+    } catch {}
+  }
+  // Sin perfil local — necesita onboarding
+  onContinue({ nombre: res.user.user_metadata?.nombre || "", email: loginEmail, _supabaseUser: res.user, _session: res.session });
+}
     } catch(e) {
       setError("Error de conexión");
     }
@@ -767,16 +790,12 @@ function RegisterScreen({ plan, onBack, onContinue }) {
     if (method === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setError("Email inválido");
     if (method === "phone" && phone.replace(/\D/g, "").length < 9) return setError("Teléfono inválido");
     if (!password || password.length < 6) return setError("La contraseña debe tener al menos 6 caracteres");
-    
     setLoading(true);
     setError("");
-    
     try {
-      // Registrar en Supabase Auth
       const emailFinal = method === "email" ? email : `${phone.replace(/\D/g, "")}@froqia.com`;
       const res = await supabaseCall("register", { email: emailFinal, password, nombre });
-      if (res.error) return setError(res.error);
-      
+      if (res.error) { setError(res.error); setLoading(false); return; }
       onContinue({ 
         nombre, cedula, 
         email: emailFinal, 
@@ -2355,7 +2374,23 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan }) {
   const [routine, setRoutine] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tip, setTip] = useState(null);
-  const [history, setHistory] = useState([]);
+const [history, setHistory] = useState([]);
+useEffect(() => {
+  const userId = user.id || user._supabaseUser?.id;
+  if (userId) {
+    supabaseCall("getRutinas", { user_id: userId }).then(res => {
+      if (res.rutinas) {
+        setHistory(res.rutinas.map(r => ({
+          date: r.fecha,
+          focus: r.nombre,
+          muscles: r.grupo_muscular ? [r.grupo_muscular] : [],
+          completed: r.ejercicios,
+          total: r.ejercicios
+        })));
+      }
+    }).catch(() => {});
+  }
+}, []);
   const [done, setDone] = useState({});
   const [showFinish, setShowFinish] = useState(false);
   const [selectedMachine, setSelectedMachine] = useState(null);
@@ -2661,7 +2696,9 @@ SOLO JSON sin backticks:
             )}
             {!loading && routine?.cooldown && <div style={{ ...card, padding: 12, marginTop: 9, borderColor: "rgba(139,92,246,0.2)", background: "rgba(139,92,246,0.04)" }}><div style={{ color: "#8b5cf6", fontSize: 10, fontWeight: 800, letterSpacing: 1, marginBottom: 5 }}>❄️ ENFRIAMIENTO</div><div style={{ color: "rgba(255,255,255,0.65)", fontSize: 13, lineHeight: 1.6 }}>{routine.cooldown}</div></div>}
 
-            {!loading && doneCount > 0 && <Btn onClick={() => { setHistory(h => [{ date: new Date().toLocaleDateString(), focus: routine?.dayFocus, muscles: routine?.musclesWorked || [], completed: doneCount, total: totalEx }, ...h]); setShowFinish(true); }} variant="success" style={{ width: "100%", marginTop: 14, padding: 14, fontSize: 15 }}>✅ Finalizar ({doneCount}/{totalEx})</Btn>}
+       {!loading && doneCount > 0 && <Btn onClick={() => {
+  if (showFinish) return; const newEntry = { date: new Date().toLocaleDateString(), focus: routine?.dayFocus, muscles: routine?.musclesWorked || [], completed: doneCount, total: totalEx }; setHistory(h => [newEntry, ...h]); const userId = JSON.parse(localStorage.getItem("froqia_session"))?.user?.id;; if (userId) { console.log("userId:", userId);
+console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id: userId, nombre: routine?.dayFocus || "Entrenamiento", ejercicios: doneCount, calorias: routine?.caloriesBurned || "0", grupo_muscular: routine?.musclesWorked?.[0] || "" }).catch(() => {}); } setShowFinish(true); }} variant="success" style={{ width: "100%", marginTop: 14, padding: 14, fontSize: 15 }}>✅ Finalizar ({doneCount}/{totalEx})</Btn>}
             <Btn onClick={generateRoutine} variant="ghost" style={{ width: "100%", marginTop: 10, fontSize: 13 }}>🔄 Nueva rutina</Btn>
           </>
         )}
@@ -2793,7 +2830,7 @@ SOLO JSON sin backticks:
               {[["Ejercicios", `${doneCount}/${totalEx}`], ["Calorías", `~${routine?.caloriesBurned}`], ["Proteína post", Math.round(daily * 0.3) + "g"], ["Intensidad", routine?.intensity]].map(([k, v]) => <div key={k} style={{ ...card, padding: "11px 13px", textAlign: "center" }}><div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{k}</div><div style={{ fontWeight: 700, fontSize: 14, marginTop: 3 }}>{v}</div></div>)}
             </div>
             <Btn onClick={() => { setShowFinish(false); setDone({}); generateRoutine(); }} style={{ width: "100%", padding: 14, fontSize: 15 }}>🔁 Nueva rutina</Btn>
-            <Btn onClick={() => setShowFinish(false)} variant="ghost" style={{ width: "100%", marginTop: 9 }}>Cerrar</Btn>
+           <Btn onClick={() => { setShowFinish(false); setDone({}); }} variant="ghost" style={{ width: "100%", marginTop: 9 }}>Cerrar</Btn>
           </div>
         </div>
       )}
@@ -2970,21 +3007,26 @@ export default function App() {
     if (saved) {
       try {
         const { user, perfil, suscripcion: sus } = JSON.parse(saved);
-        if (user && perfil && sus) {
-          // Cargar desde local primero (rápido)
+        if (user && perfil) {
+          const susFinal = sus || { 
+            plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "7 días" }, 
+            trialExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000 
+          };
           setFullUser(perfil);
-          setSuscripcion(sus);
+          setSuscripcion(susFinal);
+          setScreen("app");
+          
+          setSuscripcion(susFinal);
           setScreen("app");
           
           // Sincronizar con Supabase en segundo plano
-          supabaseCall("getPerfil", { email: user.email }).then(res => {
+          supabaseCall("getPerfil", { user_id: user.id }).then(res => {
             if (res.perfil) {
               setFullUser(res.perfil);
-              // Actualizar localStorage con datos frescos
               localStorage.setItem("froqia_session", JSON.stringify({
                 user,
                 perfil: res.perfil,
-                suscripcion: sus
+                suscripcion: susFinal
               }));
             }
           }).catch(() => {});
@@ -3003,7 +3045,6 @@ export default function App() {
         return;
       }
     }
-
     setScreen("tutorial");
   }, []);
 
@@ -3047,14 +3088,14 @@ export default function App() {
       {screen === "landing" && <LandingScreen onSelectPlan={p => { setSelectedPlan(p); setScreen("register"); }} onTutorial={() => setScreen("tutorial")} />}
       {screen === "register" && selectedPlan && <RegisterScreen plan={selectedPlan} onBack={() => setScreen("landing")} onContinue={async d => { 
         setUserData(d); 
-        // Si es login existente con perfil completo → ir directo a la app
-        if (d._loginExistente && d.peso) {
-          setFullUser(d);
-          setSuscripcion({ plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 7 * 24 * 60 * 60 * 1000 });
+       if (d._loginExistente && d.weight) {
+  setFullUser({ ...d, machines: d.machines || [], nombre: d.nombre || d.email?.split('@')[0] || 'Usuario' });
+          const sus = { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 7 * 24 * 60 * 60 * 1000 };
+          setSuscripcion(sus);
           localStorage.setItem("froqia_session", JSON.stringify({
             user: { email: d.email, id: d._supabaseUser?.id },
             perfil: d,
-            suscripcion: { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 7 * 24 * 60 * 60 * 1000 }
+            suscripcion: sus
           }));
           setScreen("app");
         } else {
@@ -3063,34 +3104,38 @@ export default function App() {
       }} />}
       {screen === "checkout" && selectedPlan && userData && <CheckoutScreen plan={selectedPlan} userData={userData} onBack={() => setScreen("register")} onSuccess={r => { setSuscripcion(r); setScreen("onboarding"); }} />}
       {screen === "onboarding" && userData && <OnboardingScreen userData={userData} onComplete={async u => {
-        const fullProfile = { ...u };
-        setFullUser(fullProfile);
-        
+        const { _supabaseUser, _session, ...fullProfile } = u;
         const supabaseUser = userData._supabaseUser;
-        const session = userData._session;
         
-        // Guardar sesión local
+        const susFinal = suscripcion || { 
+          plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "7 días" }, 
+          trialExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000 
+        };
+
+        // Guardar sesión local ANTES de setState
         localStorage.setItem("froqia_session", JSON.stringify({
           user: { email: userData.email, id: supabaseUser?.id },
           perfil: fullProfile,
-          suscripcion
+          suscripcion: susFinal
         }));
+
+        setFullUser(fullProfile);
+        setSuscripcion(susFinal);
         
-        // Guardar en Supabase
+        // Guardar en Supabase en segundo plano
         if (supabaseUser?.id) {
-          try {
-            await supabaseCall("updatePerfil", {
-              user_id: supabaseUser.id,
-              perfil: { 
-                ...fullProfile, 
-                email: userData.email,
-                nombre: userData.nombre,
-                plan_id: suscripcion?.plan?.id || "trial",
-                plan_expiry: suscripcion?.trialExpiry ? new Date(suscripcion.trialExpiry).toISOString() : null
-              }
-            });
-          } catch {}
+          supabaseCall("updatePerfil", {
+            user_id: supabaseUser.id,
+            perfil: { 
+              ...fullProfile, 
+              email: userData.email,
+              nombre: userData.nombre,
+              plan_id: susFinal?.plan?.id || "trial",
+              plan_expiry: susFinal?.trialExpiry ? new Date(susFinal.trialExpiry).toISOString() : null
+            }
+          }).catch(() => {});
         }
+
         setScreen("app");
       }} />}
       {screen === "app" && fullUser && suscripcion && (
@@ -3099,7 +3144,6 @@ export default function App() {
           suscripcion={suscripcion}
           onUpgradePlan={(newPlan) => {
             setSuscripcion(prev => ({ ...prev, plan: newPlan, trialExpiry: null }));
-            // Actualizar sesión local
             const saved = localStorage.getItem("froqia_session");
             if (saved) {
               const s = JSON.parse(saved);
@@ -3119,4 +3163,3 @@ export default function App() {
     </>
   );
 }
-

@@ -1,15 +1,15 @@
-functionsDirectory = "C:\\Users\\aayala\\OneDrive - Inverfin S.A.E.C.A\\PARTICULARES\\MIT\\App\\froqia-COMPLETO\\netlify\\functions"
-functionsDirectoryOrigin = "config-v1"
+functionsDirectory = "C:\\froqia\\netlify\\functions"
+functionsDirectoryOrigin = "config"
 redirectsOrigin = "config"
 plugins = []
 headers = []
 
 [build]
-publish = "C:\\Users\\aayala\\OneDrive - Inverfin S.A.E.C.A\\PARTICULARES\\MIT\\App\\froqia-COMPLETO\\dist"
+publish = "C:\\froqia\\dist"
 publishOrigin = "config"
-commandOrigin = "ui"
-command = "npm run build"
-functions = "C:\\Users\\aayala\\OneDrive - Inverfin S.A.E.C.A\\PARTICULARES\\MIT\\App\\froqia-COMPLETO\\netlify\\functions"
+commandOrigin = "config"
+command = "npm ci --include=dev && npx vite build"
+functions = "C:\\froqia\\netlify\\functions"
 
 [build.environment]
 

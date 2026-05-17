@@ -2532,34 +2532,35 @@ useEffect(() => {
 
   async function generateRoutine(group = null) {
     setLoading(true); setDone({});
-    const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
-    const warmupExtras = WARMUP_EXTRAS.filter(e => (user.machines || []).includes(e.id));
-    const finisherExtras = FINISHER_OPTIONS.filter(e => (user.machines || []).includes(e.id));
-    const hist = history.slice(-3).map(h => h.muscles.join(", ")).join(" | ") || "Sin historial";
+    try {
+      const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
+      const warmupExtras = WARMUP_EXTRAS.filter(e => (user.machines || []).includes(e.id));
+      const finisherExtras = FINISHER_OPTIONS.filter(e => (user.machines || []).includes(e.id));
+      const hist = history.slice(-3).map(h => h.muscles.join(", ")).join(" | ") || "Sin historial";
 
-    const warmupHint = warmupExtras.length > 0
-      ? `Calentamiento disponible: ${warmupExtras.map(e => e.name).join(", ")}.`
-      : "Calentamiento genérico 5-8 min.";
-    const finisherHint = finisherExtras.length > 0
-      ? `Opciones de cierre: ${finisherExtras.map(e => e.name).join(", ")}. Elegí UNO.`
-      : "Cierre con estiramientos.";
+      const warmupHint = warmupExtras.length > 0
+        ? `Calentamiento disponible: ${warmupExtras.map(e => e.name).join(", ")}.`
+        : "Calentamiento genérico 5-8 min.";
+      const finisherHint = finisherExtras.length > 0
+        ? `Opciones de cierre: ${finisherExtras.map(e => e.name).join(", ")}. Elegí UNO.`
+        : "Cierre con estiramientos.";
 
-    // Estimación de fuerza base según peso corporal y experiencia
-    const expFactor = user.experience === "beginner" ? 0.4 : user.experience === "intermediate" ? 0.6 : 0.8;
-    const baseStrength = Math.round(parseFloat(user.weight) * expFactor);
+      // Estimación de fuerza base según peso corporal y experiencia
+      const expFactor = user.experience === "beginner" ? 0.4 : user.experience === "intermediate" ? 0.6 : 0.8;
+      const baseStrength = Math.round(parseFloat(user.weight) * expFactor);
 
-    const sexLabel = user.sex === "female" ? "Mujer" : user.sex === "male" ? "Hombre" : "No especificado";
-    const muscleGroupInfo = group || MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
-    const muscleGroupHint = !muscleGroupInfo || muscleGroupInfo.id === "surprise"
-      ? "Elegí libremente según historial"
-      : muscleGroupInfo.muscles.length > 0
-        ? `⚠️ OBLIGATORIO: TODOS los ejercicios DEBEN trabajar exclusivamente: ${muscleGroupInfo.muscles.join(", ")}. NO incluyas otros músculos.`
-        : muscleGroupInfo.id === "full_body"
-          ? "⚠️ OBLIGATORIO: Full Body - DEBES combinar tren superior, inferior y core en la misma sesión."
-          : muscleGroupInfo.id === "cardio"
-            ? "⚠️ OBLIGATORIO: SOLO ejercicios cardiovasculares (bici, cinta, elíptica, remo). NO incluyas pesas."
-            : "Elegí libremente según historial";
-    const prompt = `Sos un entrenador personal experto. Generá la rutina del día.
+      const sexLabel = user.sex === "female" ? "Mujer" : user.sex === "male" ? "Hombre" : "No especificado";
+      const muscleGroupInfo = group || MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
+      const muscleGroupHint = !muscleGroupInfo || muscleGroupInfo.id === "surprise"
+        ? "Elegí libremente según historial"
+        : muscleGroupInfo.muscles.length > 0
+          ? `⚠️ OBLIGATORIO: TODOS los ejercicios DEBEN trabajar exclusivamente: ${muscleGroupInfo.muscles.join(", ")}. NO incluyas otros músculos.`
+          : muscleGroupInfo.id === "full_body"
+            ? "⚠️ OBLIGATORIO: Full Body - DEBES combinar tren superior, inferior y core en la misma sesión."
+            : muscleGroupInfo.id === "cardio"
+              ? "⚠️ OBLIGATORIO: SOLO ejercicios cardiovasculares (bici, cinta, elíptica, remo). NO incluyas pesas."
+              : "Elegí libremente según historial";
+      const prompt = `Sos un entrenador personal experto. Generá la rutina del día.
 PERFIL: ${user.nombre}, ${user.age}a, ${user.weight}kg, ${sexLabel}. CUERPO: ${bodyInfo?.sublabel} | OBJETIVO: ${goalInfo?.label} | EXP: ${user.experience} | DÍAS/SEM: ${user.daysPerWeek}
 META PROTEÍNA: ${daily}g/día | HISTORIAL RECIENTE: ${hist}
 EQUIPAMIENTO DISPONIBLE: ${equipment.map(m => m.name).join(", ")}
@@ -2577,32 +2578,34 @@ INSTRUCCIONES:
 - El tip diario debe incluir gramos de proteína
 SOLO JSON sin backticks:
 {"dayFocus":"string","warmup":"descripción específica","exercises":[{"machine":"nombre","muscle":"músculo","sets":3,"reps":"8-12","rest":"60 seg","weight_suggestion":"20-25 kg","tip":""}],"finisher":{"name":"","desc":""},"cooldown":"string","duration":"string","musclesWorked":[""],"dailyTip":{"category":"Nutrición|Técnica|Recuperación|Motivación","title":"","content":""},"caloriesBurned":"","intensity":""}`;
-    try {
-      const r = await fetch("/.netlify/functions/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, messages: [{ role: "user", content: prompt }] }) });
-      const d = await r.json();
-      const t = d.content?.find(b => b.type === "text")?.text || "";
-      const p = JSON.parse(t.replace(/```json|```/g, "").trim());
-      setRoutine(p); setTip(p.dailyTip);
-    } catch {
-      const fb = {
-        dayFocus: "Tren Superior - Pecho y Espalda",
-        warmup: "Rotaciones con banda elástica 5 min + movilidad de hombros y cadera.",
-        exercises: [
-          { machine: "Chest Press (máquina)", muscle: "Pectoral", sets: 3, reps: "10-12", rest: "60 seg", weight_suggestion: "30-40 kg", tip: "Codos a 45°, exhala al empujar." },
-          { machine: "Jalón al Pecho (máquina)", muscle: "Dorsal", sets: 3, reps: "8-10", rest: "60 seg", weight_suggestion: "35-45 kg", tip: "Jalá hacia el pecho, no atrás." },
-          { machine: "Pec Fly / Mariposa (máquina)", muscle: "Pectoral", sets: 3, reps: "12-15", rest: "45 seg", weight_suggestion: "20-30 kg", tip: "Arco controlado, sin rebotes." },
-          { machine: "Remo Sentado (máquina)", muscle: "Espalda Media", sets: 3, reps: "10-12", rest: "60 seg", weight_suggestion: "30-40 kg", tip: "Aprieta omóplatos al final." }
-        ],
-        finisher: { name: "Circuito abdominal de cierre", desc: "3 rondas: 20 crunches + 30 seg plancha + 15 elevaciones de piernas. Sin descanso entre ejercicios." },
-        cooldown: "Estiramientos de pecho y dorsal 5 min.",
-        duration: "50-60 min",
-        musclesWorked: ["Pectoral", "Dorsal", "Espalda Media"],
-        dailyTip: { category: "Nutrición", title: `Meta: ${daily}g de proteína hoy`, content: `Repartí ${daily}g en 4 comidas: desayuno ${Math.round(daily*0.25)}g, almuerzo ${Math.round(daily*0.3)}g, merienda ${Math.round(daily*0.15)}g, cena ${Math.round(daily*0.3)}g.` },
-        caloriesBurned: "300-380", intensity: "Moderada"
-      };
-      setRoutine(fb); setTip(fb.dailyTip);
+      try {
+        const r = await fetch("/.netlify/functions/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1200, messages: [{ role: "user", content: prompt }] }) });
+        const d = await r.json();
+        const t = d.content?.find(b => b.type === "text")?.text || "";
+        const p = JSON.parse(t.replace(/```json|```/g, "").trim());
+        setRoutine(p); setTip(p.dailyTip);
+      } catch {
+        const fb = {
+          dayFocus: "Tren Superior - Pecho y Espalda",
+          warmup: "Rotaciones con banda elástica 5 min + movilidad de hombros y cadera.",
+          exercises: [
+            { machine: "Chest Press (máquina)", muscle: "Pectoral", sets: 3, reps: "10-12", rest: "60 seg", weight_suggestion: "30-40 kg", tip: "Codos a 45°, exhala al empujar." },
+            { machine: "Jalón al Pecho (máquina)", muscle: "Dorsal", sets: 3, reps: "8-10", rest: "60 seg", weight_suggestion: "35-45 kg", tip: "Jalá hacia el pecho, no atrás." },
+            { machine: "Pec Fly / Mariposa (máquina)", muscle: "Pectoral", sets: 3, reps: "12-15", rest: "45 seg", weight_suggestion: "20-30 kg", tip: "Arco controlado, sin rebotes." },
+            { machine: "Remo Sentado (máquina)", muscle: "Espalda Media", sets: 3, reps: "10-12", rest: "60 seg", weight_suggestion: "30-40 kg", tip: "Aprieta omóplatos al final." }
+          ],
+          finisher: { name: "Circuito abdominal de cierre", desc: "3 rondas: 20 crunches + 30 seg plancha + 15 elevaciones de piernas. Sin descanso entre ejercicios." },
+          cooldown: "Estiramientos de pecho y dorsal 5 min.",
+          duration: "50-60 min",
+          musclesWorked: ["Pectoral", "Dorsal", "Espalda Media"],
+          dailyTip: { category: "Nutrición", title: `Meta: ${daily}g de proteína hoy`, content: `Repartí ${daily}g en 4 comidas: desayuno ${Math.round(daily*0.25)}g, almuerzo ${Math.round(daily*0.3)}g, merienda ${Math.round(daily*0.15)}g, cena ${Math.round(daily*0.3)}g.` },
+          caloriesBurned: "300-380", intensity: "Moderada"
+        };
+        setRoutine(fb); setTip(fb.dailyTip);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   // ── Cargar alternativas para un ejercicio ─────────────────────────────────
@@ -2836,11 +2839,11 @@ SOLO JSON sin backticks:
             {/* Botón para generar rutina manualmente */}
             {!routine && !loading && (
               <div style={{ textAlign: "center", padding: "32px 16px" }}>
-                <Btn onClick={generateRoutine} style={{ width: "100%", fontSize: 16, padding: "16px 24px" }}>
+                <Btn onClick={generateRoutine} disabled={!selectedMuscleGroup} style={{ width: "100%", fontSize: 16, padding: "16px 24px" }}>
                   ✨ Generar rutina
                 </Btn>
                 <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 12 }}>
-                  {selectedMuscleGroup ? `Enfoque: ${MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label}` : "Elegí un grupo muscular o generá rutina libre"}
+                  {selectedMuscleGroup ? `Enfoque: ${MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label}` : "Elegí un grupo muscular para comenzar"}
                 </div>
               </div>
             )}
@@ -3021,7 +3024,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
               {[["Ejercicios", `${doneCount}/${totalEx}`], ["Calorías", `~${routine?.caloriesBurned}`], ["Proteína post", Math.round(daily * 0.3) + "g"], ["Intensidad", routine?.intensity]].map(([k, v]) => <div key={k} style={{ ...card, padding: "11px 13px", textAlign: "center" }}><div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{k}</div><div style={{ fontWeight: 700, fontSize: 14, marginTop: 3 }}>{v}</div></div>)}
             </div>
             <Btn onClick={() => { setShowFinish(false); setDone({}); generateRoutine(); }} style={{ width: "100%", padding: 14, fontSize: 15 }}>🔁 Nueva rutina</Btn>
-           <Btn onClick={() => { setShowFinish(false); setDone({}); }} variant="ghost" style={{ width: "100%", marginTop: 9 }}>Cerrar</Btn>
+           <Btn onClick={() => { setShowFinish(false); setDone({}); setRoutine(null); }} variant="ghost" style={{ width: "100%", marginTop: 9 }}>Cerrar</Btn>
           </div>
         </div>
       )}

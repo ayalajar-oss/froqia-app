@@ -3012,7 +3012,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
               {[["Ejercicios", `${doneCount}/${totalEx}`], ["Calorías", `~${routine?.caloriesBurned}`], ["Proteína post", Math.round(daily * 0.3) + "g"], ["Intensidad", routine?.intensity]].map(([k, v]) => <div key={k} style={{ ...card, padding: "11px 13px", textAlign: "center" }}><div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{k}</div><div style={{ fontWeight: 700, fontSize: 14, marginTop: 3 }}>{v}</div></div>)}
             </div>
             <Btn onClick={() => { setShowFinish(false); setDone({}); setRoutine(null); setSelectedMuscleGroup(null); }} style={{ width: "100%", padding: 14, fontSize: 15 }}>🔁 Nueva rutina</Btn>
-           <Btn onClick={() => { setShowFinish(false); setDone({}); setRoutine(null); }} variant="ghost" style={{ width: "100%", marginTop: 9 }}>Cerrar</Btn>
+           <Btn onClick={() => { setShowFinish(false); setDone({}); setRoutine(null); setSelectedMuscleGroup(null); }} variant="ghost" style={{ width: "100%", marginTop: 9 }}>Cerrar</Btn>
           </div>
         </div>
       )}

@@ -73,9 +73,9 @@ export const handler = async (event) => {
         plan_id: perfil.plan_id || "trial",
         plan_expiry: perfil.plan_expiry || null,
         experiencia: perfil.experience,
+        cedula: perfil.cedula || null,
         updated_at: new Date().toISOString()
-      });
-      console.log("updatePerfil error:", JSON.stringify(error));
+      });      console.log("updatePerfil error:", JSON.stringify(error));
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
     }

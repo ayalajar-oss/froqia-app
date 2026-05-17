@@ -1298,7 +1298,110 @@ function getDailyQuote() {
   const day = new Date().getDay() + new Date().getDate();
   return MOTIVATIONAL_QUOTES[day % MOTIVATIONAL_QUOTES.length];
 }
+function WeeklyDashboard({ history }) {
+  const today = new Date();
+  const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
+  const ayerIdx = todayIdx === 0 ? 6 : todayIdx - 1;
+  const [selectedDay, setSelectedDay] = useState(ayerIdx);
 
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - todayIdx);
+  startOfWeek.setHours(0,0,0,0);
+
+  const getDateIdx = (h) => {
+    const fechaStr = (h.date || h.fecha || '').split('T')[0];
+    const [year, month, day] = fechaStr.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
+    return d.getDay() === 0 ? 6 : d.getDay() - 1;
+  };
+
+  const thisWeek = history.filter(h => {
+    const fechaStr = (h.date || h.fecha || '').split('T')[0];
+    const [year, month, day] = fechaStr.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
+    return d >= startOfWeek;
+  });
+
+  const diasEntrenados = new Set(thisWeek.map(getDateIdx));
+  const racha = diasEntrenados.size;
+  const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+  const rutinasDeDia = selectedDay !== null ? thisWeek.filter(h => getDateIdx(h) === selectedDay) : [];
+
+  return (
+    <div style={{ ...card, padding: "14px 16px", marginBottom: 12, background: "linear-gradient(135deg,rgba(232,74,46,0.06),rgba(245,158,11,0.03))", borderColor: "rgba(232,74,46,0.15)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ color: "#e8a090", fontSize: 11, fontWeight: 800, letterSpacing: 1 }}>📊 ESTA SEMANA</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 16 }}>🔥</span>
+          <span style={{ color: "#f59e0b", fontWeight: 800, fontSize: 15 }}>{racha}</span>
+          <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}>días entrenados</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {diasSemana.map((dia, i) => {
+          const entrenado = diasEntrenados.has(i);
+          const esHoy = todayIdx === i;
+          const seleccionado = selectedDay === i;
+          return (
+            <div key={dia} onClick={() => setSelectedDay(prev => prev === i ? null : i)} style={{ flex: 1, textAlign: "center", cursor: "pointer" }}>
+              <div style={{ fontSize: 10, color: esHoy ? "#e84a2e" : seleccionado ? "#fff" : "rgba(255,255,255,0.3)", fontWeight: seleccionado ? 800 : 500, marginBottom: 4 }}>{dia}</div>
+              <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: entrenado ? "#10b981" : seleccionado ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${entrenado ? "#10b981" : seleccionado ? "#e84a2e" : esHoy ? "#e84a2e44" : "rgba(255,255,255,0.08)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", transition: "all 0.2s" }}>
+                {entrenado ? "✓" : esHoy ? "●" : ""}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {selectedDay !== null && (
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10 }}>
+          <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 700, marginBottom: 8 }}>
+            {diasSemana[selectedDay].toUpperCase()}
+          </div>
+          {rutinasDeDia.length === 0 ? (
+            <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 13 }}>
+              {selectedDay === todayIdx ? "Aún no entrenaste hoy 💪" : "Sin entrenamiento este día"}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {rutinasDeDia.map((r, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 10, padding: "8px 12px" }}>
+                  <div>
+                    <div style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{r.focus || r.nombre}</div>
+                    <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 2 }}>{r.grupo_muscular || (r.muscles || [])[0]} · {r.ejercicios || r.completed} ejercicios</div>
+                  </div>
+                  <div style={{ color: "#10b981", fontWeight: 800, fontSize: 13 }}>✓</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+function TipDelDia ({ tip, tipColor, goalInfo, bodyInfo, user, daily, setTip }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!tip || !tip.category) return null;
+  const safeColor = (tipColor && tipColor[tip.category]) || "#e84a2e";
+  return (
+    <div style={{ ...card, marginBottom: 12, overflow: "hidden" }}>
+      <button onClick={() => setExpanded(e => !e)} style={{ width: "100%", background: safeColor + "0a", border: "none", padding: "11px 14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'DM Sans',sans-serif" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Pill color={safeColor}>{tip.category}</Pill>
+          <span style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{tip.title}</span>
+        </div>
+        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>{expanded ? "▲" : "▼"}</span>
+      </button>
+      {expanded && (
+        <div style={{ padding: "0 14px 14px", background: safeColor + "0a" }}>
+          <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.6, marginBottom: 8 }}>{tip.content}</div>
+          <button onClick={async () => { try { const r = await fetch("/.netlify/functions/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 300, messages: [{ role: "user", content: `Consejo para ${goalInfo?.label}, ${bodyInfo?.sublabel}, ${user.weight}kg, meta ${daily}g proteína. SOLO JSON: {"category":"Nutrición|Técnica|Recuperación|Motivación","title":"...","content":"..."}` }] }) }); const d = await r.json(); setTip(JSON.parse(d.content?.find(b => b.type === "text")?.text?.replace(/```json|```/g,"").trim()||"{}")); } catch {} }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans',sans-serif" }}>↻ Nuevo tip</button>
+        </div>
+      )}
+    </div>
+  );
+}
 function MotivationalQuote() {
   const [quote, setQuote] = useState(getDailyQuote());
   const [animating, setAnimating] = useState(false);
@@ -2418,9 +2521,9 @@ useEffect(() => {
 
   async function generateRoutine() {
     setLoading(true); setDone({});
-    const equipment = ALL_EQUIPMENT.filter(m => user.machines.includes(m.id));
-    const warmupExtras = WARMUP_EXTRAS.filter(e => user.machines.includes(e.id));
-    const finisherExtras = FINISHER_OPTIONS.filter(e => user.machines.includes(e.id));
+    const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
+    const warmupExtras = WARMUP_EXTRAS.filter(e => (user.machines || []).includes(e.id));
+    const finisherExtras = FINISHER_OPTIONS.filter(e => (user.machines || []).includes(e.id));
     const hist = history.slice(-3).map(h => h.muscles.join(", ")).join(" | ") || "Sin historial";
 
     const warmupHint = warmupExtras.length > 0
@@ -2490,7 +2593,7 @@ SOLO JSON sin backticks:
     setSubstituting(index);
 
     const ex = routine.exercises[index];
-    const equipment = ALL_EQUIPMENT.filter(m => user.machines.includes(m.id));
+    const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
     const usedMachines = routine.exercises.map(e => e.machine);
 
     const expFactor = user.experience === "beginner" ? 0.4 : user.experience === "intermediate" ? 0.6 : 0.8;
@@ -2640,17 +2743,11 @@ SOLO JSON sin backticks:
               </div>
             </div>
 
-            {tip && (
-              <div style={{ ...card, padding: 14, marginBottom: 12, background: (tipColor[tip.category] || "#e84a2e") + "0a", borderColor: (tipColor[tip.category] || "#e84a2e") + "2a" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}>
-                  <Pill color={tipColor[tip.category] || "#e84a2e"}>{tip.category}</Pill>
-                  <button onClick={async () => { try { const r = await fetch("/.netlify/functions/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 300, messages: [{ role: "user", content: `Consejo para ${goalInfo?.label}, ${bodyInfo?.sublabel}, ${user.weight}kg, meta ${daily}g proteína. SOLO JSON: {"category":"Nutrición|Técnica|Recuperación|Motivación","title":"...","content":"..."}` }] }) }); const d = await r.json(); setTip(JSON.parse(d.content?.find(b => b.type === "text")?.text?.replace(/```json|```/g,"").trim()||"{}")); } catch {} }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.25)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans',sans-serif" }}>↻</button>
-                </div>
-                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{tip.title}</div>
-                <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.6 }}>{tip.content}</div>
-              </div>
-            )}
-
+           {tip?.category && (
+  <TipDelDia tip={tip} tipColor={tipColor} goalInfo={goalInfo} bodyInfo={bodyInfo} user={user} daily={daily} setTip={setTip} />
+)}
+  
+<WeeklyDashboard history={history} />
             {/* Frase motivadora del día */}
             <MotivationalQuote />
 
@@ -2794,7 +2891,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
               </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 9, marginBottom: 12 }}>
-              {[["⚖️", user.weight + "kg", "Peso"], ["📏", user.height + "cm", "Altura"], ["🎂", user.age + "a", "Edad"], ["⚧", user.sex === "female" ? "Mujer" : user.sex === "male" ? "Hombre" : "N/E", "Sexo"], ["📅", user.daysPerWeek + "d/sem", "Frecuencia"], ["🥩", daily + "g", "Proteína/día"], ["🏋️", user.machines.length, "Máquinas"]].map(([e, v, l]) => <div key={l} style={{ ...card, padding: "10px 8px", textAlign: "center" }}><div style={{ fontSize: 18, marginBottom: 3 }}>{e}</div><div style={{ fontWeight: 800, fontSize: 15 }}>{v}</div><div style={{ color: "rgba(255,255,255,0.25)", fontSize: 10 }}>{l}</div></div>)}
+              {[["⚖️", user.weight + "kg", "Peso"], ["📏", user.height + "cm", "Altura"], ["🎂", user.age + "a", "Edad"], ["⚧", user.sex === "female" ? "Mujer" : user.sex === "male" ? "Hombre" : "N/E", "Sexo"], ["📅", user.daysPerWeek + "d/sem", "Frecuencia"], ["🥩", daily + "g", "Proteína/día"], ["🏋️", (user.machines || []).length, "Máquinas"]].map(([e, v, l]) => <div key={l} style={{ ...card, padding: "10px 8px", textAlign: "center" }}><div style={{ fontSize: 18, marginBottom: 3 }}>{e}</div><div style={{ fontWeight: 800, fontSize: 15 }}>{v}</div><div style={{ color: "rgba(255,255,255,0.25)", fontSize: 10 }}>{l}</div></div>)}
             </div>
             {/* Language selector */}
             <div style={{ ...card, padding: "13px 16px", marginBottom: 12 }}>

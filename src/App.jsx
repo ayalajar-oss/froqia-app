@@ -976,12 +976,13 @@ function CheckoutScreen({ plan, userData, onBack, onSuccess }) {
 // ─── ONBOARDING ───────────────────────────────────────────────────────────────
 function OnboardingScreen({ userData, onComplete }) {
   const [step, setStep] = useState(0);
-  const [data, setData] = useState({ age: "", weight: "", height: "", sex: "", bodyType: "", goal: "", photo: null, machines: ALL_EQUIPMENT.map(m => m.id), daysPerWeek: 4, experience: "beginner" });
+  const [data, setData] = useState({ fechaNacimiento: "", weight: "", height: "", sex: "", bodyType: "", goal: "", photo: null, machines: ALL_EQUIPMENT.map(m => m.id), daysPerWeek: 4, experience: "beginner" });
   const fileRef = useRef();
   const set = (k, v) => setData(d => ({ ...d, [k]: v }));
   const toggleMachine = id => set("machines", data.machines.includes(id) ? data.machines.filter(m => m !== id) : [...data.machines, id]);
   const handlePhoto = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = ev => set("photo", ev.target.result); r.readAsDataURL(f); } };
-  const canNext = () => { if (step === 0) return data.age && data.weight && data.height && data.sex; if (step === 1) return data.bodyType; if (step === 2) return data.goal; return data.machines.length > 0; };
+  const calcAge = (fn) => fn ? Math.floor((Date.now() - new Date(fn)) / (365.25 * 24 * 60 * 60 * 1000)) : "";
+  const canNext = () => { if (step === 0) return data.fechaNacimiento && data.weight && data.height && data.sex; if (step === 1) return data.bodyType; if (step === 2) return data.goal; return data.machines.length > 0; };
   const catColor = { Upper: "#e84a2e", Lower: "#f59e0b", Arms: "#8b5cf6", Core: "#10b981" };
   const catLabel = { Upper: "TREN SUPERIOR", Lower: "TREN INFERIOR", Arms: "BRAZOS", Core: "CORE" };
   const steps = ["Tu cuerpo", "Tu tipo físico", "Tu objetivo", "Equipamiento"];
@@ -1037,7 +1038,6 @@ function OnboardingScreen({ userData, onComplete }) {
               {[
                 { v: "male", e: "♂️", l: "Hombre" },
                 { v: "female", e: "♀️", l: "Mujer" },
-                { v: "other", e: "⚧", l: "Prefiero no decir" },
               ].map(({ v, e, l }) => (
                 <div key={v} onClick={() => set("sex", v)} style={{ flex: 1, padding: "12px 6px", textAlign: "center", borderRadius: 12, cursor: "pointer", background: data.sex === v ? "#e84a2e18" : "rgba(255,255,255,0.03)", border: `2px solid ${data.sex === v ? "#e84a2e" : "rgba(255,255,255,0.07)"}`, transition: "all 0.2s" }}>
                   <div style={{ fontSize: 22, marginBottom: 4 }}>{e}</div>
@@ -1050,11 +1050,16 @@ function OnboardingScreen({ userData, onComplete }) {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10 }}>
-            <div style={{ flex: 1 }}><Input label="Edad" type="number" value={data.age} onChange={v => set("age", v)} placeholder="28" /></div>
-            <div style={{ flex: 1 }}><Input label="Peso (kg)" type="number" value={data.weight} onChange={v => set("weight", v)} placeholder="80" /></div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, display: "block", marginBottom: 6 }}>
+              FECHA DE NACIMIENTO{data.fechaNacimiento ? <span style={{ color: "#e8a090", marginLeft: 8 }}>{calcAge(data.fechaNacimiento)} años</span> : ""}
+            </label>
+            <input type="date" value={data.fechaNacimiento} onChange={e => set("fechaNacimiento", e.target.value)} max={new Date().toISOString().split("T")[0]} style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#fff", fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", colorScheme: "dark" }} />
           </div>
-          <Input label="Altura (cm)" type="number" value={data.height} onChange={v => set("height", v)} placeholder="175" />
+          <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ flex: 1 }}><Input label="Peso (kg)" type="number" value={data.weight} onChange={v => set("weight", v)} placeholder="80" /></div>
+            <div style={{ flex: 1 }}><Input label="Altura (cm)" type="number" value={data.height} onChange={v => set("height", v)} placeholder="175" /></div>
+          </div>
 
           {/* Physical profile — sin mencionar IMC */}
           {profile && (
@@ -1255,7 +1260,7 @@ function OnboardingScreen({ userData, onComplete }) {
 
       <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
         {step > 0 && <Btn variant="ghost" onClick={() => setStep(s => s - 1)} style={{ flex: 0.4 }}>← Atrás</Btn>}
-        <Btn onClick={() => { if (step < 3) setStep(s => s + 1); else onComplete({ ...userData, ...data }); }} disabled={!canNext()} style={{ flex: 1 }}>
+        <Btn onClick={() => { if (step < 3) setStep(s => s + 1); else onComplete({ ...userData, ...data, age: calcAge(data.fechaNacimiento), fecha_nacimiento: data.fechaNacimiento }); }} disabled={!canNext()} style={{ flex: 1 }}>
           {step === 3 ? "🚀 ¡Empezar en FROQIA!" : "Continuar →"}
         </Btn>
       </div>
@@ -2535,6 +2540,9 @@ useEffect(() => {
   const trialDaysLeft = suscripcion.trialExpiry ? Math.max(0, Math.ceil((suscripcion.trialExpiry - Date.now()) / (1000 * 60 * 60 * 24))) : null;
   const dayName = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"][new Date().getDay()];
   const greeting = new Date().getHours() < 12 ? "Buenos días" : new Date().getHours() < 19 ? "Buenas tardes" : "Buenas noches";
+  const today = new Date();
+  const bday = user.fecha_nacimiento || user.fechaNacimiento;
+  const isBirthday = bday && (() => { const d = new Date(bday); return d.getDate() === today.getDate() && d.getMonth() === today.getMonth(); })();
   const doneCount = Object.values(done).filter(Boolean).length;
   const totalEx = routine?.exercises?.length || 0;
   const tipColor = { "Nutrición": "#f59e0b", "Técnica": "#8b5cf6", "Recuperación": "#10b981", "Motivación": "#e84a2e" };
@@ -2778,6 +2786,13 @@ SOLO JSON sin backticks:
         {/* HOME */}
         {tab === "home" && (
           <>
+            {isBirthday && (
+              <div style={{ background: "linear-gradient(135deg,rgba(232,74,46,0.18),rgba(245,158,11,0.12))", border: "1.5px solid rgba(232,74,46,0.35)", borderRadius: 16, padding: "14px 18px", marginTop: 16, marginBottom: 4, textAlign: "center" }}>
+                <div style={{ fontSize: 28, marginBottom: 4 }}>🎂</div>
+                <div style={{ fontWeight: 800, fontSize: 16, color: "#fff" }}>¡Feliz cumpleaños {user.nombre}!</div>
+                <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 4 }}>Que este año estés más fuerte que nunca 💪</div>
+              </div>
+            )}
             <div style={{ display: "flex", gap: 10, marginTop: 16, marginBottom: 12 }}>
               <div style={{ flex: 1, ...card, padding: "12px 14px", borderColor: "rgba(16,185,129,0.25)", background: "rgba(16,185,129,0.06)" }}>
                 <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 10, fontWeight: 700 }}>PROTEÍNA HOY</div>
@@ -2985,7 +3000,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
               <Avatar photo={user.photo} name={user.nombre} size={76} />
               <h2 style={{ margin: "12px 0 3px", fontSize: 20, fontWeight: 800 }}>{user.nombre}</h2>
               <p style={{ color: "rgba(255,255,255,0.3)", margin: "0 0 10px", fontSize: 13 }}>{user.email || user.phone}</p>
-              <button onClick={() => { setEditForm({ nombre: user.nombre, weight: user.weight, height: user.height, age: user.age, sex: user.sex, daysPerWeek: user.daysPerWeek, experience: user.experience }); setEditingProfile(true); }} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.3)", color: "#e8a090", borderRadius: 10, padding: "7px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>✏️ Editar perfil</button>
+              <button onClick={() => { setEditForm({ nombre: user.nombre, weight: user.weight, height: user.height, age: user.age, fechaNacimiento: user.fecha_nacimiento || user.fechaNacimiento || "", sex: user.sex, daysPerWeek: user.daysPerWeek, experience: user.experience }); setEditingProfile(true); }} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.3)", color: "#e8a090", borderRadius: 10, padding: "7px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>✏️ Editar perfil</button>
               <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                 <Pill color={goalInfo?.color}>{goalInfo?.emoji} {goalInfo?.label}</Pill>
                 <Pill color={bodyInfo?.color}>{bodyInfo?.emoji} {bodyInfo?.sublabel}</Pill>
@@ -2999,7 +3014,6 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
                   ["Nombre", "nombre", "text"],
                   ["Peso (kg)", "weight", "number"],
                   ["Altura (cm)", "height", "number"],
-                  ["Edad", "age", "number"],
                 ].map(([label, key, type]) => (
                   <div key={key} style={{ marginBottom: 13 }}>
                     <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>{label.toUpperCase()}</label>
@@ -3012,9 +3026,15 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
                   </div>
                 ))}
                 <div style={{ marginBottom: 13 }}>
+                  <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>
+                    FECHA DE NACIMIENTO{editForm.fechaNacimiento ? <span style={{ color: "#e8a090", marginLeft: 8 }}>{Math.floor((Date.now() - new Date(editForm.fechaNacimiento)) / (365.25 * 24 * 60 * 60 * 1000))} años</span> : ""}
+                  </label>
+                  <input type="date" value={editForm.fechaNacimiento ?? ""} onChange={e => setEditForm(f => ({ ...f, fechaNacimiento: e.target.value, age: Math.floor((Date.now() - new Date(e.target.value)) / (365.25 * 24 * 60 * 60 * 1000)) }))} max={new Date().toISOString().split("T")[0]} style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#fff", fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", colorScheme: "dark" }} />
+                </div>
+                <div style={{ marginBottom: 13 }}>
                   <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>SEXO</label>
                   <div style={{ display: "flex", gap: 8 }}>
-                    {[["male", "Hombre"], ["female", "Mujer"], ["other", "Otro"]].map(([v, l]) => (
+                    {[["male", "Hombre"], ["female", "Mujer"]].map(([v, l]) => (
                       <button key={v} onClick={() => setEditForm(f => ({ ...f, sex: v }))} style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: `1.5px solid ${editForm.sex === v ? "#e84a2e" : "rgba(255,255,255,0.1)"}`, background: editForm.sex === v ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.04)", color: editForm.sex === v ? "#e8a090" : "rgba(255,255,255,0.5)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>{l}</button>
                     ))}
                   </div>

@@ -3352,10 +3352,14 @@ export default function App() {
       try {
         const { user, perfil, suscripcion: sus } = JSON.parse(saved);
         if (user && perfil) {
-          const susFinal = sus || {
-            plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "3 días" },
-            trialExpiry: Date.now() + 3 * 24 * 60 * 60 * 1000
+          const buildSus = (p, fallback) => {
+            if (p?.plan_id && p.plan_id !== "trial") {
+              const planInfo = PLANES.find(pl => pl.id === p.plan_id) || PLANES[0];
+              return { plan: planInfo, trialExpiry: p.plan_expiry ? new Date(p.plan_expiry).getTime() : null };
+            }
+            return fallback || { plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "3 días" }, trialExpiry: Date.now() + 3 * 24 * 60 * 60 * 1000 };
           };
+          const susFinal = buildSus(perfil, sus);
           setFullUser(normalizeUser({ ...perfil, id: perfil.id || user.id }));
           setSuscripcion(susFinal);
           setScreen("app");
@@ -3365,10 +3369,12 @@ export default function App() {
             if (res.perfil) {
               const merged = { ...perfil, ...res.perfil, id: perfil.id || user.id, fecha_nacimiento: perfil.fecha_nacimiento || res.perfil.fecha_nacimiento || null };
               setFullUser(normalizeUser(merged));
+              const susActualizada = buildSus(merged, susFinal);
+              setSuscripcion(susActualizada);
               localStorage.setItem("froqia_session", JSON.stringify({
                 user,
                 perfil: merged,
-                suscripcion: susFinal
+                suscripcion: susActualizada
               }));
             }
           }).catch(() => {});
@@ -3432,7 +3438,8 @@ export default function App() {
         setUserData(d); 
        if (d._loginExistente) {
   setFullUser(normalizeUser({ ...d, id: d.id || d._supabaseUser?.id, machines: d.machines || d.equipos || [], nombre: d.nombre || d.email?.split('@')[0] || 'Usuario' }));
-          const sus = { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 3 * 24 * 60 * 60 * 1000 };
+          const loginPlan = (d.plan_id && d.plan_id !== "trial") ? PLANES.find(p => p.id === d.plan_id) || PLANES[0] : selectedPlan;
+          const sus = { plan: loginPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : (loginPlan?.trial ? Date.now() + 3 * 24 * 60 * 60 * 1000 : null) };
           setSuscripcion(sus);
           localStorage.setItem("froqia_session", JSON.stringify({
             user: { email: d.email, id: d._supabaseUser?.id },

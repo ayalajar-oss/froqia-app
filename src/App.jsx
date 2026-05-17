@@ -3328,6 +3328,9 @@ function UpgradeCheckout({ plan, user, onSuccess, onCancel }) {
             >
               {verifyingPago ? "⏳ Verificando pago..." : "✅ Ya pagué → Activar plan"}
             </button>
+            <button onClick={() => setStep("review")} style={{ width: "100%", marginTop: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)", borderRadius: 13, padding: 13, fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+              ← Volver
+            </button>
           </div>
         )}
 

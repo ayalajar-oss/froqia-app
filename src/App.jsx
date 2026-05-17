@@ -1793,9 +1793,17 @@ function SmartExerciseCard({ ex, index, done, onToggle, onVideoClick, onSubstitu
           {done ? "✓" : index + 1}
         </div>
 
+        {/* Thumbnail */}
+        {machineData?.videoId
+          ? <img src={`https://img.youtube.com/vi/${machineData.videoId}/mqdefault.jpg`} style={{ width: 56, height: 42, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+          : <div style={{ width: 56, height: 42, borderRadius: 8, flexShrink: 0, background: "rgba(232,74,46,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
+              {MUSCLE_GROUPS.find(g => g.muscles.some(m => ex.muscle?.toLowerCase().includes(m.toLowerCase())))?.emoji || "💪"}
+            </div>
+        }
+
         {/* Info */}
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 14, textDecoration: done ? "line-through" : "none", color: done ? "rgba(255,255,255,0.35)" : "#fff" }}>{ex.machine}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, textDecoration: done ? "line-through" : "none", color: done ? "rgba(255,255,255,0.35)" : "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ex.machine}</div>
           <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, marginTop: 1 }}>{ex.muscle} · {ex.sets}×{ex.reps} · {ex.rest}</div>
         </div>
 

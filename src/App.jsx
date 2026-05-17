@@ -2488,7 +2488,7 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan }) {
   const [routine, setRoutine] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tip, setTip] = useState(null);
-  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState("surprise");
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [showGroupSelector, setShowGroupSelector] = useState(false);
 const [history, setHistory] = useState([]);
 useEffect(() => {
@@ -2530,8 +2530,6 @@ useEffect(() => {
   const totalEx = routine?.exercises?.length || 0;
   const tipColor = { "Nutrición": "#f59e0b", "Técnica": "#8b5cf6", "Recuperación": "#10b981", "Motivación": "#e84a2e" };
 
-  useEffect(() => { generateRoutine(); }, []);
-
   async function generateRoutine() {
     setLoading(true); setDone({});
     const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
@@ -2552,14 +2550,14 @@ useEffect(() => {
 
     const sexLabel = user.sex === "female" ? "Mujer" : user.sex === "male" ? "Hombre" : "No especificado";
     const muscleGroupInfo = MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
-    const muscleGroupHint = muscleGroupInfo?.id === "surprise" || !muscleGroupInfo
+    const muscleGroupHint = !muscleGroupInfo || muscleGroupInfo.id === "surprise"
       ? "Elegí libremente según historial"
       : muscleGroupInfo.muscles.length > 0
-        ? `ENFOQUE OBLIGATORIO: ${muscleGroupInfo.muscles.join(", ")}. Todos los ejercicios deben trabajar estos músculos.`
+        ? `⚠️ OBLIGATORIO: TODOS los ejercicios DEBEN trabajar exclusivamente: ${muscleGroupInfo.muscles.join(", ")}. NO incluyas otros músculos.`
         : muscleGroupInfo.id === "full_body"
-          ? "ENFOQUE: Full Body - combiná tren superior, inferior y core en la misma sesión."
+          ? "⚠️ OBLIGATORIO: Full Body - DEBES combinar tren superior, inferior y core en la misma sesión."
           : muscleGroupInfo.id === "cardio"
-            ? "ENFOQUE: Cardio - priorizá ejercicios cardiovasculares (bici, cinta, elíptica, remo)."
+            ? "⚠️ OBLIGATORIO: SOLO ejercicios cardiovasculares (bici, cinta, elíptica, remo). NO incluyas pesas."
             : "Elegí libremente según historial";
     const prompt = `Sos un entrenador personal experto. Generá la rutina del día.
 PERFIL: ${user.nombre}, ${user.age}a, ${user.weight}kg, ${sexLabel}. CUERPO: ${bodyInfo?.sublabel} | OBJETIVO: ${goalInfo?.label} | EXP: ${user.experience} | DÍAS/SEM: ${user.daysPerWeek}
@@ -2570,7 +2568,8 @@ ${warmupHint}
 ${finisherHint}
 ${muscleGroupHint}
 INSTRUCCIONES:
-- Elegí 4-6 ejercicios según el enfoque muscular especificado
+- CRÍTICO: Respetá ESTRICTAMENTE el enfoque muscular especificado arriba. Si dice "OBLIGATORIO", NO incluyas ejercicios de otros músculos.
+- Elegí 4-6 ejercicios que trabajen SOLO los músculos del enfoque
 - ${user.sex === "female" ? "Para mujer: enfatizá glúteos, isquiotibiales y core. Incluí trabajo de tren inferior en cada sesión si el objetivo lo permite." : "Para hombre: equilibrá tren superior e inferior según el historial."}
 - Adaptá series/reps al objetivo
 - weight_suggestion DEBE ser un rango en kg concreto ej: "20-25 kg" o "15 kg" — NUNCA porcentajes. Estimá según fuerza base y músculo trabajado.
@@ -2791,9 +2790,9 @@ SOLO JSON sin backticks:
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: 20 }}>{MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.emoji || "🎲"}</span>
+                  <span style={{ fontSize: 20 }}>🏋️</span>
                   <span style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>
-                    {MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label || "Elegir grupo muscular"}
+                    {selectedMuscleGroup ? MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label : "Elegir grupo muscular"}
                   </span>
                 </div>
                 <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>{showGroupSelector ? "▲" : "▼"}</span>
@@ -2833,6 +2832,18 @@ SOLO JSON sin backticks:
 
             {/* Frase motivadora del día */}
             <MotivationalQuote />
+
+            {/* Botón para generar rutina manualmente */}
+            {!routine && !loading && (
+              <div style={{ textAlign: "center", padding: "32px 16px" }}>
+                <Btn onClick={generateRoutine} style={{ width: "100%", fontSize: 16, padding: "16px 24px" }}>
+                  ✨ Generar rutina
+                </Btn>
+                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 12 }}>
+                  {selectedMuscleGroup ? `Enfoque: ${MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label}` : "Elegí un grupo muscular o generá rutina libre"}
+                </div>
+              </div>
+            )}
 
             {/* Calentamiento — pregunta si quiere hacer */}
             {!loading && routine?.warmup && <WarmupCard warmup={routine.warmup} />}

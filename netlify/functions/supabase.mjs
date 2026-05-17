@@ -45,6 +45,7 @@ export const handler = async (event) => {
         daysPerWeek: perfil.dias_semana,
         machines: perfil.equipos || [],
         experience: perfil.experiencia,
+        fecha_nacimiento: perfil.fecha_nacimiento || null,
       } : null;
       return { statusCode: 200, headers, body: JSON.stringify({ user: authData.user, session: authData.session, perfil: perfilMapeado })};
     }

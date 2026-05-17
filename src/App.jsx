@@ -3275,6 +3275,7 @@ function normalizeUser(perfil) {
     daysPerWeek: perfil.daysPerWeek || perfil.dias_semana,
     sex: perfil.sex || perfil.sexo,
     machines: perfil.machines || perfil.equipos || [],
+    fecha_nacimiento: perfil.fecha_nacimiento || perfil.fechaNacimiento || perfil.birth_date || null,
   };
 }
 
@@ -3300,13 +3301,14 @@ export default function App() {
           setSuscripcion(susFinal);
           setScreen("app");
 
-          // Sincronizar con Supabase en segundo plano
+          // Sincronizar con Supabase en segundo plano (merge para no perder campos locales)
           supabaseCall("getPerfil", { user_id: user.id }).then(res => {
             if (res.perfil) {
-              setFullUser(normalizeUser(res.perfil));
+              const merged = { ...perfil, ...res.perfil, fecha_nacimiento: perfil.fecha_nacimiento || res.perfil.fecha_nacimiento || null };
+              setFullUser(normalizeUser(merged));
               localStorage.setItem("froqia_session", JSON.stringify({
                 user,
-                perfil: res.perfil,
+                perfil: merged,
                 suscripcion: susFinal
               }));
             }

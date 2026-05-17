@@ -982,10 +982,10 @@ function OnboardingScreen({ userData, onComplete }) {
   const toggleMachine = id => set("machines", data.machines.includes(id) ? data.machines.filter(m => m !== id) : [...data.machines, id]);
   const handlePhoto = e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = ev => set("photo", ev.target.result); r.readAsDataURL(f); } };
   const calcAge = (fn) => fn ? Math.floor((Date.now() - new Date(fn)) / (365.25 * 24 * 60 * 60 * 1000)) : "";
-  const canNext = () => { if (step === 0) return data.fechaNacimiento && data.weight && data.height && data.sex; if (step === 1) return data.bodyType; if (step === 2) return data.goal; return data.machines.length > 0; };
+  const canNext = () => { if (step === 0) return data.fechaNacimiento && data.weight && data.height && data.sex; if (step === 1) return data.bodyType; return data.goal; };
   const catColor = { Upper: "#e84a2e", Lower: "#f59e0b", Arms: "#8b5cf6", Core: "#10b981" };
   const catLabel = { Upper: "TREN SUPERIOR", Lower: "TREN INFERIOR", Arms: "BRAZOS", Core: "CORE" };
-  const steps = ["Tu cuerpo", "Tu tipo físico", "Tu objetivo", "Equipamiento"];
+  const steps = ["Tu cuerpo", "Tu tipo físico", "Tu objetivo"];
 
   // Physical profile description (replaces IMC label)
   const getPhysicalProfile = () => {
@@ -1169,99 +1169,11 @@ function OnboardingScreen({ userData, onComplete }) {
         </div>
       )}
 
-      {/* Step 3: Equipamiento — selección por categoría, simple y visual */}
-      {step === 3 && (
-        <div>
-          <div style={{ ...card, padding: "13px 16px", marginBottom: 18, background: "rgba(232,74,46,0.07)", borderColor: "rgba(232,74,46,0.2)" }}>
-            <div style={{ color: "#e8a090", fontSize: 13, fontWeight: 700, marginBottom: 4 }}>🏋️ ¿Qué tiene tu gym?</div>
-            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, lineHeight: 1.6 }}>
-              Elegí las categorías disponibles. La IA sugerirá ejercicios y, si no tenés algo, podés pedir alternativa con un toque durante el entrenamiento.
-            </div>
-          </div>
-
-          {/* Selector rápido por categoría — visual y simple */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
-            {EQUIPMENT_CATEGORIES.map(cat => {
-              const catIds = cat.items.map(i => i.id);
-              const selected = catIds.every(id => data.machines.includes(id));
-              const partial = !selected && catIds.some(id => data.machines.includes(id));
-              return (
-                <div key={cat.id} onClick={() => {
-                  if (selected) set("machines", data.machines.filter(id => !catIds.includes(id)));
-                  else set("machines", [...new Set([...data.machines, ...catIds])]);
-                }} style={{
-                  padding: "14px 14px", borderRadius: 14, cursor: "pointer",
-                  background: selected ? cat.color + "15" : partial ? cat.color + "08" : "rgba(255,255,255,0.03)",
-                  border: `2px solid ${selected ? cat.color : partial ? cat.color + "44" : "rgba(255,255,255,0.07)"}`,
-                  transition: "all 0.2s", display: "flex", flexDirection: "column", gap: 6,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 24 }}>{cat.emoji}</span>
-                    <div style={{
-                      width: 22, height: 22, borderRadius: 7,
-                      background: selected ? cat.color : "rgba(255,255,255,0.06)",
-                      border: `2px solid ${selected ? cat.color : "rgba(255,255,255,0.15)"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 12, color: "#fff", fontWeight: 800, transition: "all 0.2s"
-                    }}>
-                      {selected ? "✓" : partial ? "·" : ""}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ color: selected ? "#fff" : "rgba(255,255,255,0.7)", fontWeight: 700, fontSize: 13, lineHeight: 1.3 }}>
-                      {cat.label.split(" — ")[1] || cat.label}
-                    </div>
-                    <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, marginTop: 2 }}>
-                      {cat.items.length} ejercicios
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Quick actions */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
-            <button onClick={() => set("machines", ALL_EQUIPMENT.map(m => m.id))} style={{ flex: 1, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 11, padding: "10px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              ✓ Seleccionar todo
-            </button>
-            <button onClick={() => set("machines", [])} style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)", borderRadius: 11, padding: "10px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              Limpiar todo
-            </button>
-          </div>
-
-          {/* Info box */}
-          <div style={{ ...card, padding: "12px 14px", background: "rgba(6,182,212,0.06)", borderColor: "rgba(6,182,212,0.2)" }}>
-            <div style={{ color: "#06b6d4", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 6 }}>💡 DURANTE EL ENTRENAMIENTO</div>
-            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, lineHeight: 1.6 }}>
-              Si un ejercicio usa equipo que no tenés, tocá el botón <strong style={{ color: "#fff" }}>↔</strong> y la IA buscará una alternativa con lo que sí tenés disponible.
-            </div>
-          </div>
-
-          {/* Extras calentamiento / cierre */}
-          <div style={{ marginTop: 16 }}>
-            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 10 }}>⚡ EXTRAS — CALENTAMIENTO Y CIERRE</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {[...WARMUP_EXTRAS, ...FINISHER_OPTIONS].map(e => (
-                <div key={e.id} onClick={() => toggleMachine(e.id)} style={{ display: "flex", gap: 12, padding: "10px 13px", borderRadius: 11, cursor: "pointer", background: data.machines.includes(e.id) ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.02)", border: `1px solid ${data.machines.includes(e.id) ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.05)"}`, transition: "all 0.15s" }}>
-                  <div style={{ width: 18, height: 18, borderRadius: 6, flexShrink: 0, marginTop: 1, background: data.machines.includes(e.id) ? "#f59e0b" : "transparent", border: `2px solid ${data.machines.includes(e.id) ? "#f59e0b" : "rgba(255,255,255,0.18)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff" }}>
-                    {data.machines.includes(e.id) && "✓"}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>{e.emoji} {e.name}</div>
-                    <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, lineHeight: 1.4, marginTop: 2 }}>{e.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
         {step > 0 && <Btn variant="ghost" onClick={() => setStep(s => s - 1)} style={{ flex: 0.4 }}>← Atrás</Btn>}
-        <Btn onClick={() => { if (step < 3) setStep(s => s + 1); else onComplete({ ...userData, ...data, age: calcAge(data.fechaNacimiento), fecha_nacimiento: data.fechaNacimiento }); }} disabled={!canNext()} style={{ flex: 1 }}>
-          {step === 3 ? "🚀 ¡Empezar en FROQIA!" : "Continuar →"}
+        <Btn onClick={() => { if (step < 2) setStep(s => s + 1); else onComplete({ ...userData, ...data, machines: ALL_EQUIPMENT.map(m => m.id), age: calcAge(data.fechaNacimiento), fecha_nacimiento: data.fechaNacimiento }); }} disabled={!canNext()} style={{ flex: 1 }}>
+          {step === 2 ? "🚀 ¡Empezar en FROQIA!" : "Continuar →"}
         </Btn>
       </div>
     </div>

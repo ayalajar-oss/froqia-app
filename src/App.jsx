@@ -362,7 +362,7 @@ const TAG_LABELS = { lean: "Magro", complete: "Completo", omega: "Omega-3", dair
 const TAG_COLORS = { lean: "#10b981", complete: "#f59e0b", omega: "#06b6d4", dairy: "#8b5cf6", supp: "#e84a2e", plant: "#84cc16" };
 
 const PLANES = [
-  { id: "trial", nombre: "Prueba Gratis", precio: 0, precioLabel: "GRATIS", periodo: "7 días", color: "#10b981", trial: true, features: ["✓ Rutinas diarias con IA", "✓ Calculadora de proteína", "✓ Tabla nutricional", "✓ Videos de ejercicios", "✗ Análisis médico con IA"] },
+  { id: "trial", nombre: "Prueba Gratis", precio: 0, precioLabel: "GRATIS", periodo: "3 días", color: "#10b981", trial: true, features: ["✓ Rutinas diarias con IA", "✓ Calculadora de proteína", "✓ Tabla nutricional", "✓ Videos de ejercicios", "✗ Análisis médico con IA"] },
   { id: "mensual", nombre: "Plan Mensual", precio: 75000, precioLabel: "₲ 75.000", periodo: "/ mes", color: "#e84a2e", popular: false, features: ["Todo del trial +", "Análisis de informes médicos IA", "Historial extendido", "Plan nutricional personalizado"] },
   { id: "trimestral", nombre: "Plan Trimestral", precio: 195000, precioLabel: "₲ 195.000", periodo: "/ 3 meses", color: "#f59e0b", popular: true, ahorro: "Ahorrás ₲ 30.000", features: ["Todo del plan mensual +", "Análisis de progreso avanzado", "Soporte prioritario"] },
   { id: "anual", nombre: "Plan Anual", precio: 650000, precioLabel: "₲ 650.000", periodo: "/ año", color: "#8b5cf6", popular: false, ahorro: "Ahorrás ₲ 250.000", features: ["Todo lo anterior +", "Coach virtual 24/7", "Alertas de salud basadas en análisis"] },
@@ -576,10 +576,10 @@ function TutorialScreen({ onFinish }) {
     },
     {
       emoji: "🎁",
-      title: "7 días gratis, sin tarjeta",
+      title: "3 días gratis, sin tarjeta",
       desc: "Probá FROQIA sin compromisos. Si te gusta, suscribite. Si no, no se cobra nada.",
       color: "#10b981",
-      points: ["Sin tarjeta de crédito requerida", "Acceso completo 7 días", "Cancelás cuando querás"],
+      points: ["Sin tarjeta de crédito requerida", "Acceso completo 3 días", "Cancelás cuando querás"],
     },
   ];
   const s = slides[slide];
@@ -669,7 +669,7 @@ function LandingScreen({ onSelectPlan, onTutorial }) {
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
             <div style={{ fontSize: 38 }}>🎁</div>
             <div>
-              <div style={{ color: "#10b981", fontWeight: 800, fontSize: 17 }}>7 días GRATIS</div>
+              <div style={{ color: "#10b981", fontWeight: 800, fontSize: 17 }}>3 días GRATIS</div>
               <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 13 }}>Sin tarjeta de crédito. Sin compromisos.</div>
             </div>
           </div>
@@ -852,7 +852,7 @@ function RegisterScreen({ plan, onBack, onContinue }) {
       ) : (
         <>
           <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 4px" }}>Crear tu cuenta</h2>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, margin: "0 0 20px" }}>{plan.trial ? "7 días completos gratis. Cancelás cuando querás." : "Ingresá tus datos para suscribirte."}</p>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, margin: "0 0 20px" }}>{plan.trial ? "3 días completos gratis. Cancelás cuando querás." : "Ingresá tus datos para suscribirte."}</p>
           <div style={{ display: "flex", gap: 6, marginBottom: 16, background: "rgba(255,255,255,0.04)", borderRadius: 11, padding: 4 }}>
             {[["email", "📧 Email"], ["phone", "📱 Teléfono"]].map(([v, l]) => (
               <button key={v} onClick={() => setMethod(v)} style={{ flex: 1, padding: "9px 0", border: "none", borderRadius: 8, cursor: "pointer", background: method === v ? "#e84a2e" : "transparent", color: method === v ? "#fff" : "rgba(255,255,255,0.4)", fontWeight: 700, fontSize: 13, fontFamily: "'DM Sans',sans-serif" }}>{l}</button>
@@ -886,7 +886,7 @@ function CheckoutScreen({ plan, userData, onBack, onSuccess }) {
   const [errorDetail, setErrorDetail] = useState("");
 
   useEffect(() => {
-    if (plan.trial) onSuccess({ plan, userData, pedidoHash: "TRIAL-" + Date.now(), trialExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000 });
+    if (plan.trial) onSuccess({ plan, userData, pedidoHash: "TRIAL-" + Date.now(), trialExpiry: Date.now() + 3 * 24 * 60 * 60 * 1000 });
   }, []);
 
   if (plan.trial) return (
@@ -1829,7 +1829,7 @@ function TermsModal({ onClose }) {
               { title: "3. Disclaimer médico", body: "El análisis de informes médicos realizado por la IA es orientativo y no reemplaza en ningún caso la evaluación de un médico, nutricionista o profesional de la salud certificado. Ante cualquier duda sobre tu salud, consultá a un profesional habilitado." },
               { title: "4. Limitación de responsabilidad", body: "FROQIA no asume responsabilidad por lesiones, efectos adversos o resultados derivados del uso de la aplicación. El usuario asume plena responsabilidad por la realización de cualquier rutina de ejercicios o cambio en su alimentación." },
               { title: "5. Alergias e intolerancias", body: "Las sugerencias de alimentos no tienen en cuenta condiciones médicas particulares. Si tenés alergias, intolerancias o restricciones alimentarias diagnosticadas, consultá siempre con un profesional de la salud antes de seguir cualquier recomendación." },
-              { title: "6. Suscripción y prueba gratuita", body: "El período de prueba gratuita de 7 días no requiere tarjeta de crédito. Al finalizar el período, el acceso a funciones premium quedará restringido hasta que el usuario elija un plan de pago. No se realizan cobros automáticos." },
+              { title: "6. Suscripción y prueba gratuita", body: "El período de prueba gratuita de 3 días no requiere tarjeta de crédito. Al finalizar el período, el acceso a funciones premium quedará restringido hasta que el usuario elija un plan de pago. No se realizan cobros automáticos." },
               { title: "7. Privacidad y datos", body: "Los datos personales ingresados (nombre, peso, altura, objetivos) se utilizan exclusivamente para personalizar la experiencia dentro de la app. No son compartidos con terceros ni utilizados con fines publicitarios. Los archivos médicos subidos son procesados por la IA y no se almacenan de forma permanente." },
               { title: "8. Propiedad intelectual", body: "Todo el contenido de FROQIA, incluyendo rutinas generadas, texto, diseño y software, está protegido por derechos de propiedad intelectual. Queda prohibida su reproducción sin autorización expresa." },
               { title: "9. Modificaciones", body: "FROQIA se reserva el derecho de modificar estos términos con previo aviso a los usuarios. El uso continuado de la aplicación implica la aceptación de los términos vigentes." },
@@ -3197,8 +3197,8 @@ export default function App() {
         const { user, perfil, suscripcion: sus } = JSON.parse(saved);
         if (user && perfil) {
           const susFinal = sus || {
-            plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "7 días" },
-            trialExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000
+            plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "3 días" },
+            trialExpiry: Date.now() + 3 * 24 * 60 * 60 * 1000
           };
           setFullUser(perfil);
           setSuscripcion(susFinal);
@@ -3275,7 +3275,7 @@ export default function App() {
         setUserData(d); 
        if (d._loginExistente && d.weight) {
   setFullUser({ ...d, machines: d.machines || [], nombre: d.nombre || d.email?.split('@')[0] || 'Usuario' });
-          const sus = { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 7 * 24 * 60 * 60 * 1000 };
+          const sus = { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 3 * 24 * 60 * 60 * 1000 };
           setSuscripcion(sus);
           localStorage.setItem("froqia_session", JSON.stringify({
             user: { email: d.email, id: d._supabaseUser?.id },
@@ -3293,8 +3293,8 @@ export default function App() {
         const supabaseUser = userData._supabaseUser;
         
         const susFinal = suscripcion || { 
-          plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "7 días" }, 
-          trialExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000 
+          plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "3 días" }, 
+          trialExpiry: Date.now() + 3 * 24 * 60 * 60 * 1000 
         };
 
         // Guardar sesión local ANTES de setState

@@ -2836,18 +2836,6 @@ SOLO JSON sin backticks:
             {/* Frase motivadora del día */}
             <MotivationalQuote />
 
-            {/* Botón para generar rutina manualmente */}
-            {!routine && !loading && (
-              <div style={{ textAlign: "center", padding: "32px 16px" }}>
-                <Btn onClick={() => generateRoutine(MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup))} disabled={!selectedMuscleGroup} style={{ width: "100%", fontSize: 16, padding: "16px 24px" }}>
-                  ✨ Generar rutina
-                </Btn>
-                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 12 }}>
-                  {selectedMuscleGroup ? `Enfoque: ${MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label}` : "Elegí un grupo muscular para comenzar"}
-                </div>
-              </div>
-            )}
-
             {/* Calentamiento — pregunta si quiere hacer */}
             {!loading && routine?.warmup && <WarmupCard warmup={routine.warmup} />}
 
@@ -2893,7 +2881,7 @@ SOLO JSON sin backticks:
        {!loading && doneCount > 0 && <Btn onClick={() => {
   if (showFinish) return; const newEntry = { date: new Date().toLocaleDateString(), focus: routine?.dayFocus, muscles: routine?.musclesWorked || [], completed: doneCount, total: totalEx }; setHistory(h => [newEntry, ...h]); const userId = JSON.parse(localStorage.getItem("froqia_session"))?.user?.id;; if (userId) { console.log("userId:", userId);
 console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id: userId, nombre: routine?.dayFocus || "Entrenamiento", ejercicios: doneCount, calorias: parseInt(routine?.caloriesBurned) || 0, grupo_muscular: routine?.musclesWorked?.[0] || "" }).catch(() => {}); } setShowFinish(true); }} variant="success" style={{ width: "100%", marginTop: 14, padding: 14, fontSize: 15 }}>✅ Finalizar ({doneCount}/{totalEx})</Btn>}
-            <Btn onClick={() => generateRoutine(MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup))} variant="ghost" style={{ width: "100%", marginTop: 10, fontSize: 13 }}>🔄 Nueva rutina</Btn>
+            <Btn onClick={() => { setRoutine(null); setSelectedMuscleGroup(null); setDone({}); }} variant="ghost" style={{ width: "100%", marginTop: 10, fontSize: 13 }}>🔄 Nueva rutina</Btn>
           </>
         )}
 
@@ -3023,7 +3011,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9, marginBottom: 16 }}>
               {[["Ejercicios", `${doneCount}/${totalEx}`], ["Calorías", `~${routine?.caloriesBurned}`], ["Proteína post", Math.round(daily * 0.3) + "g"], ["Intensidad", routine?.intensity]].map(([k, v]) => <div key={k} style={{ ...card, padding: "11px 13px", textAlign: "center" }}><div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{k}</div><div style={{ fontWeight: 700, fontSize: 14, marginTop: 3 }}>{v}</div></div>)}
             </div>
-            <Btn onClick={() => { setShowFinish(false); setDone({}); generateRoutine(MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)); }} style={{ width: "100%", padding: 14, fontSize: 15 }}>🔁 Nueva rutina</Btn>
+            <Btn onClick={() => { setShowFinish(false); setDone({}); setRoutine(null); setSelectedMuscleGroup(null); }} style={{ width: "100%", padding: 14, fontSize: 15 }}>🔁 Nueva rutina</Btn>
            <Btn onClick={() => { setShowFinish(false); setDone({}); setRoutine(null); }} variant="ghost" style={{ width: "100%", marginTop: 9 }}>Cerrar</Btn>
           </div>
         </div>

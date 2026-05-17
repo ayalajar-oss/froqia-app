@@ -2530,7 +2530,7 @@ useEffect(() => {
   const totalEx = routine?.exercises?.length || 0;
   const tipColor = { "Nutrición": "#f59e0b", "Técnica": "#8b5cf6", "Recuperación": "#10b981", "Motivación": "#e84a2e" };
 
-  async function generateRoutine() {
+  async function generateRoutine(group = null) {
     setLoading(true); setDone({});
     const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
     const warmupExtras = WARMUP_EXTRAS.filter(e => (user.machines || []).includes(e.id));
@@ -2549,7 +2549,7 @@ useEffect(() => {
     const baseStrength = Math.round(parseFloat(user.weight) * expFactor);
 
     const sexLabel = user.sex === "female" ? "Mujer" : user.sex === "male" ? "Hombre" : "No especificado";
-    const muscleGroupInfo = MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
+    const muscleGroupInfo = group || MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
     const muscleGroupHint = !muscleGroupInfo || muscleGroupInfo.id === "surprise"
       ? "Elegí libremente según historial"
       : muscleGroupInfo.muscles.length > 0
@@ -2806,7 +2806,7 @@ SOLO JSON sin backticks:
                       onClick={() => {
                         setSelectedMuscleGroup(g.id);
                         setShowGroupSelector(false);
-                        generateRoutine();
+                        generateRoutine(g);
                       }}
                       style={{
                         background: selectedMuscleGroup === g.id ? "linear-gradient(135deg,#e84a2e,#f59e0b)" : "rgba(255,255,255,0.06)",

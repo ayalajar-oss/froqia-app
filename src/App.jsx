@@ -1623,8 +1623,8 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
           {done ? "✓" : index + 1}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 800, fontSize: 17, lineHeight: 1.2 }}>{ex.machine}</div>
-          <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>
+          <div style={{ fontWeight: 800, fontSize: 19, lineHeight: 1.2 }}>{ex.machine}</div>
+          <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginTop: 2 }}>
             {ex.muscle} · Ejercicio {index + 1}
           </div>
         </div>
@@ -1638,18 +1638,18 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
         {/* Series y Carga */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
           <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 14, padding: "14px 16px" }}>
-            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 700, marginBottom: 6 }}>Series y Repeticiones</div>
+            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>Series y Repeticiones</div>
             <div style={{ color: "#fff", fontWeight: 900, fontSize: 22 }}>{ex.sets}×{ex.reps}</div>
           </div>
           <div style={{ background: "rgba(232,74,46,0.08)", borderRadius: 14, padding: "14px 16px", border: "1px solid rgba(232,74,46,0.2)" }}>
-            <div style={{ color: "#e8a090", fontSize: 11, fontWeight: 700, marginBottom: 6 }}>⚖️ CARGA INICIAL</div>
+            <div style={{ color: "#e8a090", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>⚖️ CARGA INICIAL</div>
             <div style={{ color: "#fff", fontWeight: 900, fontSize: 20, lineHeight: 1.1 }}>{ex.weight_suggestion || "—"}</div>
           </div>
         </div>
 
         {/* Nota de ajuste de carga */}
         <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "10px 14px", marginBottom: 14 }}>
-          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, lineHeight: 1.55 }}>
+          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, lineHeight: 1.55 }}>
             💡 <strong style={{ color: "rgba(255,255,255,0.75)" }}>¿Cómo ajustar?</strong> Empezá con el valor más bajo. Si podés hacer todas las reps con buena técnica y sin esfuerzo máximo, subí 2-5 kg la próxima serie. Si no llegás a las reps mínimas, bajá.
           </div>
         </div>
@@ -1671,19 +1671,19 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
         {/* Tip técnico */}
         {ex.tip && (
           <div style={{ background: "rgba(232,74,46,0.07)", border: "1px solid rgba(232,74,46,0.2)", borderRadius: 14, padding: "13px 16px", marginBottom: 14 }}>
-            <div style={{ color: "#e8a090", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 6 }}>💡 TÉCNICA</div>
-            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, lineHeight: 1.6 }}>{ex.tip}</div>
+            <div style={{ color: "#e8a090", fontSize: 13, fontWeight: 800, letterSpacing: 0.8, marginBottom: 6 }}>💡 TÉCNICA</div>
+            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 15, lineHeight: 1.6 }}>{ex.tip}</div>
           </div>
         )}
 
         {/* Activación muscular */}
         {machineData?.muscles_worked && (
           <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "13px 16px", marginBottom: 14 }}>
-            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 10 }}>💪 ACTIVACIÓN MUSCULAR</div>
+            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, fontWeight: 800, letterSpacing: 0.8, marginBottom: 10 }}>💪 ACTIVACIÓN MUSCULAR</div>
             {machineData.muscles_worked.map((m, i) => (
               <div key={m} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 7 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: i === 0 ? "#e84a2e" : "rgba(255,255,255,0.2)", flexShrink: 0 }} />
-                <span style={{ color: i === 0 ? "#fff" : "rgba(255,255,255,0.5)", fontSize: 13, fontWeight: i === 0 ? 700 : 400 }}>{m}</span>
+                <span style={{ color: i === 0 ? "#fff" : "rgba(255,255,255,0.5)", fontSize: 15, fontWeight: i === 0 ? 700 : 400 }}>{m}</span>
                 {i === 0 && <span style={{ fontSize: 10, color: "#e8a090", fontWeight: 700 }}>PRINCIPAL</span>}
               </div>
             ))}
@@ -1693,7 +1693,7 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
         {/* ── CAMBIAR EJERCICIO — estilo SmartFit ── */}
         <div style={{ marginTop: 8 }}>
           <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Cambiar ejercicio</div>
-          <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
+          <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 15, lineHeight: 1.6, marginBottom: 16 }}>
             Los ejercicios propuestos trabajan los mismos grupos musculares que el ejercicio actual.
           </div>
 
@@ -1728,9 +1728,9 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
                         </div>
                     }
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: "#fff", marginBottom: 3 }}>{alt.machine}</div>
-                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>{alt.sets}×{alt.reps}</div>
-                      {alt.reason && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, marginTop: 3, lineHeight: 1.4 }}>💡 {alt.reason}</div>}
+                      <div style={{ fontWeight: 700, fontSize: 16, color: "#fff", marginBottom: 3 }}>{alt.machine}</div>
+                      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>{alt.sets}×{alt.reps}</div>
+                      {alt.reason && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 3, lineHeight: 1.4 }}>💡 {alt.reason}</div>}
                     </div>
                     <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 20 }}>⇄</div>
                   </div>
@@ -1801,8 +1801,8 @@ function SmartExerciseCard({ ex, index, done, onToggle, onVideoClick, onSubstitu
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 14, textDecoration: done ? "line-through" : "none", color: done ? "rgba(255,255,255,0.35)" : "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ex.machine}</div>
-          <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, marginTop: 1 }}>{ex.muscle} · {ex.sets}×{ex.reps} · {ex.rest}</div>
+          <div style={{ fontWeight: 700, fontSize: 16, textDecoration: done ? "line-through" : "none", color: done ? "rgba(255,255,255,0.35)" : "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ex.machine}</div>
+          <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginTop: 1 }}>{ex.muscle} · {ex.sets}×{ex.reps} · {ex.rest}</div>
         </div>
 
         {/* Chevron — indica que es tappable */}

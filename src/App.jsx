@@ -2489,6 +2489,7 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan }) {
   const [loading, setLoading] = useState(false);
   const [tip, setTip] = useState(null);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState("surprise");
+  const [showGroupSelector, setShowGroupSelector] = useState(false);
 const [history, setHistory] = useState([]);
 useEffect(() => {
   const userId = user.id || user._supabaseUser?.id;
@@ -2774,31 +2775,60 @@ SOLO JSON sin backticks:
 
             {/* Selector de grupo muscular */}
             <div style={{ ...card, padding: "14px 16px", marginBottom: 12 }}>
-              <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 10 }}>🎯 ENFOQUE DE HOY</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-                {MUSCLE_GROUPS.map(g => (
-                  <button
-                    key={g.id}
-                    onClick={() => setSelectedMuscleGroup(g.id)}
-                    style={{
-                      background: selectedMuscleGroup === g.id ? "linear-gradient(135deg,#e84a2e,#f59e0b)" : "rgba(255,255,255,0.06)",
-                      border: selectedMuscleGroup === g.id ? "1.5px solid #e84a2e" : "1.5px solid rgba(255,255,255,0.08)",
-                      borderRadius: 12,
-                      padding: "10px 8px",
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                      fontFamily: "'DM Sans',sans-serif",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 4
-                    }}
-                  >
-                    <div style={{ fontSize: 20 }}>{g.emoji}</div>
-                    <div style={{ color: "#fff", fontSize: 11, fontWeight: selectedMuscleGroup === g.id ? 800 : 600, textAlign: "center", lineHeight: 1.2 }}>{g.label}</div>
-                  </button>
-                ))}
-              </div>
+              <button
+                onClick={() => setShowGroupSelector(!showGroupSelector)}
+                style={{
+                  width: "100%",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1.5px solid rgba(255,255,255,0.08)",
+                  borderRadius: 12,
+                  padding: "12px 16px",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans',sans-serif",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 20 }}>{MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.emoji || "🎲"}</span>
+                  <span style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>
+                    {MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label || "Elegir grupo muscular"}
+                  </span>
+                </div>
+                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>{showGroupSelector ? "▲" : "▼"}</span>
+              </button>
+
+              {showGroupSelector && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 12 }}>
+                  {MUSCLE_GROUPS.map(g => (
+                    <button
+                      key={g.id}
+                      onClick={() => {
+                        setSelectedMuscleGroup(g.id);
+                        setShowGroupSelector(false);
+                        generateRoutine();
+                      }}
+                      style={{
+                        background: selectedMuscleGroup === g.id ? "linear-gradient(135deg,#e84a2e,#f59e0b)" : "rgba(255,255,255,0.06)",
+                        border: selectedMuscleGroup === g.id ? "1.5px solid #e84a2e" : "1.5px solid rgba(255,255,255,0.08)",
+                        borderRadius: 12,
+                        padding: "10px 8px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        fontFamily: "'DM Sans',sans-serif",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                    >
+                      <div style={{ fontSize: 20 }}>{g.emoji}</div>
+                      <div style={{ color: "#fff", fontSize: 11, fontWeight: selectedMuscleGroup === g.id ? 800 : 600, textAlign: "center", lineHeight: 1.2 }}>{g.label}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Frase motivadora del día */}

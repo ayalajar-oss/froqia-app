@@ -2549,7 +2549,7 @@ useEffect(() => {
 
   async function saveProfile() {
     setSavingProfile(true);
-    const updated = { ...user, ...editForm };
+    const updated = { ...user, ...editForm, fecha_nacimiento: editForm.fechaNacimiento || user.fecha_nacimiento || null };
     try {
       if (userId) await supabaseCall("updatePerfil", { user_id: userId, perfil: updated });
       const saved = JSON.parse(localStorage.getItem("froqia_session") || "{}");

@@ -3169,6 +3169,8 @@ function UpgradeCheckout({ plan, user, onSuccess, onCancel }) {
   const [step, setStep] = useState("review");
   const [pedidoHash, setPedidoHash] = useState(null);
   const [numeroPedido, setNumeroPedido] = useState(null);
+  const [verifyingPago, setVerifyingPago] = useState(false);
+  const [pagoError, setPagoError] = useState("");
 
   async function iniciarPago() {
     setStep("processing");
@@ -3291,8 +3293,40 @@ function UpgradeCheckout({ plan, user, onSuccess, onCancel }) {
             }} style={{ width: "100%", background: "linear-gradient(135deg,#f59e0b,#d97706)", border: "none", color: "#fff", borderRadius: 13, padding: 15, fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>
               🚀 Ir al checkout de PagoPar
             </button>
-            <button onClick={() => onSuccess(plan)} style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)", borderRadius: 13, padding: 13, fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
-              ✅ Ya pagué → Activar plan
+            {pagoError && (
+              <div style={{ background: "rgba(232,74,46,0.1)", border: "1px solid rgba(232,74,46,0.25)", borderRadius: 10, padding: "10px 14px", marginBottom: 10, color: "#e8a090", fontSize: 13, textAlign: "center" }}>
+                {pagoError}
+              </div>
+            )}
+            <button
+              disabled={verifyingPago}
+              onClick={async () => {
+                if (PAGOPAR_CONFIG.PUBLIC_KEY === "TU_PUBLIC_KEY_PAGOPAR") { onSuccess(plan); return; }
+                setVerifyingPago(true);
+                setPagoError("");
+                try {
+                  const res = await fetch("/.netlify/functions/pagopar-estado", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ hash_pedido: pedidoHash })
+                  });
+                  const data = await res.json();
+                  const resultado = Array.isArray(data.resultado) ? data.resultado[0] : data.resultado;
+                  const estado = resultado?.estado?.toUpperCase();
+                  if (estado === "PAGADO" || estado === "APROBADO") {
+                    onSuccess(plan);
+                  } else {
+                    setPagoError("Tu pago aún no fue confirmado. Esperá unos minutos y volvé a intentar.");
+                  }
+                } catch {
+                  setPagoError("Tu pago aún no fue confirmado. Esperá unos minutos y volvé a intentar.");
+                } finally {
+                  setVerifyingPago(false);
+                }
+              }}
+              style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: verifyingPago ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.5)", borderRadius: 13, padding: 13, fontWeight: 700, fontSize: 14, cursor: verifyingPago ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif" }}
+            >
+              {verifyingPago ? "⏳ Verificando pago..." : "✅ Ya pagué → Activar plan"}
             </button>
           </div>
         )}

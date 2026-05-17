@@ -3298,14 +3298,14 @@ export default function App() {
             plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "3 días" },
             trialExpiry: Date.now() + 3 * 24 * 60 * 60 * 1000
           };
-          setFullUser(normalizeUser(perfil));
+          setFullUser(normalizeUser({ ...perfil, id: perfil.id || user.id }));
           setSuscripcion(susFinal);
           setScreen("app");
 
           // Sincronizar con Supabase en segundo plano (merge para no perder campos locales)
           supabaseCall("getPerfil", { user_id: user.id }).then(res => {
             if (res.perfil) {
-              const merged = { ...perfil, ...res.perfil, fecha_nacimiento: perfil.fecha_nacimiento || res.perfil.fecha_nacimiento || null };
+              const merged = { ...perfil, ...res.perfil, id: perfil.id || user.id, fecha_nacimiento: perfil.fecha_nacimiento || res.perfil.fecha_nacimiento || null };
               setFullUser(normalizeUser(merged));
               localStorage.setItem("froqia_session", JSON.stringify({
                 user,
@@ -3373,7 +3373,7 @@ export default function App() {
       {screen === "register" && selectedPlan && <RegisterScreen plan={selectedPlan} onBack={() => setScreen("landing")} onContinue={async d => { 
         setUserData(d); 
        if (d._loginExistente) {
-  setFullUser(normalizeUser({ ...d, machines: d.machines || d.equipos || [], nombre: d.nombre || d.email?.split('@')[0] || 'Usuario' }));
+  setFullUser(normalizeUser({ ...d, id: d.id || d._supabaseUser?.id, machines: d.machines || d.equipos || [], nombre: d.nombre || d.email?.split('@')[0] || 'Usuario' }));
           const sus = { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 3 * 24 * 60 * 60 * 1000 };
           setSuscripcion(sus);
           localStorage.setItem("froqia_session", JSON.stringify({

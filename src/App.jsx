@@ -734,6 +734,31 @@ function TermsInRegister() {
   );
 }
 
+function PwdInput({ label, value, onChange, placeholder }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div>
+      <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, display: "block", marginBottom: 6 }}>{label.toUpperCase()}</label>
+      <div style={{ position: "relative" }}>
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          style={{ width: "100%", boxSizing: "border-box", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "12px 42px 12px 14px", color: "#fff", fontSize: 15, outline: "none", fontFamily: "'DM Sans',sans-serif" }}
+          onFocus={e => e.target.style.borderColor = "#e84a2e66"}
+          onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+        />
+        <button
+          type="button"
+          onClick={() => setShow(s => !s)}
+          style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "rgba(255,255,255,0.35)", padding: 0, lineHeight: 1 }}
+        >{show ? "🙈" : "👁"}</button>
+      </div>
+    </div>
+  );
+}
+
 function RegisterScreen({ plan, onBack, onContinue }) {
   const [method, setMethod] = useState("email");
   const [email, setEmail] = useState("");
@@ -741,55 +766,41 @@ function RegisterScreen({ plan, onBack, onContinue }) {
   const [nombre, setNombre] = useState("");
   const [cedula, setCedula] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showLogin, setShowLogin] = useState(false);
-  const [loginEmail, setLoginEmail] = useState("");
+  const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!loginEmail || !loginPassword) return setError("Completá email y contraseña");
+    if (!loginIdentifier || !loginPassword) return setError("Ingresá tu email o teléfono y contraseña");
     setLoading(true);
     setError("");
+    const emailFinal = loginIdentifier.includes("@")
+      ? loginIdentifier.trim()
+      : `${loginIdentifier.replace(/\D/g, "")}@froqia.com`;
     try {
-      const res = await supabaseCall("login", { email: loginEmail, password: loginPassword });
-      if (res.error) { 
-        setError(res.error); 
-        setLoading(false);
-        return; 
-      }
+      const res = await supabaseCall("login", { email: emailFinal, password: loginPassword });
+      if (res.error) { setError(res.error); setLoading(false); return; }
       if (res.user && res.perfil) {
         setLoading(false);
-        onContinue({ 
-          ...res.perfil, 
-          email: loginEmail, 
-          _supabaseUser: res.user,
-          _session: res.session,
-          _loginExistente: true 
-        });
+        onContinue({ ...res.perfil, email: emailFinal, _supabaseUser: res.user, _session: res.session, _loginExistente: true });
       } else if (res.user) {
-  setLoading(false);
-  // Buscar perfil en localStorage como fallback
-  const savedRaw = localStorage.getItem("froqia_session");
-  if (savedRaw) {
-    try {
-      const saved = JSON.parse(savedRaw);
-      if (saved.perfil && saved.user?.email === loginEmail) {
-        onContinue({ 
-          ...saved.perfil, 
-          email: loginEmail, 
-          _supabaseUser: res.user,
-          _session: res.session,
-          _loginExistente: true 
-        });
-        return;
+        setLoading(false);
+        const savedRaw = localStorage.getItem("froqia_session");
+        if (savedRaw) {
+          try {
+            const saved = JSON.parse(savedRaw);
+            if (saved.perfil && saved.user?.email === emailFinal) {
+              onContinue({ ...saved.perfil, email: emailFinal, _supabaseUser: res.user, _session: res.session, _loginExistente: true });
+              return;
+            }
+          } catch {}
+        }
+        onContinue({ nombre: res.user.user_metadata?.nombre || "", email: emailFinal, _supabaseUser: res.user, _session: res.session });
       }
-    } catch {}
-  }
-  // Sin perfil local — necesita onboarding
-  onContinue({ nombre: res.user.user_metadata?.nombre || "", email: loginEmail, _supabaseUser: res.user, _session: res.session });
-}
-    } catch(e) {
+    } catch {
       setError("Error de conexión");
     }
     setLoading(false);
@@ -801,21 +812,15 @@ function RegisterScreen({ plan, onBack, onContinue }) {
     if (method === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setError("Email inválido");
     if (method === "phone" && phone.replace(/\D/g, "").length < 9) return setError("Teléfono inválido");
     if (!password || password.length < 6) return setError("La contraseña debe tener al menos 6 caracteres");
+    if (password !== confirmPassword) return setError("Las contraseñas no coinciden");
     setLoading(true);
     setError("");
     try {
       const emailFinal = method === "email" ? email : `${phone.replace(/\D/g, "")}@froqia.com`;
       const res = await supabaseCall("register", { email: emailFinal, password, nombre, cedula });
       if (res.error) { setError(res.error); setLoading(false); return; }
-      onContinue({ 
-        nombre, cedula, 
-        email: emailFinal, 
-        phone: method === "phone" ? phone : "", 
-        method,
-        _supabaseUser: res.user,
-        _session: res.session
-      });
-    } catch(e) {
+      onContinue({ nombre, cedula, email: emailFinal, phone: method === "phone" ? phone : "", method, _supabaseUser: res.user, _session: res.session });
+    } catch {
       setError("Error de conexión");
     }
     setLoading(false);
@@ -838,8 +843,8 @@ function RegisterScreen({ plan, onBack, onContinue }) {
           <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 4px" }}>Iniciar sesión</h2>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, margin: "0 0 20px" }}>Ya tenés cuenta en FROQIA</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <Input label="Email" type="email" value={loginEmail} onChange={setLoginEmail} placeholder="tu@correo.com" />
-            <Input label="Contraseña" type="password" value={loginPassword} onChange={setLoginPassword} placeholder="Tu contraseña" />
+            <Input label="Email o teléfono" value={loginIdentifier} onChange={setLoginIdentifier} placeholder="tu@correo.com o 0981123456" />
+            <PwdInput label="Contraseña" value={loginPassword} onChange={setLoginPassword} placeholder="Tu contraseña" />
           </div>
           {error && <div style={{ marginTop: 12, padding: "10px 13px", background: "rgba(232,74,46,0.1)", border: "1px solid rgba(232,74,46,0.3)", borderRadius: 10, color: "#e8a090", fontSize: 13 }}>⚠️ {error}</div>}
           <Btn onClick={handleLogin} disabled={loading} variant="primary" style={{ width: "100%", marginTop: 20, padding: 15, fontSize: 15 }}>
@@ -862,7 +867,8 @@ function RegisterScreen({ plan, onBack, onContinue }) {
             <Input label="Nombre completo" value={nombre} onChange={setNombre} placeholder="Ej: Carlos González" />
             <Input label="Número de cédula" value={cedula} onChange={setCedula} placeholder="Ej: 5234567" />
             {method === "email" ? <Input label="Correo electrónico" type="email" value={email} onChange={setEmail} placeholder="tu@correo.com" prefix="✉" /> : <Input label="Teléfono" type="tel" value={phone} onChange={setPhone} placeholder="+595 971 123 456" prefix="📱" />}
-            <Input label="Contraseña" type="password" value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres" />
+            <PwdInput label="Contraseña" value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres" />
+            <PwdInput label="Confirmar contraseña" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repetí tu contraseña" />
           </div>
           {error && <div style={{ marginTop: 12, padding: "10px 13px", background: "rgba(232,74,46,0.1)", border: "1px solid rgba(232,74,46,0.3)", borderRadius: 10, color: "#e8a090", fontSize: 13 }}>⚠️ {error}</div>}
           <Btn onClick={handleSubmit} disabled={loading} variant={plan.trial ? "trial" : "primary"} style={{ width: "100%", marginTop: 20, padding: 15, fontSize: 15 }}>

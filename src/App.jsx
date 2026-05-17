@@ -1721,14 +1721,12 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
                     onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
                   >
                     {/* Thumbnail / ícono del ejercicio */}
-                    <div style={{ width: 56, height: 56, borderRadius: 12, background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>
-                      {alt.machine.toLowerCase().includes("peso") || alt.machine.toLowerCase().includes("corporal") || alt.machine.toLowerCase().includes("flexion") ? "🤸" :
-                       alt.machine.toLowerCase().includes("barra") ? "🏋️" :
-                       alt.machine.toLowerCase().includes("mancuerna") ? "💪" :
-                       alt.machine.toLowerCase().includes("banda") || alt.machine.toLowerCase().includes("goma") ? "🟡" :
-                       alt.machine.toLowerCase().includes("polea") || alt.machine.toLowerCase().includes("cable") ? "🔗" :
-                       alt.machine.toLowerCase().includes("cardio") || alt.machine.toLowerCase().includes("biciclet") ? "🚴" : "🏋️"}
-                    </div>
+                    {altMachineData?.videoId
+                      ? <img src={`https://img.youtube.com/vi/${altMachineData.videoId}/mqdefault.jpg`} style={{ width: 56, height: 42, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+                      : <div style={{ width: 56, height: 42, borderRadius: 8, flexShrink: 0, background: "rgba(232,74,46,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
+                          {MUSCLE_GROUPS.find(g => g.muscles.some(m => alt.muscle?.toLowerCase().includes(m.toLowerCase())))?.emoji || "💪"}
+                        </div>
+                    }
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: 14, color: "#fff", marginBottom: 3 }}>{alt.machine}</div>
                       <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>{alt.sets}×{alt.reps}</div>

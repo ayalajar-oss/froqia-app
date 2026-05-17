@@ -805,7 +805,7 @@ function RegisterScreen({ plan, onBack, onContinue }) {
     setError("");
     try {
       const emailFinal = method === "email" ? email : `${phone.replace(/\D/g, "")}@froqia.com`;
-      const res = await supabaseCall("register", { email: emailFinal, password, nombre });
+      const res = await supabaseCall("register", { email: emailFinal, password, nombre, cedula });
       if (res.error) { setError(res.error); setLoading(false); return; }
       onContinue({ 
         nombre, cedula, 

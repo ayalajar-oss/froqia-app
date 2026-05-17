@@ -21,12 +21,27 @@ export const handler = async (event) => {
     const { action, data } = JSON.parse(event.body || "{}");
 
     if (action === "register") {
-      const { email, password, nombre } = data;
-      const { data: authData, error } = await supabase.auth.signUp({ 
+      const { email, password, nombre, cedula } = data;
+      if (cedula) {
+        const { data: existing } = await supabase.from("perfiles").select("id").eq("cedula", cedula).maybeSingle();
+        if (existing) return { statusCode: 200, headers, body: JSON.stringify({ error: "Esta cédula ya está registrada. Si ya tenés cuenta, iniciá sesión." }) };
+      }
+      const { data: authData, error } = await supabase.auth.signUp({
         email, password, options: { data: { nombre } }
       });
       if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
       return { statusCode: 200, headers, body: JSON.stringify({ user: authData.user, session: authData.session })};
+    }
+
+    if (action === "checkCedula") {
+      const { cedula } = data;
+      const { data: perfil } = await supabase.from("perfiles").select("id, plan_expiry").eq("cedula", cedula).maybeSingle();
+      if (!perfil) return { statusCode: 200, headers, body: JSON.stringify({ exists: false }) };
+      const ahora = new Date().toISOString();
+      if (perfil.plan_expiry && perfil.plan_expiry > ahora) {
+        return { statusCode: 200, headers, body: JSON.stringify({ exists: true, hadTrial: false, hasPlan: true }) };
+      }
+      return { statusCode: 200, headers, body: JSON.stringify({ exists: true, hadTrial: true }) };
     }
 
     if (action === "login") {

@@ -3182,6 +3182,19 @@ async function supabaseCall(action, data) {
   return r.json();
 }
 
+function normalizeUser(perfil) {
+  if (!perfil) return perfil;
+  return {
+    ...perfil,
+    weight: perfil.weight || perfil.peso,
+    height: perfil.height || perfil.altura,
+    age: perfil.age || perfil.edad,
+    daysPerWeek: perfil.daysPerWeek || perfil.dias_semana,
+    sex: perfil.sex || perfil.sexo,
+    machines: perfil.machines || perfil.equipos || [],
+  };
+}
+
 export default function App() {
   const [screen, setScreen] = useState("loading");
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -3200,14 +3213,14 @@ export default function App() {
             plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "3 días" },
             trialExpiry: Date.now() + 3 * 24 * 60 * 60 * 1000
           };
-          setFullUser(perfil);
+          setFullUser(normalizeUser(perfil));
           setSuscripcion(susFinal);
           setScreen("app");
-          
+
           // Sincronizar con Supabase en segundo plano
           supabaseCall("getPerfil", { user_id: user.id }).then(res => {
             if (res.perfil) {
-              setFullUser(res.perfil);
+              setFullUser(normalizeUser(res.perfil));
               localStorage.setItem("froqia_session", JSON.stringify({
                 user,
                 perfil: res.perfil,
@@ -3273,8 +3286,8 @@ export default function App() {
       {screen === "landing" && <LandingScreen onSelectPlan={p => { setSelectedPlan(p); setScreen("register"); }} onTutorial={() => setScreen("tutorial")} />}
       {screen === "register" && selectedPlan && <RegisterScreen plan={selectedPlan} onBack={() => setScreen("landing")} onContinue={async d => { 
         setUserData(d); 
-       if (d._loginExistente && d.weight) {
-  setFullUser({ ...d, machines: d.machines || [], nombre: d.nombre || d.email?.split('@')[0] || 'Usuario' });
+       if (d._loginExistente) {
+  setFullUser(normalizeUser({ ...d, machines: d.machines || d.equipos || [], nombre: d.nombre || d.email?.split('@')[0] || 'Usuario' }));
           const sus = { plan: selectedPlan, trialExpiry: d.plan_expiry ? new Date(d.plan_expiry).getTime() : Date.now() + 3 * 24 * 60 * 60 * 1000 };
           setSuscripcion(sus);
           localStorage.setItem("froqia_session", JSON.stringify({
@@ -3304,7 +3317,7 @@ export default function App() {
           suscripcion: susFinal
         }));
 
-        setFullUser(fullProfile);
+        setFullUser(normalizeUser(fullProfile));
         setSuscripcion(susFinal);
         
         // Guardar en Supabase en segundo plano

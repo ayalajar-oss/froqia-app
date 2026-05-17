@@ -2550,11 +2550,11 @@ useEffect(() => {
   async function saveProfile() {
     setSavingProfile(true);
     const updated = { ...user, ...editForm, fecha_nacimiento: editForm.fechaNacimiento || user.fecha_nacimiento || null };
+    const saved = JSON.parse(localStorage.getItem("froqia_session") || "{}");
+    localStorage.setItem("froqia_session", JSON.stringify({ ...saved, perfil: updated }));
+    onUpdateUser(updated);
     try {
       if (userId) await supabaseCall("updatePerfil", { user_id: userId, perfil: updated });
-      const saved = JSON.parse(localStorage.getItem("froqia_session") || "{}");
-      localStorage.setItem("froqia_session", JSON.stringify({ ...saved, perfil: updated }));
-      onUpdateUser(updated);
     } catch {}
     setSavingProfile(false);
     setEditingProfile(false);

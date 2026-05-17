@@ -262,7 +262,18 @@ const FINISHER_OPTIONS = [
   { id: "hiit_finish", name: "HIIT finalizador (5 min)", desc: "5 rounds: 30 seg de burpees o saltos al cajón + 30 seg de descanso. Para acelerar la quema calórica.", emoji: "⚡", category: "Cardio" },
 ];
 
-
+// ─── MUSCLE GROUPS ────────────────────────────────────────────────────────────
+const MUSCLE_GROUPS = [
+  { id: "chest_biceps", label: "Pecho+Bíceps", emoji: "💪", muscles: ["Pectoral", "Bíceps"] },
+  { id: "back_triceps", label: "Espalda+Tríceps", emoji: "🔥", muscles: ["Dorsal", "Espalda", "Tríceps"] },
+  { id: "shoulders", label: "Hombros", emoji: "🏋️", muscles: ["Hombros", "Deltoides"] },
+  { id: "quads", label: "Cuádriceps", emoji: "🦵", muscles: ["Cuádriceps"] },
+  { id: "hamstrings_glutes", label: "Femorales+Glúteos", emoji: "🍑", muscles: ["Femorales", "Glúteos", "Isquiotibiales"] },
+  { id: "full_body", label: "Full Body", emoji: "⚡", muscles: [] },
+  { id: "core", label: "Core", emoji: "🎯", muscles: ["Core", "Abdominales"] },
+  { id: "cardio", label: "Cardio", emoji: "🏃", muscles: [] },
+  { id: "surprise", label: "Sorprendeme", emoji: "🎲", muscles: [] },
+];
 
 // ─── PROTEIN FOODS ────────────────────────────────────────────────────────────
 const PROTEIN_FOODS = [
@@ -2477,6 +2488,7 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan }) {
   const [routine, setRoutine] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tip, setTip] = useState(null);
+  const [selectedMuscleGroup, setSelectedMuscleGroup] = useState("surprise");
 const [history, setHistory] = useState([]);
 useEffect(() => {
   const userId = user.id || user._supabaseUser?.id;
@@ -2538,6 +2550,16 @@ useEffect(() => {
     const baseStrength = Math.round(parseFloat(user.weight) * expFactor);
 
     const sexLabel = user.sex === "female" ? "Mujer" : user.sex === "male" ? "Hombre" : "No especificado";
+    const muscleGroupInfo = MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
+    const muscleGroupHint = muscleGroupInfo?.id === "surprise" || !muscleGroupInfo
+      ? "Elegí libremente según historial"
+      : muscleGroupInfo.muscles.length > 0
+        ? `ENFOQUE OBLIGATORIO: ${muscleGroupInfo.muscles.join(", ")}. Todos los ejercicios deben trabajar estos músculos.`
+        : muscleGroupInfo.id === "full_body"
+          ? "ENFOQUE: Full Body - combiná tren superior, inferior y core en la misma sesión."
+          : muscleGroupInfo.id === "cardio"
+            ? "ENFOQUE: Cardio - priorizá ejercicios cardiovasculares (bici, cinta, elíptica, remo)."
+            : "Elegí libremente según historial";
     const prompt = `Sos un entrenador personal experto. Generá la rutina del día.
 PERFIL: ${user.nombre}, ${user.age}a, ${user.weight}kg, ${sexLabel}. CUERPO: ${bodyInfo?.sublabel} | OBJETIVO: ${goalInfo?.label} | EXP: ${user.experience} | DÍAS/SEM: ${user.daysPerWeek}
 META PROTEÍNA: ${daily}g/día | HISTORIAL RECIENTE: ${hist}
@@ -2545,8 +2567,9 @@ EQUIPAMIENTO DISPONIBLE: ${equipment.map(m => m.name).join(", ")}
 FUERZA BASE ESTIMADA: ${baseStrength}kg (ajustá según el músculo y ejercicio)
 ${warmupHint}
 ${finisherHint}
+${muscleGroupHint}
 INSTRUCCIONES:
-- Elegí 4-6 ejercicios variando grupos musculares según historial
+- Elegí 4-6 ejercicios según el enfoque muscular especificado
 - ${user.sex === "female" ? "Para mujer: enfatizá glúteos, isquiotibiales y core. Incluí trabajo de tren inferior en cada sesión si el objetivo lo permite." : "Para hombre: equilibrá tren superior e inferior según el historial."}
 - Adaptá series/reps al objetivo
 - weight_suggestion DEBE ser un rango en kg concreto ej: "20-25 kg" o "15 kg" — NUNCA porcentajes. Estimá según fuerza base y músculo trabajado.
@@ -2746,8 +2769,38 @@ SOLO JSON sin backticks:
            {tip?.category && (
   <TipDelDia tip={tip} tipColor={tipColor} goalInfo={goalInfo} bodyInfo={bodyInfo} user={user} daily={daily} setTip={setTip} />
 )}
-  
+
 <WeeklyDashboard history={history} />
+
+            {/* Selector de grupo muscular */}
+            <div style={{ ...card, padding: "14px 16px", marginBottom: 12 }}>
+              <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 800, letterSpacing: 0.8, marginBottom: 10 }}>🎯 ENFOQUE DE HOY</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                {MUSCLE_GROUPS.map(g => (
+                  <button
+                    key={g.id}
+                    onClick={() => setSelectedMuscleGroup(g.id)}
+                    style={{
+                      background: selectedMuscleGroup === g.id ? "linear-gradient(135deg,#e84a2e,#f59e0b)" : "rgba(255,255,255,0.06)",
+                      border: selectedMuscleGroup === g.id ? "1.5px solid #e84a2e" : "1.5px solid rgba(255,255,255,0.08)",
+                      borderRadius: 12,
+                      padding: "10px 8px",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      fontFamily: "'DM Sans',sans-serif",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 4
+                    }}
+                  >
+                    <div style={{ fontSize: 20 }}>{g.emoji}</div>
+                    <div style={{ color: "#fff", fontSize: 11, fontWeight: selectedMuscleGroup === g.id ? 800 : 600, textAlign: "center", lineHeight: 1.2 }}>{g.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Frase motivadora del día */}
             <MotivationalQuote />
 

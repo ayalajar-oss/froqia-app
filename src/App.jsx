@@ -3105,14 +3105,11 @@ export default function App() {
       try {
         const { user, perfil, suscripcion: sus } = JSON.parse(saved);
         if (user && perfil) {
-          const susFinal = sus || { 
-            plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "7 días" }, 
-            trialExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000 
+          const susFinal = sus || {
+            plan: { id: "trial", nombre: "Prueba Gratis", trial: true, color: "#10b981", precioLabel: "GRATIS", periodo: "7 días" },
+            trialExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000
           };
           setFullUser(perfil);
-          setSuscripcion(susFinal);
-          setScreen("app");
-          
           setSuscripcion(susFinal);
           setScreen("app");
           
@@ -3250,10 +3247,8 @@ export default function App() {
           }}
           onLogout={() => {
             localStorage.removeItem("froqia_session");
-            setScreen("landing");
-            setFullUser(null);
-            setSuscripcion(null);
-            setUserData(null);
+            // Force reload para evitar blank screen en iOS
+            window.location.href = "/";
           }}
         />
       )}

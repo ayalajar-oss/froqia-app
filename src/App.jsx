@@ -2489,13 +2489,16 @@ SOLO JSON sin backticks ni texto extra:
 }
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
-function MainApp({ user, suscripcion, onLogout, onUpgradePlan }) {
+function MainApp({ user, suscripcion, onLogout, onUpgradePlan, onUpdateUser }) {
   const [tab, setTab] = useState("home");
   const [routine, setRoutine] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tip, setTip] = useState(null);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [showGroupSelector, setShowGroupSelector] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({});
+  const [savingProfile, setSavingProfile] = useState(false);
 const [history, setHistory] = useState([]);
 useEffect(() => {
   const userId = user.id || user._supabaseUser?.id;
@@ -2535,6 +2538,19 @@ useEffect(() => {
   const doneCount = Object.values(done).filter(Boolean).length;
   const totalEx = routine?.exercises?.length || 0;
   const tipColor = { "Nutrición": "#f59e0b", "Técnica": "#8b5cf6", "Recuperación": "#10b981", "Motivación": "#e84a2e" };
+
+  async function saveProfile() {
+    setSavingProfile(true);
+    const updated = { ...user, ...editForm };
+    try {
+      if (userId) await supabaseCall("updatePerfil", { user_id: userId, perfil: updated });
+      const saved = JSON.parse(localStorage.getItem("froqia_session") || "{}");
+      localStorage.setItem("froqia_session", JSON.stringify({ ...saved, perfil: updated }));
+      onUpdateUser(updated);
+    } catch {}
+    setSavingProfile(false);
+    setEditingProfile(false);
+  }
 
   async function generateRoutine(group = null) {
     setLoading(true); setDone({});
@@ -2968,12 +2984,59 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
             <div style={{ textAlign: "center", padding: "22px 0 16px" }}>
               <Avatar photo={user.photo} name={user.nombre} size={76} />
               <h2 style={{ margin: "12px 0 3px", fontSize: 20, fontWeight: 800 }}>{user.nombre}</h2>
-              <p style={{ color: "rgba(255,255,255,0.3)", margin: "0 0 12px", fontSize: 13 }}>{user.email || user.phone}</p>
+              <p style={{ color: "rgba(255,255,255,0.3)", margin: "0 0 10px", fontSize: 13 }}>{user.email || user.phone}</p>
+              <button onClick={() => { setEditForm({ nombre: user.nombre, weight: user.weight, height: user.height, age: user.age, sex: user.sex, daysPerWeek: user.daysPerWeek, experience: user.experience }); setEditingProfile(true); }} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.3)", color: "#e8a090", borderRadius: 10, padding: "7px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>✏️ Editar perfil</button>
               <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                 <Pill color={goalInfo?.color}>{goalInfo?.emoji} {goalInfo?.label}</Pill>
                 <Pill color={bodyInfo?.color}>{bodyInfo?.emoji} {bodyInfo?.sublabel}</Pill>
               </div>
             </div>
+
+            {editingProfile && (
+              <div style={{ ...card, padding: "18px 16px", marginBottom: 14 }}>
+                <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 16 }}>✏️ Editar perfil</div>
+                {[
+                  ["Nombre", "nombre", "text"],
+                  ["Peso (kg)", "weight", "number"],
+                  ["Altura (cm)", "height", "number"],
+                  ["Edad", "age", "number"],
+                ].map(([label, key, type]) => (
+                  <div key={key} style={{ marginBottom: 13 }}>
+                    <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>{label.toUpperCase()}</label>
+                    <input
+                      type={type}
+                      value={editForm[key] ?? ""}
+                      onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                      style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#fff", fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                    />
+                  </div>
+                ))}
+                <div style={{ marginBottom: 13 }}>
+                  <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>SEXO</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[["male", "Hombre"], ["female", "Mujer"], ["other", "Otro"]].map(([v, l]) => (
+                      <button key={v} onClick={() => setEditForm(f => ({ ...f, sex: v }))} style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: `1.5px solid ${editForm.sex === v ? "#e84a2e" : "rgba(255,255,255,0.1)"}`, background: editForm.sex === v ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.04)", color: editForm.sex === v ? "#e8a090" : "rgba(255,255,255,0.5)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginBottom: 13 }}>
+                  <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>DÍAS POR SEMANA: <span style={{ color: "#e8a090" }}>{editForm.daysPerWeek}</span></label>
+                  <input type="range" min={1} max={7} value={editForm.daysPerWeek ?? 3} onChange={e => setEditForm(f => ({ ...f, daysPerWeek: parseInt(e.target.value) }))} style={{ width: "100%" }} />
+                </div>
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 8 }}>EXPERIENCIA</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[["beginner", "🌱", "Principiante"], ["intermediate", "⚡", "Intermedio"], ["advanced", "🏆", "Avanzado"]].map(([v, e, l]) => (
+                      <button key={v} onClick={() => setEditForm(f => ({ ...f, experience: v }))} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, border: `1.5px solid ${editForm.experience === v ? "#e84a2e" : "rgba(255,255,255,0.1)"}`, background: editForm.experience === v ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.04)", color: editForm.experience === v ? "#e8a090" : "rgba(255,255,255,0.5)", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "center" }}>{e}<br />{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 9 }}>
+                  <Btn onClick={() => setEditingProfile(false)} variant="ghost" style={{ flex: 1 }}>Cancelar</Btn>
+                  <Btn onClick={saveProfile} disabled={savingProfile} style={{ flex: 2 }}>{savingProfile ? "Guardando..." : "💾 Guardar"}</Btn>
+                </div>
+              </div>
+            )}
             <div style={{ ...card, padding: "13px 16px", marginBottom: 12, borderColor: planInfo?.color + "44", background: planInfo?.color + "0a" }}>
               <div style={{ color: planInfo?.color, fontSize: 10, fontWeight: 800, marginBottom: 6 }}>⭐ SUSCRIPCIÓN</div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -3340,6 +3403,7 @@ export default function App() {
         <MainApp
           user={fullUser}
           suscripcion={suscripcion}
+          onUpdateUser={(updated) => setFullUser(normalizeUser(updated))}
           onUpgradePlan={(newPlan) => {
             setSuscripcion(prev => ({ ...prev, plan: newPlan, trialExpiry: null }));
             const saved = localStorage.getItem("froqia_session");

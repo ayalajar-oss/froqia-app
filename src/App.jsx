@@ -2152,7 +2152,7 @@ function ProteinCalculator({ user }) {
 
 
 // ─── MEDICAL FILES ────────────────────────────────────────────────────────────
-function MedicalFiles({ user, isPremium, onUpgrade }) {
+function MedicalFiles({ user, isPremium, onUpgrade, onNewAnalysis }) {
   const [files, setFiles] = useState([]);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
@@ -2256,6 +2256,29 @@ SOLO JSON sin backticks ni texto extra:
       const text = data.content?.find(b => b.type === "text")?.text || "No se pudo analizar.";
       setFiles(f => f.map(fi => fi.id === fileEntry.id ? { ...fi, analysis: text } : fi));
       setAnalysis(text);
+
+      // Segunda llamada: extraer valores numéricos en JSON
+      let valores_clave = {};
+      let tipo_informe = fileEntry.name;
+      try {
+        const vRes = await fetch("/.netlify/functions/ai", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: 400, messages: [{ role: "user", content: `Análisis médico:\n\n${text}\n\nDel análisis anterior extrae los valores numéricos de laboratorio en formato JSON. Ejemplo: {"glucosa": 95, "hemoglobina": 14.5, "colesterol_total": 180}. SOLO JSON sin texto extra.` }] })
+        });
+        const vData = await vRes.json();
+        const vText = vData.content?.find(b => b.type === "text")?.text || "{}";
+        valores_clave = JSON.parse(vText.replace(/```json|```/g, "").trim());
+        const firstLine = text.split("\n").find(l => l.trim().length > 3 && l.trim().length < 80);
+        if (firstLine) tipo_informe = firstLine.replace(/[📋🔬💪🥗⚠️#*]/g, "").replace("RESUMEN:", "").trim();
+      } catch {}
+
+      // Guardar en Supabase
+      const uid = user.id || user._supabaseUser?.id;
+      if (uid) {
+        const entry = { nombre_archivo: fileEntry.name, tipo_informe, valores_clave, fecha: new Date().toISOString().split("T")[0], analisis: text };
+        supabaseCall("saveMedicalFile", { user_id: uid, tipo: fileEntry.type, ...entry }).catch(() => {});
+        if (onNewAnalysis) onNewAnalysis(entry);
+      }
     } catch { setError("Error al analizar. Verificá tu conexión."); }
     setAnalyzing(false);
   }
@@ -2425,6 +2448,7 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan, onUpdateUser }) {
   const [pesoInput, setPesoInput] = useState("");
   const [savingPeso, setSavingPeso] = useState(false);
   const [progreso, setProgreso] = useState([]);
+  const [medicalHistory, setMedicalHistory] = useState([]);
 const [history, setHistory] = useState([]);
 useEffect(() => {
   const uid = user.id || user._supabaseUser?.id;
@@ -2442,6 +2466,9 @@ useEffect(() => {
     }).catch(() => {});
     supabaseCall("getProgreso", { user_id: uid }).then(res => {
       if (res.progreso) setProgreso(res.progreso);
+    }).catch(() => {});
+    supabaseCall("getMedicalFiles", { user_id: uid }).then(res => {
+      if (res.archivos) setMedicalHistory(res.archivos);
     }).catch(() => {});
   }
 }, []);
@@ -2884,7 +2911,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
         )}
 
         {/* MÉDICO */}
-        {tab === "medical" && <div style={{ paddingTop: 16 }}><h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800 }}>🧪 Análisis Médico</h3><p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, margin: "0 0 16px" }}>Subí tus hemogramas e informes. La IA los analiza y ajusta tu plan.</p><MedicalFiles user={user} isPremium={isPremium} onUpgrade={() => setTab("upgrade")} /></div>}
+        {tab === "medical" && <div style={{ paddingTop: 16 }}><h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800 }}>🧪 Análisis Médico</h3><p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, margin: "0 0 16px" }}>Subí tus hemogramas e informes. La IA los analiza y ajusta tu plan.</p><MedicalFiles user={user} isPremium={isPremium} onUpgrade={() => setTab("upgrade")} onNewAnalysis={entry => setMedicalHistory(h => [entry, ...h])} /></div>}
 
         {/* UPGRADE */}
         {tab === "upgrade" && (
@@ -2958,6 +2985,28 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
                   </div>
               }
             </div>
+
+            {/* Análisis médicos */}
+            {medicalHistory.length > 0 && (
+              <>
+                <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 10, color: "rgba(255,255,255,0.5)", letterSpacing: 0.5 }}>ANÁLISIS MÉDICOS</div>
+                {medicalHistory.slice(0, 5).map((m, i) => (
+                  <div key={i} style={{ ...card, padding: "12px 14px", marginBottom: 9, borderColor: "rgba(139,92,246,0.2)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                      <div style={{ color: "#8b5cf6", fontWeight: 700, fontSize: 13, flex: 1, paddingRight: 8 }}>{m.tipo_informe || m.nombre_archivo}</div>
+                      <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, whiteSpace: "nowrap" }}>{m.fecha}</span>
+                    </div>
+                    {m.valores_clave && Object.keys(m.valores_clave).length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                        {Object.entries(m.valores_clave).slice(0, 6).map(([k, v]) => (
+                          <Pill key={k} color="#8b5cf6">{k.replace(/_/g, " ")}: {v}</Pill>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
 
             {/* Historial de rutinas */}
             <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 10, color: "rgba(255,255,255,0.5)", letterSpacing: 0.5 }}>ENTRENAMIENTOS</div>

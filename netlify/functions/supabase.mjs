@@ -127,6 +127,25 @@ export const handler = async (event) => {
       return { statusCode: 200, headers, body: JSON.stringify({ progreso }) };
     }
 
+    if (action === "saveMedicalFile") {
+      const { user_id, nombre_archivo, tipo, analisis, valores_clave, tipo_informe, fecha } = data;
+      const { error } = await supabase.from("historial_medico").insert({
+        user_id, nombre_archivo, tipo, analisis,
+        valores_clave: valores_clave || {},
+        tipo_informe: tipo_informe || nombre_archivo,
+        fecha: fecha || new Date().toISOString().split("T")[0]
+      });
+      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    }
+
+    if (action === "getMedicalFiles") {
+      const { user_id } = data;
+      const { data: archivos, error } = await supabase.from("historial_medico").select("*").eq("user_id", user_id).order("fecha", { ascending: false }).limit(20);
+      if (error) return { statusCode: 200, headers, body: JSON.stringify({ error: error.message }) };
+      return { statusCode: 200, headers, body: JSON.stringify({ archivos }) };
+    }
+
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Acción no reconocida: " + action }) };
 
   } catch (err) {

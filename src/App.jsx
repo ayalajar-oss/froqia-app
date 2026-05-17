@@ -3344,7 +3344,7 @@ export default function App() {
         <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 16, textAlign: "center", lineHeight: 1.7, marginBottom: 30, maxWidth: 320 }}>
           Tu suscripción a FROQIA fue procesada correctamente. ¡Bienvenido!
         </p>
-        <button onClick={() => setScreen("tutorial")} style={{ background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", borderRadius: 14, padding: "16px 32px", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
+        <button onClick={() => setScreen("welcome")} style={{ background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", borderRadius: 14, padding: "16px 32px", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>
           🚀 Comenzar en FROQIA
         </button>
       </div>
@@ -3389,7 +3389,8 @@ export default function App() {
           setScreen("checkout");
         }
       }} />}
-      {screen === "checkout" && selectedPlan && userData && <CheckoutScreen plan={selectedPlan} userData={userData} onBack={() => setScreen("register")} onSuccess={r => { setSuscripcion(r); setScreen("onboarding"); }} />}
+      {screen === "checkout" && selectedPlan && userData && <CheckoutScreen plan={selectedPlan} userData={userData} onBack={() => setScreen("register")} onSuccess={r => { setSuscripcion(r); setScreen("welcome"); }} />}
+      {screen === "welcome" && <TutorialScreen onFinish={() => setScreen("onboarding")} />}
       {screen === "onboarding" && userData && <OnboardingScreen userData={userData} onComplete={async u => {
         const { _supabaseUser, _session, ...fullProfile } = u;
         const supabaseUser = userData._supabaseUser;

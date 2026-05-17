@@ -2553,8 +2553,9 @@ useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("froqia_session") || "{}");
     localStorage.setItem("froqia_session", JSON.stringify({ ...saved, perfil: updated }));
     onUpdateUser(updated);
+    const uid = user.id || user._supabaseUser?.id;
     try {
-      if (userId) await supabaseCall("updatePerfil", { user_id: userId, perfil: updated });
+      if (uid) await supabaseCall("updatePerfil", { user_id: uid, perfil: updated });
     } catch {}
     setSavingProfile(false);
     setEditingProfile(false);

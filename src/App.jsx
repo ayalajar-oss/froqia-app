@@ -2504,11 +2504,14 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan, onUpdateUser }) {
   const [editingProfile, setEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [savingProfile, setSavingProfile] = useState(false);
+  const [pesoInput, setPesoInput] = useState("");
+  const [savingPeso, setSavingPeso] = useState(false);
+  const [progreso, setProgreso] = useState([]);
 const [history, setHistory] = useState([]);
 useEffect(() => {
-  const userId = user.id || user._supabaseUser?.id;
-  if (userId) {
-    supabaseCall("getRutinas", { user_id: userId }).then(res => {
+  const uid = user.id || user._supabaseUser?.id;
+  if (uid) {
+    supabaseCall("getRutinas", { user_id: uid }).then(res => {
       if (res.rutinas) {
         setHistory(res.rutinas.map(r => ({
           date: r.fecha,
@@ -2518,6 +2521,9 @@ useEffect(() => {
           total: r.ejercicios
         })));
       }
+    }).catch(() => {});
+    supabaseCall("getProgreso", { user_id: uid }).then(res => {
+      if (res.progreso) setProgreso(res.progreso);
     }).catch(() => {});
   }
 }, []);
@@ -2559,6 +2565,20 @@ useEffect(() => {
     } catch {}
     setSavingProfile(false);
     setEditingProfile(false);
+  }
+
+  async function savePeso() {
+    const peso = parseFloat(pesoInput);
+    if (!peso || peso <= 0) return;
+    setSavingPeso(true);
+    const uid = user.id || user._supabaseUser?.id;
+    try {
+      await supabaseCall("saveProgreso", { user_id: uid, peso, notas: "" });
+      const hoy = new Date().toISOString().split("T")[0];
+      setProgreso(p => [{ fecha: hoy, peso }, ...p]);
+      setPesoInput("");
+    } catch {}
+    setSavingPeso(false);
   }
 
   async function generateRoutine(group = null) {
@@ -2989,6 +3009,40 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
         {tab === "history" && (
           <>
             <h3 style={{ margin: "18px 0 14px", fontSize: 18, fontWeight: 800 }}>📊 Historial</h3>
+
+            {/* Registro de peso */}
+            <div style={{ ...card, padding: "16px", marginBottom: 18 }}>
+              <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 12 }}>⚖️ Peso corporal</div>
+              <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                <input
+                  type="number"
+                  placeholder="Ej: 75.5"
+                  value={pesoInput}
+                  onChange={e => setPesoInput(e.target.value)}
+                  min="20" max="300" step="0.1"
+                  style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#fff", fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+                />
+                <button
+                  onClick={savePeso}
+                  disabled={savingPeso || !pesoInput}
+                  style={{ background: savingPeso || !pesoInput ? "rgba(232,74,46,0.3)" : "#e84a2e", border: "none", borderRadius: 10, padding: "10px 16px", color: "#fff", fontSize: 13, fontWeight: 800, cursor: savingPeso || !pesoInput ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", whiteSpace: "nowrap" }}
+                >{savingPeso ? "..." : "Registrar"}</button>
+              </div>
+              {progreso.length === 0
+                ? <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 13, margin: 0 }}>Sin registros aún.</p>
+                : <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {progreso.slice(0, 7).map((p, i) => (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: i < Math.min(progreso.length, 7) - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
+                        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>{p.fecha}</span>
+                        <span style={{ fontWeight: 800, fontSize: 15 }}>{p.peso} <span style={{ color: "rgba(255,255,255,0.35)", fontWeight: 400, fontSize: 12 }}>kg</span></span>
+                      </div>
+                    ))}
+                  </div>
+              }
+            </div>
+
+            {/* Historial de rutinas */}
+            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 10, color: "rgba(255,255,255,0.5)", letterSpacing: 0.5 }}>ENTRENAMIENTOS</div>
             {history.length === 0 ? <div style={{ textAlign: "center", padding: "48px 20px" }}><div style={{ fontSize: 48, marginBottom: 14 }}>📋</div><p style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>Completá tu primer entrenamiento.</p></div>
               : history.map((h, i) => <div key={i} style={{ ...card, padding: "14px 16px", marginBottom: 9 }}><div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}><div style={{ fontWeight: 700, fontSize: 14 }}>{h.focus}</div><Pill color="#10b981">✓ {h.completed}/{h.total}</Pill></div><div style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginBottom: 7 }}>{h.date}</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{h.muscles.map(m => <Pill key={m} color="rgba(255,255,255,0.2)">{m}</Pill>)}</div></div>)}
           </>

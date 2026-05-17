@@ -2549,7 +2549,7 @@ useEffect(() => {
 
   async function saveProfile() {
     setSavingProfile(true);
-    const updated = { ...user, ...editForm, fecha_nacimiento: editForm.fechaNacimiento || user.fecha_nacimiento || null };
+    const updated = { ...user, ...editForm };
     const saved = JSON.parse(localStorage.getItem("froqia_session") || "{}");
     localStorage.setItem("froqia_session", JSON.stringify({ ...saved, perfil: updated }));
     onUpdateUser(updated);
@@ -3000,7 +3000,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
               <Avatar photo={user.photo} name={user.nombre} size={76} />
               <h2 style={{ margin: "12px 0 3px", fontSize: 20, fontWeight: 800 }}>{user.nombre}</h2>
               <p style={{ color: "rgba(255,255,255,0.3)", margin: "0 0 10px", fontSize: 13 }}>{user.email || user.phone}</p>
-              <button onClick={() => { setEditForm({ nombre: user.nombre, weight: user.weight, height: user.height, age: user.age, fechaNacimiento: user.fecha_nacimiento || user.fechaNacimiento || "", sex: user.sex, daysPerWeek: user.daysPerWeek, experience: user.experience }); setEditingProfile(true); }} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.3)", color: "#e8a090", borderRadius: 10, padding: "7px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>✏️ Editar perfil</button>
+              <button onClick={() => { setEditForm({ nombre: user.nombre, weight: user.weight, height: user.height, age: user.age, fecha_nacimiento: user.fecha_nacimiento || "", sex: user.sex, daysPerWeek: user.daysPerWeek, experience: user.experience }); setEditingProfile(true); }} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.3)", color: "#e8a090", borderRadius: 10, padding: "7px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>✏️ Editar perfil</button>
               <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                 <Pill color={goalInfo?.color}>{goalInfo?.emoji} {goalInfo?.label}</Pill>
                 <Pill color={bodyInfo?.color}>{bodyInfo?.emoji} {bodyInfo?.sublabel}</Pill>
@@ -3027,9 +3027,9 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
                 ))}
                 <div style={{ marginBottom: 13 }}>
                   <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>
-                    FECHA DE NACIMIENTO{editForm.fechaNacimiento ? <span style={{ color: "#e8a090", marginLeft: 8 }}>{Math.floor((Date.now() - new Date(editForm.fechaNacimiento)) / (365.25 * 24 * 60 * 60 * 1000))} años</span> : ""}
+                    FECHA DE NACIMIENTO{editForm.fecha_nacimiento ? <span style={{ color: "#e8a090", marginLeft: 8 }}>{Math.floor((Date.now() - new Date(editForm.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000))} años</span> : ""}
                   </label>
-                  <input type="date" value={editForm.fechaNacimiento ?? ""} onChange={e => setEditForm(f => ({ ...f, fechaNacimiento: e.target.value, age: Math.floor((Date.now() - new Date(e.target.value)) / (365.25 * 24 * 60 * 60 * 1000)) }))} max={new Date().toISOString().split("T")[0]} style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#fff", fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", colorScheme: "dark" }} />
+                  <input type="date" value={editForm.fecha_nacimiento ?? ""} onChange={e => setEditForm(f => ({ ...f, fecha_nacimiento: e.target.value, age: Math.floor((Date.now() - new Date(e.target.value)) / (365.25 * 24 * 60 * 60 * 1000)) }))} max={new Date().toISOString().split("T")[0]} style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "10px 14px", color: "#fff", fontSize: 15, fontFamily: "'DM Sans',sans-serif", outline: "none", colorScheme: "dark" }} />
                 </div>
                 <div style={{ marginBottom: 13 }}>
                   <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 5 }}>SEXO</label>

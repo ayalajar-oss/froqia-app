@@ -2442,6 +2442,122 @@ SOLO JSON sin backticks ni texto extra:
   );
 }
 
+// ─── COACH SCREEN ─────────────────────────────────────────────────────────────
+function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, setMessages }) {
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = { role: "user", content: input.trim() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+    try {
+      const systemPrompt = `Sos el coach personal de IA de FROQIA. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}, experiencia: ${user.experience}. Meta proteína: ${daily}g/día. Respondé en español rioplatense, de forma motivadora, concisa y personalizada. Podés ayudar con dudas de entrenamiento, nutrición, recuperación y motivación.`;
+      const r = await fetch("/.netlify/functions/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 600,
+          system: systemPrompt,
+          messages: newMessages.map(m => ({ role: m.role, content: m.content }))
+        })
+      });
+      const d = await r.json();
+      const text = d.content?.find(b => b.type === "text")?.text || "No pude responder, intentá de nuevo.";
+      setMessages(prev => [...prev, { role: "assistant", content: text }]);
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: "Error al conectar con el coach. Intentá de nuevo." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isPremium) {
+    return (
+      <div style={{ paddingTop: 32, textAlign: "center" }}>
+        <div style={{ fontSize: 52, marginBottom: 16 }}>💬</div>
+        <h3 style={{ fontWeight: 800, fontSize: 20, margin: "0 0 8px" }}>Coach IA FROQIA</h3>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, lineHeight: 1.6, margin: "0 0 24px" }}>
+          Chateá con tu coach personal de IA. Resolvé dudas de entrenamiento, nutrición y motivación en cualquier momento.
+        </p>
+        <button onClick={onUpgrade} style={{ background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 12, padding: "13px 28px", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 20px rgba(232,74,46,0.35)" }}>
+          ⭐ Ver planes de suscripción
+        </button>
+        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginTop: 12 }}>Disponible en planes de pago</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 148px)", paddingTop: 16 }}>
+      <div style={{ marginBottom: 12 }}>
+        <h3 style={{ margin: 0, fontWeight: 800, fontSize: 18 }}>💬 Coach FROQIA</h3>
+        <p style={{ margin: "4px 0 0", color: "rgba(255,255,255,0.4)", fontSize: 12 }}>Tu coach personal con IA · siempre disponible</p>
+      </div>
+
+      <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12, paddingBottom: 12 }}>
+        {messages.length === 0 && (
+          <div style={{ textAlign: "center", paddingTop: 48, color: "rgba(255,255,255,0.25)", fontSize: 13 }}>
+            <div style={{ fontSize: 44, marginBottom: 12 }}>👋</div>
+            <div>¡Hola {user.nombre.split(" ")[0]}! Preguntame lo que quieras sobre tu entrenamiento, nutrición o motivación.</div>
+          </div>
+        )}
+        {messages.map((msg, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+            <div style={{
+              maxWidth: "82%",
+              padding: "10px 14px",
+              borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+              background: msg.role === "user" ? "linear-gradient(135deg,#e84a2e,#c53d25)" : "rgba(255,255,255,0.07)",
+              border: msg.role === "user" ? "none" : "1px solid rgba(255,255,255,0.08)",
+              color: "#fff",
+              fontSize: 14,
+              lineHeight: 1.55,
+              whiteSpace: "pre-wrap",
+            }}>
+              {msg.content}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+            <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", fontSize: 14 }}>
+              ✦ Escribiendo…
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div style={{ display: "flex", gap: 10, paddingBottom: 8 }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
+          placeholder="Preguntá a tu coach…"
+          style={{ flex: 1, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "12px 14px", color: "#fff", fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
+        />
+        <button
+          onClick={sendMessage}
+          disabled={!input.trim() || loading}
+          style={{ background: input.trim() && !loading ? "linear-gradient(135deg,#e84a2e,#c53d25)" : "rgba(255,255,255,0.08)", border: "none", borderRadius: 12, padding: "0 18px", cursor: input.trim() && !loading ? "pointer" : "default", color: "#fff", fontSize: 18, transition: "all 0.2s", flexShrink: 0 }}
+        >
+          ➤
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 function MainApp({ user, suscripcion, onLogout, onUpgradePlan, onUpdateUser }) {
   const [tab, setTab] = useState("home");
@@ -2490,6 +2606,7 @@ useEffect(() => {
   const [substituting, setSubstituting] = useState(null);
   // Alternatives panel — { [exIndex]: [{machine,muscle,sets,reps,rest,tip,weight_suggestion}] | "loading" | null }
   const [alternatives, setAlternatives] = useState({});
+  const [coachMessages, setCoachMessages] = useState([]);
 
   const goalInfo = GOALS.find(g => g.id === user.goal);
   const bodyInfo = BODY_TYPES.find(b => b.id === user.bodyType);
@@ -3109,11 +3226,24 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
             <Btn onClick={onLogout} variant="ghost" style={{ width: "100%" }}>🚪 Cerrar sesión</Btn>
           </>
         )}
+
+        {/* COACH */}
+        {tab === "coach" && (
+          <CoachScreen
+            user={user}
+            goalInfo={goalInfo}
+            daily={daily}
+            isPremium={isPremium}
+            onUpgrade={() => setTab("upgrade")}
+            messages={coachMessages}
+            setMessages={setCoachMessages}
+          />
+        )}
       </div>
 
       {/* Bottom nav */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 520, background: "rgba(8,8,9,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-around", padding: "10px 0 18px" }}>
-        {[["home", "🏠", "Inicio"], ["nutrition", "🥗", "Nutrición"], ["medical", "🧪", "Médico"], ["history", "📊", "Historial"], ["profile", "👤", "Perfil"]].map(([id, icon, label]) => (
+        {[["home", "🏠", "Inicio"], ["nutrition", "🥗", "Nutrición"], ["coach", "💬", "Coach"], ["history", "📊", "Historial"], ["profile", "👤", "Perfil"]].map(([id, icon, label]) => (
           <button key={id} onClick={() => setTab(id)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: tab === id ? "#e8a090" : "rgba(255,255,255,0.3)", fontFamily: "'DM Sans',sans-serif" }}>
             <span style={{ fontSize: 20 }}>{icon}</span>
             <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>

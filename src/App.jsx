@@ -286,18 +286,18 @@ const MUSCLE_GROUPS = [
 // ─── PROTEIN FOODS ────────────────────────────────────────────────────────────
 const PROTEIN_FOODS = [
   // unit: "g" = gramos libres | "unit" = contable con nombre
-  { name: "Pechuga de pollo", emoji: "🍗", per100g: 31, cal100g: 165, fat: 3.6, carbs: 0, tag: "lean", desc: "La mejor fuente magra. Ideal post-entreno.", unit: "g", defaultGrams: 150 },
-  { name: "Carne vacuna magra", emoji: "🥩", per100g: 26, cal100g: 218, fat: 13, carbs: 0, tag: "lean", desc: "Rica en hierro y zinc. 2-3 veces/semana.", unit: "g", defaultGrams: 150 },
-  { name: "Huevo entero", emoji: "🥚", per100g: 13, cal100g: 155, fat: 11, carbs: 1.1, tag: "complete", desc: "Proteína completa y económica. ~6g prot. c/u.", unit: "unit", unitName: "huevo", unitGrams: 50, defaultUnits: 2 },
-  { name: "Clara de huevo", emoji: "🍳", per100g: 11, cal100g: 52, fat: 0.2, carbs: 0.7, tag: "lean", desc: "Casi pura proteína, sin grasa. ~4g prot. c/u.", unit: "unit", unitName: "clara", unitGrams: 33, defaultUnits: 3 },
-  { name: "Atún al agua", emoji: "🐟", per100g: 25, cal100g: 116, fat: 1, carbs: 0, tag: "lean", desc: "~20g proteína por lata. Máx 3 veces/semana.", unit: "unit", unitName: "lata (80g)", unitGrams: 80, defaultUnits: 1 },
-  { name: "Salmón", emoji: "🐠", per100g: 20, cal100g: 208, fat: 13, carbs: 0, tag: "omega", desc: "Rico en omega-3. Excelente para recuperación.", unit: "g", defaultGrams: 120 },
-  { name: "Yogurt griego (0%)", emoji: "🥛", per100g: 10, cal100g: 59, fat: 0.4, carbs: 3.6, tag: "dairy", desc: "~10g proteína por pote. Ideal para merienda.", unit: "unit", unitName: "pote (200g)", unitGrams: 200, defaultUnits: 1 },
-  { name: "Yogurt griego (entero)", emoji: "🫙", per100g: 9, cal100g: 97, fat: 5, carbs: 3.6, tag: "dairy", desc: "Más grasa y saciante. Desayuno ideal.", unit: "unit", unitName: "pote (200g)", unitGrams: 200, defaultUnits: 1 },
-  { name: "Queso cottage", emoji: "🧀", per100g: 11, cal100g: 98, fat: 4.3, carbs: 3.4, tag: "dairy", desc: "Digestión lenta. Perfecto antes de dormir.", unit: "g", defaultGrams: 150 },
-  { name: "Pavo (pechuga)", emoji: "🦃", per100g: 29, cal100g: 135, fat: 1, carbs: 0, tag: "lean", desc: "Más magro que el pollo. Muy versátil.", unit: "g", defaultGrams: 100 },
-  { name: "Proteína Whey", emoji: "💊", per100g: 75, cal100g: 380, fat: 4, carbs: 8, tag: "supp", desc: "Absorción rápida post-entreno.", unit: "unit", unitName: "scoop (30g)", unitGrams: 30, defaultUnits: 1 },
-  { name: "Lentejas cocidas", emoji: "🫘", per100g: 9, cal100g: 116, fat: 0.4, carbs: 20, tag: "plant", desc: "Proteína vegetal + fibra. 2-3 veces/semana.", unit: "g", defaultGrams: 150 },
+  { name: "Huevo entero", group: "huevos", emoji: "🥚", per100g: 13, cal100g: 155, fat: 11, carbs: 1.1, tag: "complete", desc: "Proteína completa y económica. ~6g prot. c/u.", unit: "unit", unitName: "huevo", unitGrams: 50, defaultUnits: 2 },
+  { name: "Clara de huevo", group: "huevos", emoji: "🍳", per100g: 11, cal100g: 52, fat: 0.2, carbs: 0.7, tag: "lean", desc: "Casi pura proteína, sin grasa. ~4g prot. c/u.", unit: "unit", unitName: "clara", unitGrams: 33, defaultUnits: 3 },
+  { name: "Carne vacuna magra", group: "carnes", emoji: "🥩", per100g: 26, cal100g: 218, fat: 13, carbs: 0, tag: "lean", desc: "Rica en hierro y zinc. 2-3 veces/semana.", unit: "g", defaultGrams: 150 },
+  { name: "Pechuga de pollo", group: "carnes", emoji: "🍗", per100g: 31, cal100g: 165, fat: 3.6, carbs: 0, tag: "lean", desc: "La mejor fuente magra. Ideal post-entreno.", unit: "g", defaultGrams: 150 },
+  { name: "Pavo (pechuga)", group: "carnes", emoji: "🦃", per100g: 29, cal100g: 135, fat: 1, carbs: 0, tag: "lean", desc: "Más magro que el pollo. Muy versátil.", unit: "g", defaultGrams: 100 },
+  { name: "Atún al agua", group: "pescados", emoji: "🐟", per100g: 25, cal100g: 116, fat: 1, carbs: 0, tag: "lean", desc: "~20g proteína por lata. Máx 3 veces/semana.", unit: "unit", unitName: "lata (80g)", unitGrams: 80, defaultUnits: 1 },
+  { name: "Salmón", group: "pescados", emoji: "🐠", per100g: 20, cal100g: 208, fat: 13, carbs: 0, tag: "omega", desc: "Rico en omega-3. Excelente para recuperación.", unit: "g", defaultGrams: 120 },
+  { name: "Yogurt griego (0%)", group: "lacteos", emoji: "🥛", per100g: 10, cal100g: 59, fat: 0.4, carbs: 3.6, tag: "dairy", desc: "~10g proteína por pote. Ideal para merienda.", unit: "unit", unitName: "pote (200g)", unitGrams: 200, defaultUnits: 1 },
+  { name: "Yogurt griego (entero)", group: "lacteos", emoji: "🫙", per100g: 9, cal100g: 97, fat: 5, carbs: 3.6, tag: "dairy", desc: "Más grasa y saciante. Desayuno ideal.", unit: "unit", unitName: "pote (200g)", unitGrams: 200, defaultUnits: 1 },
+  { name: "Queso cottage", group: "lacteos", emoji: "🧀", per100g: 11, cal100g: 98, fat: 4.3, carbs: 3.4, tag: "dairy", desc: "Digestión lenta. Perfecto antes de dormir.", unit: "g", defaultGrams: 150 },
+  { name: "Lentejas cocidas", group: "otros", emoji: "🫘", per100g: 9, cal100g: 116, fat: 0.4, carbs: 20, tag: "plant", desc: "Proteína vegetal + fibra. 2-3 veces/semana.", unit: "g", defaultGrams: 150 },
+  { name: "Proteína Whey", group: "otros", emoji: "💊", per100g: 75, cal100g: 380, fat: 4, carbs: 8, tag: "supp", desc: "Absorción rápida post-entreno.", unit: "unit", unitName: "scoop (30g)", unitGrams: 30, defaultUnits: 1 },
 ];
 
 // Helper: devuelve los gramos totales de una entrada del plan
@@ -313,8 +313,9 @@ function getFoodProtein(food, planEntry) {
 }
 
 // Genera un plan sugerido que alcance la meta de proteína
-function generateSuggestedPlan(daily, excluded = []) {
-  const available = PROTEIN_FOODS.filter(f => !excluded.includes(f.name));
+function generateSuggestedPlan(daily, excluded = [], favorites = []) {
+  const favSet = favorites.length > 0 ? favorites : PROTEIN_FOODS.map(f => f.name);
+  const available = PROTEIN_FOODS.filter(f => favSet.includes(f.name) && !excluded.includes(f.name));
   // Plantilla balanceada: desayuno, almuerzo, merienda, cena
   const templates = [
     // desayuno
@@ -1796,11 +1797,47 @@ function ProteinCalculator({ user }) {
   const [showTerms, setShowTerms] = useState(false);
   const [filter, setFilter] = useState("all");
   const [tab, setTab] = useState("plan");
+  const [favoriteFoods, setFavoriteFoods] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("froqia_favorite_foods") || "null") || PROTEIN_FOODS.map(f => f.name); }
+    catch { return PROTEIN_FOODS.map(f => f.name); }
+  });
+  const [dayPlan, setDayPlan] = useState(null);
+  const [loadingDayPlan, setLoadingDayPlan] = useState(false);
+  const [showDayPlan, setShowDayPlan] = useState(false);
   // mealPlan: { [foodName]: { grams? number, units? number } }
   const [mealPlan, setMealPlan] = useState(() => generateSuggestedPlan(daily, []));
   // browsing grams (antes de agregar al plan)
   const [browseGrams, setBrowseGrams] = useState({});
   const [browseUnits, setBrowseUnits] = useState({});
+
+  const toggleFavorite = (name) => {
+    setFavoriteFoods(prev => {
+      const next = prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name];
+      localStorage.setItem("froqia_favorite_foods", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const generateDayPlan = async () => {
+    setLoadingDayPlan(true);
+    setShowDayPlan(true);
+    const goalInfo = GOALS.find(g => g.id === user.goal);
+    const favFoods = favoriteFoods.length > 0 ? favoriteFoods : PROTEIN_FOODS.map(f => f.name);
+    const prompt = `Sos un nutricionista deportivo especializado en alimentación paraguaya. El usuario es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}. Meta proteína: ${daily}g/día. Alimentos disponibles que consume: ${favFoods.join(", ")}. Generá un plan de 4 comidas (Desayuno, Almuerzo, Merienda, Cena) con platos reales y accesibles en Paraguay. Usá principalmente los alimentos disponibles. SOLO JSON sin backticks: {"comidas":[{"nombre":"Desayuno","hora":"7:00","plato":"descripción concreta del plato","proteina":25,"calorias":350,"ingredientes":["ingrediente 1","ingrediente 2"]}],"total_proteina":150,"nota":"consejo personalizado del día"}`;
+    try {
+      const r = await fetch("/.netlify/functions/ai", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 900, messages: [{ role: "user", content: prompt }] })
+      });
+      const d = await r.json();
+      const text = d.content?.find(b => b.type === "text")?.text || "";
+      setDayPlan(JSON.parse(text.replace(/```json|```/g, "").trim()));
+    } catch {
+      setDayPlan(null);
+    } finally {
+      setLoadingDayPlan(false);
+    }
+  };
 
   const ALLERGY_OPTIONS = [
     { id: "gluten", label: "Gluten / Trigo", emoji: "🌾", excludes: [] },
@@ -1905,18 +1942,98 @@ function ProteinCalculator({ user }) {
 
       {/* ── TABS ── */}
       <div style={{ display: "flex", gap: 6, marginBottom: 14, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4 }}>
-        {[["plan", `📋 Mi plan${planCount > 0 ? ` (${planCount})` : ""}`], ["browse", "🔍 Explorar"]].map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} style={{ flex: 1, padding: "10px 0", border: "none", borderRadius: 9, cursor: "pointer", background: tab === id ? (id === "plan" ? "#10b981" : "#e84a2e") : "transparent", color: tab === id ? "#fff" : "rgba(255,255,255,0.45)", fontWeight: 700, fontSize: 13, transition: "all 0.2s", fontFamily: "'DM Sans',sans-serif" }}>{label}</button>
+        {[["foods", "🥘 Mis alimentos"], ["plan", `📋 Mi plan${planCount > 0 ? ` (${planCount})` : ""}`], ["browse", "🔍 Explorar"]].map(([id, label]) => (
+          <button key={id} onClick={() => setTab(id)} style={{ flex: 1, padding: "10px 0", border: "none", borderRadius: 9, cursor: "pointer", background: tab === id ? (id === "plan" ? "#10b981" : id === "foods" ? "#8b5cf6" : "#e84a2e") : "transparent", color: tab === id ? "#fff" : "rgba(255,255,255,0.45)", fontWeight: 700, fontSize: 12, transition: "all 0.2s", fontFamily: "'DM Sans',sans-serif" }}>{label}</button>
         ))}
       </div>
+
+      {/* ── TAB: MIS ALIMENTOS ── */}
+      {tab === "foods" && (
+        <div>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, margin: "0 0 16px", lineHeight: 1.6 }}>
+            Marcá los alimentos que consumís habitualmente. El plan sugerido y la distribución IA usarán solo estos.
+          </p>
+          {[
+            { key: "huevos", label: "🥚 Huevos" },
+            { key: "carnes", label: "🥩 Carnes" },
+            { key: "pescados", label: "🐟 Pescados" },
+            { key: "lacteos", label: "🥛 Lácteos" },
+            { key: "otros", label: "🌿 Otros" },
+          ].map(group => {
+            const groupFoods = PROTEIN_FOODS.filter(f => f.group === group.key);
+            return (
+              <div key={group.key} style={{ marginBottom: 16 }}>
+                <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, fontWeight: 800, letterSpacing: 1, marginBottom: 8, textTransform: "uppercase" }}>{group.label}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {groupFoods.map(food => {
+                    const selected = favoriteFoods.includes(food.name);
+                    return (
+                      <div key={food.name} onClick={() => toggleFavorite(food.name)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 12, cursor: "pointer", background: selected ? "rgba(139,92,246,0.08)" : "rgba(255,255,255,0.03)", border: `1.5px solid ${selected ? "rgba(139,92,246,0.3)" : "rgba(255,255,255,0.07)"}`, transition: "all 0.15s" }}>
+                        <span style={{ fontSize: 22 }}>{food.emoji}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, fontSize: 14, color: selected ? "#fff" : "rgba(255,255,255,0.5)" }}>{food.name}</div>
+                          <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 1 }}>{food.per100g}g prot/100g · {food.cal100g} kcal</div>
+                        </div>
+                        <div style={{ width: 22, height: 22, borderRadius: 6, background: selected ? "#8b5cf6" : "transparent", border: `2px solid ${selected ? "#8b5cf6" : "rgba(255,255,255,0.2)"}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 13, flexShrink: 0, transition: "all 0.15s" }}>
+                          {selected && "✓"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 12, textAlign: "center", marginTop: 4, marginBottom: 16 }}>
+            {favoriteFoods.length} de {PROTEIN_FOODS.length} alimentos seleccionados · Se guarda automáticamente
+          </div>
+        </div>
+      )}
 
       {/* ── TAB: MI PLAN ── */}
       {tab === "plan" && (
         <div>
           {/* Botón regenerar plan */}
-          <button onClick={() => setMealPlan(generateSuggestedPlan(daily, excluded))} style={{ width: "100%", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 12, padding: "11px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <button onClick={() => setMealPlan(generateSuggestedPlan(daily, excluded, favoriteFoods))} style={{ width: "100%", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 12, padding: "11px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             ✨ Regenerar plan sugerido
           </button>
+          <button onClick={generateDayPlan} disabled={loadingDayPlan} style={{ width: "100%", background: loadingDayPlan ? "rgba(255,255,255,0.04)" : "rgba(232,74,46,0.1)", border: `1px solid ${loadingDayPlan ? "rgba(255,255,255,0.08)" : "rgba(232,74,46,0.25)"}`, color: loadingDayPlan ? "rgba(255,255,255,0.3)" : "#e8a090", borderRadius: 12, padding: "11px 0", fontSize: 13, fontWeight: 700, cursor: loadingDayPlan ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            {loadingDayPlan ? "⏳ Generando distribución…" : "🍽️ Sugerirme distribución del día"}
+          </button>
+
+          {showDayPlan && (
+            <div style={{ ...card, padding: 16, marginBottom: 14, background: "rgba(232,74,46,0.04)", borderColor: "rgba(232,74,46,0.15)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: "#e8a090" }}>🍽️ Distribución del día</div>
+                <button onClick={() => setShowDayPlan(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 16 }}>✕</button>
+              </div>
+              {loadingDayPlan ? (
+                <div style={{ textAlign: "center", padding: "20px 0", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>✦ Generando tu plan personalizado…</div>
+              ) : dayPlan ? (
+                <div>
+                  {dayPlan.comidas?.map((comida, i) => (
+                    <div key={i} style={{ marginBottom: 12, paddingBottom: 12, borderBottom: i < dayPlan.comidas.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                        <div style={{ fontWeight: 700, fontSize: 13 }}>{comida.nombre} <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 400, fontSize: 12 }}>{comida.hora}</span></div>
+                        <div style={{ color: "#10b981", fontSize: 12, fontWeight: 700 }}>{comida.proteina}g · {comida.calorias} kcal</div>
+                      </div>
+                      <div style={{ color: "#fff", fontSize: 14, marginBottom: 4, lineHeight: 1.4 }}>{comida.plato}</div>
+                      {comida.ingredientes?.length > 0 && (
+                        <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{comida.ingredientes.join(" · ")}</div>
+                      )}
+                    </div>
+                  ))}
+                  <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)", marginBottom: dayPlan.nota ? 10 : 0 }}>
+                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Total proteína estimada</span>
+                    <span style={{ color: "#10b981", fontWeight: 800, fontSize: 14 }}>{dayPlan.total_proteina}g</span>
+                  </div>
+                  {dayPlan.nota && <div style={{ padding: "8px 12px", background: "rgba(232,74,46,0.08)", borderRadius: 10, color: "#e8a090", fontSize: 12, lineHeight: 1.5 }}>💡 {dayPlan.nota}</div>}
+                </div>
+              ) : (
+                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center" }}>No se pudo generar el plan. Intentá de nuevo.</div>
+              )}
+            </div>
+          )}
 
           {planCount === 0 ? (
             <div style={{ textAlign: "center", padding: "36px 20px" }}>

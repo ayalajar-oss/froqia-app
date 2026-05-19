@@ -2567,13 +2567,14 @@ useEffect(() => {
       const prompt = `Sos un entrenador personal experto. Generá la rutina del día.
 PERFIL: ${user.nombre}, ${user.age}a, ${user.weight}kg, ${sexLabel}. CUERPO: ${bodyInfo?.sublabel} | OBJETIVO: ${goalInfo?.label} | EXP: ${user.experience} | DÍAS/SEM: ${user.daysPerWeek}
 META PROTEÍNA: ${daily}g/día | HISTORIAL RECIENTE (NO repetir estos grupos musculares hoy): ${hist}. Es OBLIGATORIO variar los grupos musculares respecto al historial.
-EQUIPAMIENTO DISPONIBLE: ${equipment.map(m => m.name).join(", ")}
+EQUIPAMIENTO DISPONIBLE (usa EXACTAMENTE estos nombres en el campo machine, sin variaciones): ${equipment.map(m => m.name).join(", ")}
 FUERZA BASE ESTIMADA: ${baseStrength}kg (ajustá según el músculo y ejercicio)
 ${warmupHint}
 ${finisherHint}
 ${muscleGroupHint}
 INSTRUCCIONES:
 - CRÍTICO: Respetá ESTRICTAMENTE el enfoque muscular especificado arriba. Si dice "OBLIGATORIO", NO incluyas ejercicios de otros músculos.
+- CRÍTICO: El campo 'machine' de cada ejercicio DEBE ser exactamente uno de los nombres de la lista de equipamiento. No inventes nombres ni uses variaciones.
 - Elegí 4-6 ejercicios que trabajen SOLO los músculos del enfoque
 - ${user.sex === "female" ? "Para mujer: enfatizá glúteos, isquiotibiales y core. Incluí trabajo de tren inferior en cada sesión si el objetivo lo permite." : "Para hombre: equilibrá tren superior e inferior según el historial."}
 - Adaptá series/reps al objetivo

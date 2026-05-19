@@ -134,9 +134,9 @@ const EQUIPMENT_CATEGORIES = [
       { id: "leg_curl_m", name: "Curl de Isquiotibiales (máquina)", muscle: "Isquiotibiales", videoId: "ELOCsoDSmrg", tips: ["Cadera pegada al asiento", "Contracción completa", "Baja controlado"], muscles_worked: ["Isquiotibiales", "Gemelos"] },
       { id: "leg_ext_m", name: "Extensión de Cuádriceps (máquina)", muscle: "Cuádriceps", videoId: "YyvSfVjQeL0", tips: ["Extensión completa arriba", "No rebotes", "Contrae el cuádriceps"], muscles_worked: ["Cuádriceps (4 cabezas)"] },
       { id: "calf_raise_m", name: "Elevación de Gemelos (máquina)", muscle: "Gemelos", videoId: "gwLzBJYoWlI", tips: ["Rango completo de movimiento", "Pausa arriba", "Baja lento"], muscles_worked: ["Gastrocnemio", "Sóleo"] },
-      { id: "hip_abductor_m", name: "Abductor de Cadera (máquina)", muscle: "Abductores", videoId: "WEoMRBf_hEY", tips: ["Espalda recta", "Movimiento controlado", "Aprieta al tope"], muscles_worked: ["Abductores", "Glúteo medio"] },
-      { id: "hip_adductor_m", name: "Aductor de Cadera (máquina)", muscle: "Aductores", videoId: "A-YgnD7LHOE", tips: ["Espalda recta", "Sin impulso", "Control en la apertura"], muscles_worked: ["Aductores", "Glúteo menor"] },
-      { id: "glute_m", name: "Glúteo (máquina / kickback)", muscle: "Glúteos", videoId: "ex69oUlGVZo", tips: ["Core activado", "No arqueés la espalda", "Contrae el glúteo al tope"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
+      { id: "hip_abductor_m", name: "Abductor de Cadera (máquina)", muscle: "Abductores", videoId: "tu4o4quPv2k", tips: ["Espalda recta", "Movimiento controlado", "Aprieta al tope"], muscles_worked: ["Abductores", "Glúteo medio"] },
+      { id: "hip_adductor_m", name: "Aductor de Cadera (máquina)", muscle: "Aductores", videoId: "36EB4I915sU", tips: ["Espalda recta", "Sin impulso", "Control en la apertura"], muscles_worked: ["Aductores", "Glúteo menor"] },
+      { id: "glute_m", name: "Glúteo (máquina / kickback)", muscle: "Glúteos", videoId: "nvkENDWDcTc", tips: ["Core activado", "No arqueés la espalda", "Contrae el glúteo al tope"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
     ]
   },
   {
@@ -177,7 +177,7 @@ const EQUIPMENT_CATEGORIES = [
       { id: "cable_pulldown", name: "Jalón con Polea Alta", muscle: "Dorsal", videoId: "CAwf7n6Luuc", tips: ["Agarre al ancho de hombros", "Jalá al pecho", "Control en la vuelta"], muscles_worked: ["Dorsal ancho", "Bíceps", "Romboides"] },
       { id: "cable_tricep", name: "Extensión de Tríceps en Polea", muscle: "Tríceps", videoId: "2-LAMcpzODU", tips: ["Codos fijos", "Extensión completa", "Control al volver"], muscles_worked: ["Tríceps (3 cabezas)"] },
       { id: "cable_curl", name: "Curl de Bíceps en Polea", muscle: "Bíceps", videoId: "ykJmrZ5v0Oo", tips: ["Codos fijos al cuerpo", "Contrae al máximo", "Baja controlado"], muscles_worked: ["Bíceps braquial"] },
-      { id: "cable_lateral", name: "Elevación Lateral con Polea", muscle: "Hombros", videoId: "3VcKaXpzqRo", tips: ["Leve flexión de codo", "Llega a la altura del hombro", "No balancees"], muscles_worked: ["Deltoides lateral"] },
+      { id: "cable_lateral", name: "Elevación Lateral con Polea", muscle: "Hombros", videoId: "lMJUXEvcMkQ", tips: ["Leve flexión de codo", "Llega a la altura del hombro", "No balancees"], muscles_worked: ["Deltoides lateral"] },
     ]
   },
   {
@@ -205,7 +205,7 @@ const EQUIPMENT_CATEGORIES = [
       { id: "band_row", name: "Remo con Banda Elástica", muscle: "Espalda", videoId: "GZbfZ033f74", tips: ["Espalda recta", "Aprieta omóplatos", "Control al extender"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
       { id: "band_chest", name: "Press de Pecho con Banda", muscle: "Pectoral", videoId: "xUm0BiZCWlQ", tips: ["Banda detrás de la espalda", "Empuje firme", "Control al volver"], muscles_worked: ["Pectoral", "Tríceps"] },
       { id: "band_curl", name: "Curl de Bíceps con Banda", muscle: "Bíceps", videoId: "ykJmrZ5v0Oo", tips: ["Pisa la banda", "Sube controlado", "Sin balanceo"], muscles_worked: ["Bíceps braquial"] },
-      { id: "band_lateral", name: "Caminata Lateral con Banda", muscle: "Abductores / Glúteos", videoId: "jkNIJDoysJo", tips: ["Banda en tobillos o rodillas", "Posición de semi-sentadilla", "Pasos controlados"], muscles_worked: ["Glúteo medio", "Abductores"] },
+      { id: "band_lateral", name: "Caminata Lateral con Banda", muscle: "Abductores / Glúteos", videoId: "A12uKYg-Kuo", tips: ["Banda en tobillos o rodillas", "Posición de semi-sentadilla", "Pasos controlados"], muscles_worked: ["Glúteo medio", "Abductores"] },
       { id: "band_warmup", name: "Calentamiento con Banda (rotaciones)", muscle: "Movilidad", videoId: "EA7u4Q_8HQ0", tips: ["Movimientos lentos y amplios", "Sin tensión excesiva", "Ideal para el inicio"], muscles_worked: ["Hombros", "Cadera", "Columna"] },
     ]
   },
@@ -216,11 +216,11 @@ const EQUIPMENT_CATEGORIES = [
     color: "#06b6d4",
     items: [
       { id: "treadmill", name: "Cinta / Trotadora", muscle: "Cardio", videoId: "tTej59yPYIo", tips: ["Postura erguida", "Brazos relajados", "Empieza lento y aumenta"], muscles_worked: ["Cardio", "Piernas", "Core"] },
-      { id: "bike", name: "Bicicleta Estática", muscle: "Cardio", videoId: "UHtCBqJ-JtQ", tips: ["Asiento a altura de cadera", "Pedaleado fluido", "Resistencia progresiva"], muscles_worked: ["Cardio", "Cuádriceps", "Glúteos"] },
-      { id: "elliptical", name: "Elíptica", muscle: "Cardio", videoId: "FkMaZMRjE8c", tips: ["Espalda recta", "Usa los brazos también", "Ritmo constante"], muscles_worked: ["Cardio", "Cuerpo completo"] },
+      { id: "bike", name: "Bicicleta Estática", muscle: "Cardio", videoId: "dieOsJlsvpM", tips: ["Asiento a altura de cadera", "Pedaleado fluido", "Resistencia progresiva"], muscles_worked: ["Cardio", "Cuádriceps", "Glúteos"] },
+      { id: "elliptical", name: "Elíptica", muscle: "Cardio", videoId: "hV4ezxXuhHw", tips: ["Espalda recta", "Usa los brazos también", "Ritmo constante"], muscles_worked: ["Cardio", "Cuerpo completo"] },
       { id: "rowing_machine", name: "Remo (máquina)", muscle: "Cardio / Espalda", videoId: "GZbfZ033f74", tips: ["Empuje con las piernas primero", "Luego inclináte atrás", "Finaliza con los brazos"], muscles_worked: ["Cardio", "Espalda", "Piernas"] },
-      { id: "jump_rope", name: "Cuerda de Saltar", muscle: "Cardio", videoId: "1BZM2L-AutY", tips: ["Muñecas hacen el movimiento", "Aterrizás suave", "Empieza 30 seg y aumenta"], muscles_worked: ["Cardio", "Gemelos", "Coordinación"] },
-      { id: "stair_climber", name: "Escaladora / Stepper", muscle: "Cardio / Glúteos", videoId: "E7PZILBfFOo", tips: ["No te apoyes demasiado", "Pasos completos", "Ritmo constante"], muscles_worked: ["Glúteos", "Cuádriceps", "Cardio"] },
+      { id: "jump_rope", name: "Cuerda de Saltar", muscle: "Cardio", videoId: "O0ZTgiJrn08", tips: ["Muñecas hacen el movimiento", "Aterrizás suave", "Empieza 30 seg y aumenta"], muscles_worked: ["Cardio", "Gemelos", "Coordinación"] },
+      { id: "stair_climber", name: "Escaladora / Stepper", muscle: "Cardio / Glúteos", videoId: "Zz_9Hx82RLo", tips: ["No te apoyes demasiado", "Pasos completos", "Ritmo constante"], muscles_worked: ["Glúteos", "Cuádriceps", "Cardio"] },
     ]
   },
   {

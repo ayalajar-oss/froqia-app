@@ -242,7 +242,12 @@ const EQUIPMENT_CATEGORIES = [
 
 // Accesores planos para compatibilidad con la lógica de la app
 const ALL_EQUIPMENT = EQUIPMENT_CATEGORIES.flatMap(c => c.items.map(i => ({ ...i, category: c.id, categoryLabel: c.label, categoryColor: c.color })));
-const getMachineData = (name) => ALL_EQUIPMENT.find(m => name?.toLowerCase().includes(m.name.toLowerCase().split("(")[0].trim()) || m.name.toLowerCase().includes((name || "").toLowerCase().split("(")[0].trim()));
+const getMachineData = (name) => {
+  if (!name) return null;
+  const exact = ALL_EQUIPMENT.find(m => m.name.toLowerCase() === name.toLowerCase());
+  if (exact) return exact;
+  return ALL_EQUIPMENT.find(m => name.toLowerCase().includes(m.name.toLowerCase().split("(")[0].trim()) || m.name.toLowerCase().includes(name.toLowerCase().split("(")[0].trim()));
+};
 
 // Extras de calentamiento, abdominales y cierre
 const WARMUP_EXTRAS = [
@@ -2558,7 +2563,7 @@ useEffect(() => {
               : "Elegí libremente según historial";
       const prompt = `Sos un entrenador personal experto. Generá la rutina del día.
 PERFIL: ${user.nombre}, ${user.age}a, ${user.weight}kg, ${sexLabel}. CUERPO: ${bodyInfo?.sublabel} | OBJETIVO: ${goalInfo?.label} | EXP: ${user.experience} | DÍAS/SEM: ${user.daysPerWeek}
-META PROTEÍNA: ${daily}g/día | HISTORIAL RECIENTE: ${hist}
+META PROTEÍNA: ${daily}g/día | HISTORIAL RECIENTE (NO repetir estos grupos musculares hoy): ${hist}. Es OBLIGATORIO variar los grupos musculares respecto al historial.
 EQUIPAMIENTO DISPONIBLE: ${equipment.map(m => m.name).join(", ")}
 FUERZA BASE ESTIMADA: ${baseStrength}kg (ajustá según el músculo y ejercicio)
 ${warmupHint}

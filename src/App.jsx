@@ -2443,14 +2443,23 @@ SOLO JSON sin backticks ni texto extra:
 }
 
 // ─── COACH SCREEN ─────────────────────────────────────────────────────────────
-function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, setMessages }) {
+function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, setMessages, selectedMuscleGroup }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rutinas, setRutinas] = useState([]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const uid = user.id || user._supabaseUser?.id;
+    if (!uid) return;
+    supabaseCall("getRutinas", { user_id: uid }).then(res => {
+      if (res.rutinas) setRutinas(res.rutinas);
+    }).catch(() => {});
+  }, [user]);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -2460,7 +2469,14 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
     setInput("");
     setLoading(true);
     try {
-      const systemPrompt = `Sos el coach personal de IA de FROQIA. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}, experiencia: ${user.experience}. Meta proteína: ${daily}g/día. Respondé en español rioplatense, de forma motivadora, concisa y personalizada. Podés ayudar con dudas de entrenamiento, nutrición, recuperación y motivación.`;
+      const selectedGroup = MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
+      const histLine = rutinas.length > 0
+        ? `Historial reciente de entrenamientos: ${rutinas.slice(0, 5).map(r => r.fecha + ": " + r.nombre + " (" + r.grupo_muscular + ")").join(", ")}. Último entrenamiento: ${rutinas[0]?.fecha} - ${rutinas[0]?.nombre}.`
+        : "Sin historial de entrenamientos registrado aún.";
+      const groupLine = selectedGroup
+        ? `Grupo muscular de hoy seleccionado: ${selectedGroup.label}.`
+        : "Grupo muscular de hoy: no seleccionado.";
+      const systemPrompt = `Sos el coach personal de IA de FROQIA. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}, experiencia: ${user.experience}. Meta proteína: ${daily}g/día. ${histLine} ${groupLine} Podés sugerir qué grupo muscular trabajar hoy basándote en el historial para evitar repetición. Respondé en español rioplatense, de forma motivadora, concisa y personalizada. Podés ayudar con dudas de entrenamiento, nutrición, recuperación y motivación.`;
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3237,6 +3253,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
             onUpgrade={() => setTab("upgrade")}
             messages={coachMessages}
             setMessages={setCoachMessages}
+            selectedMuscleGroup={selectedMuscleGroup}
           />
         )}
       </div>

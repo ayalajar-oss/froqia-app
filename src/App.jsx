@@ -104,13 +104,13 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🏋️",
     color: "#e84a2e",
     items: [
-      { id: "chest_press_m", name: "Chest Press (máquina)", muscle: "Pectoral", videoIds: [""], tips: ["Codos a 45°", "Exhala al empujar", "No bloquees los codos"], muscles_worked: ["Pectoral mayor", "Tríceps", "Deltoides anterior"] },
-      { id: "pec_fly_m", name: "Pec Fly / Mariposa (máquina)", muscle: "Pectoral", videoIds: [""], tips: ["Leve flexión de codos", "Abre con control", "Cierra apretando el pecho"], muscles_worked: ["Pectoral mayor", "Deltoides anterior"] },
-      { id: "shoulder_press_m", name: "Shoulder Press (máquina)", muscle: "Hombros", videoIds: [""], tips: ["Espalda recta", "No encogés los hombros", "Rango completo"], muscles_worked: ["Deltoides", "Tríceps", "Trapecio"] },
-      { id: "lat_pulldown_m", name: "Jalón al Pecho (máquina)", muscle: "Dorsal", videoIds: [""], tips: ["Jalá hacia el pecho", "Abre el pecho", "Control en la vuelta"], muscles_worked: ["Dorsal ancho", "Bíceps", "Romboides"] },
-      { id: "seated_row_m", name: "Remo Sentado (máquina)", muscle: "Espalda Media", videoIds: [""], tips: ["Aprieta omóplatos", "Codos pegados al cuerpo", "Espalda erguida"], muscles_worked: ["Romboides", "Trapecio medio", "Bíceps"] },
-      { id: "rear_delt_m", name: "Deltoides Posterior (máquina)", muscle: "Deltoides Post.", videoIds: [""], tips: ["Codos ligeramente flexionados", "Jalá hacia atrás", "Aprieta escápulas"], muscles_worked: ["Deltoides posterior", "Romboides"] },
-      { id: "pullover_m", name: "Pullover (máquina)", muscle: "Dorsal", videoIds: [""], tips: ["Agarre firme", "Codos ligeramente flexionados", "Sentís el dorsal"], muscles_worked: ["Dorsal ancho", "Serrato anterior"] },
+      { id: "chest_press_m", name: "Chest Press (máquina)", muscle: "Pectoral", videoId: "xUm0BiZCWlQ", tips: ["Codos a 45°", "Exhala al empujar", "No bloquees los codos"], muscles_worked: ["Pectoral mayor", "Tríceps", "Deltoides anterior"] },
+      { id: "pec_fly_m", name: "Pec Fly / Mariposa (máquina)", muscle: "Pectoral", videoId: "Z57CtFmRMxA", tips: ["Leve flexión de codos", "Abre con control", "Cierra apretando el pecho"], muscles_worked: ["Pectoral mayor", "Deltoides anterior"] },
+      { id: "shoulder_press_m", name: "Shoulder Press (máquina)", muscle: "Hombros", videoId: "WvLMauqrnK8", tips: ["Espalda recta", "No encogés los hombros", "Rango completo"], muscles_worked: ["Deltoides", "Tríceps", "Trapecio"] },
+      { id: "lat_pulldown_m", name: "Jalón al Pecho (máquina)", muscle: "Dorsal", videoId: "CAwf7n6Luuc", tips: ["Jalá hacia el pecho", "Abre el pecho", "Control en la vuelta"], muscles_worked: ["Dorsal ancho", "Bíceps", "Romboides"] },
+      { id: "seated_row_m", name: "Remo Sentado (máquina)", muscle: "Espalda Media", videoId: "GZbfZ033f74", tips: ["Aprieta omóplatos", "Codos pegados al cuerpo", "Espalda erguida"], muscles_worked: ["Romboides", "Trapecio medio", "Bíceps"] },
+      { id: "rear_delt_m", name: "Deltoides Posterior (máquina)", muscle: "Deltoides Post.", videoId: "EA7u4Q_8HQ0", tips: ["Codos ligeramente flexionados", "Jalá hacia atrás", "Aprieta escápulas"], muscles_worked: ["Deltoides posterior", "Romboides"] },
+      { id: "pullover_m", name: "Pullover (máquina)", muscle: "Dorsal", videoId: "jr2_P_c5_6I", tips: ["Agarre firme", "Codos ligeramente flexionados", "Sentís el dorsal"], muscles_worked: ["Dorsal ancho", "Serrato anterior"] },
     ]
   },
   {
@@ -119,9 +119,9 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "💪",
     color: "#8b5cf6",
     items: [
-      { id: "bicep_curl_m", name: "Curl de Bíceps (máquina)", muscle: "Bíceps", videoIds: [""], tips: ["Codos fijos", "Sube lento, baja lento", "Sin balanceo"], muscles_worked: ["Bíceps braquial", "Braquialis"] },
-      { id: "tricep_ext_m", name: "Extensión de Tríceps (máquina)", muscle: "Tríceps", videoIds: [""], tips: ["Codos fijos", "Extensión completa", "Control total"], muscles_worked: ["Tríceps (3 cabezas)"] },
-      { id: "tricep_dip_m", name: "Fondos en Máquina (tríceps)", muscle: "Tríceps", videoIds: [""], tips: ["Torso ligeramente inclinado", "Baja controlado", "Extensión completa"], muscles_worked: ["Tríceps", "Pectoral inferior"] },
+      { id: "bicep_curl_m", name: "Curl de Bíceps (máquina)", muscle: "Bíceps", videoId: "ykJmrZ5v0Oo", tips: ["Codos fijos", "Sube lento, baja lento", "Sin balanceo"], muscles_worked: ["Bíceps braquial", "Braquialis"] },
+      { id: "tricep_ext_m", name: "Extensión de Tríceps (máquina)", muscle: "Tríceps", videoId: "2-LAMcpzODU", tips: ["Codos fijos", "Extensión completa", "Control total"], muscles_worked: ["Tríceps (3 cabezas)"] },
+      { id: "tricep_dip_m", name: "Fondos en Máquina (tríceps)", muscle: "Tríceps", videoId: "A1paElHFQ58", tips: ["Torso ligeramente inclinado", "Baja controlado", "Extensión completa"], muscles_worked: ["Tríceps", "Pectoral inferior"] },
     ]
   },
   {
@@ -130,13 +130,13 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🦵",
     color: "#f59e0b",
     items: [
-      { id: "leg_press_m", name: "Prensa de Piernas (máquina)", muscle: "Cuádriceps", videoIds: [""], tips: ["Pies al ancho de hombros", "Rodillas no sobrepasen pies", "Espalda pegada"], muscles_worked: ["Cuádriceps", "Glúteos", "Isquiotibiales"] },
-      { id: "leg_curl_m", name: "Curl de Isquiotibiales (máquina)", muscle: "Isquiotibiales", videoIds: [""], tips: ["Cadera pegada al asiento", "Contracción completa", "Baja controlado"], muscles_worked: ["Isquiotibiales", "Gemelos"] },
-      { id: "leg_ext_m", name: "Extensión de Cuádriceps (máquina)", muscle: "Cuádriceps", videoIds: [""], tips: ["Extensión completa arriba", "No rebotes", "Contrae el cuádriceps"], muscles_worked: ["Cuádriceps (4 cabezas)"] },
-      { id: "calf_raise_m", name: "Elevación de Gemelos (máquina)", muscle: "Gemelos", videoIds: [""], tips: ["Rango completo de movimiento", "Pausa arriba", "Baja lento"], muscles_worked: ["Gastrocnemio", "Sóleo"] },
-      { id: "hip_abductor_m", name: "Abductor de Cadera (máquina)", muscle: "Abductores", videoIds: [""], tips: ["Espalda recta", "Movimiento controlado", "Aprieta al tope"], muscles_worked: ["Abductores", "Glúteo medio"] },
-      { id: "hip_adductor_m", name: "Aductor de Cadera (máquina)", muscle: "Aductores", videoIds: [""], tips: ["Espalda recta", "Sin impulso", "Control en la apertura"], muscles_worked: ["Aductores", "Glúteo menor"] },
-      { id: "glute_m", name: "Glúteo (máquina / kickback)", muscle: "Glúteos", videoIds: [""], tips: ["Core activado", "No arqueés la espalda", "Contrae el glúteo al tope"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
+      { id: "leg_press_m", name: "Prensa de Piernas (máquina)", muscle: "Cuádriceps", videoId: "IZxyjW7MPJQ", tips: ["Pies al ancho de hombros", "Rodillas no sobrepasen pies", "Espalda pegada"], muscles_worked: ["Cuádriceps", "Glúteos", "Isquiotibiales"] },
+      { id: "leg_curl_m", name: "Curl de Isquiotibiales (máquina)", muscle: "Isquiotibiales", videoId: "ELOCsoDSmrg", tips: ["Cadera pegada al asiento", "Contracción completa", "Baja controlado"], muscles_worked: ["Isquiotibiales", "Gemelos"] },
+      { id: "leg_ext_m", name: "Extensión de Cuádriceps (máquina)", muscle: "Cuádriceps", videoId: "YyvSfVjQeL0", tips: ["Extensión completa arriba", "No rebotes", "Contrae el cuádriceps"], muscles_worked: ["Cuádriceps (4 cabezas)"] },
+      { id: "calf_raise_m", name: "Elevación de Gemelos (máquina)", muscle: "Gemelos", videoId: "gwLzBJYoWlI", tips: ["Rango completo de movimiento", "Pausa arriba", "Baja lento"], muscles_worked: ["Gastrocnemio", "Sóleo"] },
+      { id: "hip_abductor_m", name: "Abductor de Cadera (máquina)", muscle: "Abductores", videoId: "tu4o4quPv2k", tips: ["Espalda recta", "Movimiento controlado", "Aprieta al tope"], muscles_worked: ["Abductores", "Glúteo medio"] },
+      { id: "hip_adductor_m", name: "Aductor de Cadera (máquina)", muscle: "Aductores", videoId: "36EB4I915sU", tips: ["Espalda recta", "Sin impulso", "Control en la apertura"], muscles_worked: ["Aductores", "Glúteo menor"] },
+      { id: "glute_m", name: "Glúteo (máquina / kickback)", muscle: "Glúteos", videoId: "nvkENDWDcTc", tips: ["Core activado", "No arqueés la espalda", "Contrae el glúteo al tope"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
     ]
   },
   {
@@ -145,9 +145,9 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🎯",
     color: "#10b981",
     items: [
-      { id: "ab_crunch_m", name: "Crunch Abdominal (máquina)", muscle: "Abdomen", videoIds: [""], tips: ["No jalés el cuello", "Contrae el core", "Exhala al subir"], muscles_worked: ["Recto abdominal", "Oblicuos"] },
-      { id: "back_ext_m", name: "Extensión Lumbar (máquina)", muscle: "Lumbar", videoIds: [""], tips: ["Movimiento controlado", "No hiperextendas", "Aprieta glúteos arriba"], muscles_worked: ["Erector espinal", "Glúteos"] },
-      { id: "rotary_torso_m", name: "Rotación de Torso (máquina)", muscle: "Oblicuos", videoIds: [""], tips: ["Giro controlado", "No uses impulso", "Rotación desde la cintura"], muscles_worked: ["Oblicuos", "Transverso abdominal"] },
+      { id: "ab_crunch_m", name: "Crunch Abdominal (máquina)", muscle: "Abdomen", videoId: "Xyd_fa5zoEU", tips: ["No jalés el cuello", "Contrae el core", "Exhala al subir"], muscles_worked: ["Recto abdominal", "Oblicuos"] },
+      { id: "back_ext_m", name: "Extensión Lumbar (máquina)", muscle: "Lumbar", videoId: "ph3pddpKzzw", tips: ["Movimiento controlado", "No hiperextendas", "Aprieta glúteos arriba"], muscles_worked: ["Erector espinal", "Glúteos"] },
+      { id: "rotary_torso_m", name: "Rotación de Torso (máquina)", muscle: "Oblicuos", videoId: "5FGnJGJoMHI", tips: ["Giro controlado", "No uses impulso", "Rotación desde la cintura"], muscles_worked: ["Oblicuos", "Transverso abdominal"] },
     ]
   },
   {
@@ -156,14 +156,14 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🏋️",
     color: "#06b6d4",
     items: [
-      { id: "barbell_bench", name: "Press de Banca (barra)", muscle: "Pectoral", videoIds: [""], tips: ["Escápulas juntas", "Pies en el suelo", "Baja la barra al pecho"], muscles_worked: ["Pectoral mayor", "Tríceps", "Deltoides anterior"] },
-      { id: "barbell_squat", name: "Sentadilla con Barra", muscle: "Cuádriceps", videoIds: [""], tips: ["Espalda recta", "Rodillas hacia afuera", "Baja hasta paralelo"], muscles_worked: ["Cuádriceps", "Glúteos", "Isquiotibiales"] },
-      { id: "barbell_deadlift", name: "Peso Muerto con Barra", muscle: "Espalda / Glúteos", videoIds: [""], tips: ["Espalda neutral", "Barra pegada al cuerpo", "Empuja con las piernas"], muscles_worked: ["Isquiotibiales", "Glúteos", "Erector espinal"] },
-      { id: "barbell_row", name: "Remo con Barra", muscle: "Espalda", videoIds: [""], tips: ["Espalda a 45°", "Codos pegados", "Aprieta omóplatos"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
-      { id: "dumbbell_curl", name: "Curl de Bíceps con Mancuernas", muscle: "Bíceps", videoIds: [""], tips: ["Alterna o simultáneo", "Sin balanceo", "Rota la muñeca al subir"], muscles_worked: ["Bíceps braquial", "Braquialis"] },
-      { id: "dumbbell_press", name: "Press de Hombros con Mancuernas", muscle: "Hombros", videoIds: [""], tips: ["Codos a 90°", "No bloquees arriba", "Controlado en la bajada"], muscles_worked: ["Deltoides", "Tríceps"] },
-      { id: "dumbbell_row", name: "Remo con Mancuerna", muscle: "Espalda", videoIds: [""], tips: ["Espalda paralela al suelo", "Codo pegado al cuerpo", "Contrae el dorsal"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
-      { id: "dumbbell_lunge", name: "Estocada con Mancuernas", muscle: "Piernas", videoIds: [""], tips: ["Torso erguido", "Rodilla no pasa el pie", "Paso amplio"], muscles_worked: ["Cuádriceps", "Glúteos", "Isquiotibiales"] },
+      { id: "barbell_bench", name: "Press de Banca (barra)", muscle: "Pectoral", videoId: "rT7DgCr-3pg", tips: ["Escápulas juntas", "Pies en el suelo", "Baja la barra al pecho"], muscles_worked: ["Pectoral mayor", "Tríceps", "Deltoides anterior"] },
+      { id: "barbell_squat", name: "Sentadilla con Barra", muscle: "Cuádriceps", videoId: "ultWZbUMPL8", tips: ["Espalda recta", "Rodillas hacia afuera", "Baja hasta paralelo"], muscles_worked: ["Cuádriceps", "Glúteos", "Isquiotibiales"] },
+      { id: "barbell_deadlift", name: "Peso Muerto con Barra", muscle: "Espalda / Glúteos", videoId: "op9kVnSso6Q", tips: ["Espalda neutral", "Barra pegada al cuerpo", "Empuja con las piernas"], muscles_worked: ["Isquiotibiales", "Glúteos", "Erector espinal"] },
+      { id: "barbell_row", name: "Remo con Barra", muscle: "Espalda", videoId: "G8l_8chR5BE", tips: ["Espalda a 45°", "Codos pegados", "Aprieta omóplatos"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
+      { id: "dumbbell_curl", name: "Curl de Bíceps con Mancuernas", muscle: "Bíceps", videoId: "pY1eUygY3rY", tips: ["Alterna o simultáneo", "Sin balanceo", "Rota la muñeca al subir"], muscles_worked: ["Bíceps braquial", "Braquialis"] },
+      { id: "dumbbell_press", name: "Press de Hombros con Mancuernas", muscle: "Hombros", videoId: "qEwKCR5JCog", tips: ["Codos a 90°", "No bloquees arriba", "Controlado en la bajada"], muscles_worked: ["Deltoides", "Tríceps"] },
+      { id: "dumbbell_row", name: "Remo con Mancuerna", muscle: "Espalda", videoId: "uV-mE3rT7g4", tips: ["Espalda paralela al suelo", "Codo pegado al cuerpo", "Contrae el dorsal"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
+      { id: "dumbbell_lunge", name: "Estocada con Mancuernas", muscle: "Piernas", videoId: "D7KaRcUTQeE", tips: ["Torso erguido", "Rodilla no pasa el pie", "Paso amplio"], muscles_worked: ["Cuádriceps", "Glúteos", "Isquiotibiales"] },
     ]
   },
   {
@@ -172,12 +172,12 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🔗",
     color: "#f59e0b",
     items: [
-      { id: "cable_fly", name: "Aperturas con Polea", muscle: "Pectoral", videoIds: [""], tips: ["Leve flexión de codos", "Mantén el ángulo", "Control total"], muscles_worked: ["Pectoral mayor", "Deltoides anterior"] },
-      { id: "cable_row", name: "Remo en Polea Baja", muscle: "Espalda", videoIds: [""], tips: ["Espalda recta", "Aprieta omóplatos", "Control en la vuelta"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
-      { id: "cable_pulldown", name: "Jalón con Polea Alta", muscle: "Dorsal", videoIds: [""], tips: ["Agarre al ancho de hombros", "Jalá al pecho", "Control en la vuelta"], muscles_worked: ["Dorsal ancho", "Bíceps", "Romboides"] },
-      { id: "cable_tricep", name: "Extensión de Tríceps en Polea", muscle: "Tríceps", videoIds: [""], tips: ["Codos fijos", "Extensión completa", "Control al volver"], muscles_worked: ["Tríceps (3 cabezas)"] },
-      { id: "cable_curl", name: "Curl de Bíceps en Polea", muscle: "Bíceps", videoIds: [""], tips: ["Codos fijos al cuerpo", "Contrae al máximo", "Baja controlado"], muscles_worked: ["Bíceps braquial"] },
-      { id: "cable_lateral", name: "Elevación Lateral con Polea", muscle: "Hombros", videoIds: [""], tips: ["Leve flexión de codo", "Llega a la altura del hombro", "No balancees"], muscles_worked: ["Deltoides lateral"] },
+      { id: "cable_fly", name: "Aperturas con Polea", muscle: "Pectoral", videoId: "DUHdrPUrOsQ", tips: ["Leve flexión de codos", "Mantén el ángulo", "Control total"], muscles_worked: ["Pectoral mayor", "Deltoides anterior"] },
+      { id: "cable_row", name: "Remo en Polea Baja", muscle: "Espalda", videoId: "-Cz7-dqpLOE", tips: ["Espalda recta", "Aprieta omóplatos", "Control en la vuelta"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
+      { id: "cable_pulldown", name: "Jalón con Polea Alta", muscle: "Dorsal", videoId: "CAwf7n6Luuc", tips: ["Agarre al ancho de hombros", "Jalá al pecho", "Control en la vuelta"], muscles_worked: ["Dorsal ancho", "Bíceps", "Romboides"] },
+      { id: "cable_tricep", name: "Extensión de Tríceps en Polea", muscle: "Tríceps", videoId: "MRmeUet5VUw", tips: ["Codos fijos", "Extensión completa", "Control al volver"], muscles_worked: ["Tríceps (3 cabezas)"] },
+      { id: "cable_curl", name: "Curl de Bíceps en Polea", muscle: "Bíceps", videoId: "0j6rItm15YI", tips: ["Codos fijos al cuerpo", "Contrae al máximo", "Baja controlado"], muscles_worked: ["Bíceps braquial"] },
+      { id: "cable_lateral", name: "Elevación Lateral con Polea", muscle: "Hombros", videoId: "lMJUXEvcMkQ", tips: ["Leve flexión de codo", "Llega a la altura del hombro", "No balancees"], muscles_worked: ["Deltoides lateral"] },
     ]
   },
   {
@@ -186,12 +186,12 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🤸",
     color: "#10b981",
     items: [
-      { id: "pushup", name: "Flexiones de Brazos", muscle: "Pectoral / Tríceps", videoIds: [""], tips: ["Core activado", "Cuerpo recto", "Codos a 45°"], muscles_worked: ["Pectoral", "Tríceps", "Core"] },
-      { id: "pullup", name: "Dominadas", muscle: "Dorsal / Bíceps", videoIds: [""], tips: ["Agarre supino o prono", "Sube el pecho a la barra", "Baja controlado"], muscles_worked: ["Dorsal", "Bíceps", "Romboides"] },
-      { id: "dip", name: "Fondos en Paralelas", muscle: "Pectoral / Tríceps", videoIds: [""], tips: ["Inclináte hacia adelante", "Baja hasta 90°", "Sin balanceo"], muscles_worked: ["Pectoral inferior", "Tríceps", "Deltoides anterior"] },
-      { id: "squat_bw", name: "Sentadilla (peso corporal)", muscle: "Piernas", videoIds: [""], tips: ["Peso en los talones", "Rodillas hacia afuera", "Pecho erguido"], muscles_worked: ["Cuádriceps", "Glúteos"] },
-      { id: "plank", name: "Plancha", muscle: "Core", videoIds: [""], tips: ["Cuerpo recto", "No bajes la cadera", "Respira de forma regular"], muscles_worked: ["Core completo", "Hombros"] },
-      { id: "hip_thrust_bw", name: "Hip Thrust (peso corporal)", muscle: "Glúteos", videoIds: [""], tips: ["Empuje desde talones", "Aprieta glúteos arriba", "Espalda apoyada"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
+      { id: "pushup", name: "Flexiones de Brazos", muscle: "Pectoral / Tríceps", videoId: "IODxDxX7oi4", tips: ["Core activado", "Cuerpo recto", "Codos a 45°"], muscles_worked: ["Pectoral", "Tríceps", "Core"] },
+      { id: "pullup", name: "Dominadas", muscle: "Dorsal / Bíceps", videoId: "eGo4IYlbE5g", tips: ["Agarre supino o prono", "Sube el pecho a la barra", "Baja controlado"], muscles_worked: ["Dorsal", "Bíceps", "Romboides"] },
+      { id: "dip", name: "Fondos en Paralelas", muscle: "Pectoral / Tríceps", videoId: "2z8JmcrW-As", tips: ["Inclináte hacia adelante", "Baja hasta 90°", "Sin balanceo"], muscles_worked: ["Pectoral inferior", "Tríceps", "Deltoides anterior"] },
+      { id: "squat_bw", name: "Sentadilla (peso corporal)", muscle: "Piernas", videoId: "YaXPRqUwItQ", tips: ["Peso en los talones", "Rodillas hacia afuera", "Pecho erguido"], muscles_worked: ["Cuádriceps", "Glúteos"] },
+      { id: "plank", name: "Plancha", muscle: "Core", videoId: "pSHjTRCQxIw", tips: ["Cuerpo recto", "No bajes la cadera", "Respira de forma regular"], muscles_worked: ["Core completo", "Hombros"] },
+      { id: "hip_thrust_bw", name: "Hip Thrust (peso corporal)", muscle: "Glúteos", videoId: "LM8XHLYJoYs", tips: ["Empuje desde talones", "Aprieta glúteos arriba", "Espalda apoyada"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
     ]
   },
   {
@@ -200,13 +200,13 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🟡",
     color: "#f59e0b",
     items: [
-      { id: "band_squat", name: "Sentadilla con Banda", muscle: "Piernas / Glúteos", videoIds: [""], tips: ["Banda en rodillas", "Rodillas hacia afuera", "Activa glúteos"], muscles_worked: ["Cuádriceps", "Glúteo medio", "Aductores"] },
-      { id: "band_hip_thrust", name: "Hip Thrust con Banda", muscle: "Glúteos", videoIds: [""], tips: ["Banda en caderas", "Empuje desde talones", "Contrae al tope"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
-      { id: "band_row", name: "Remo con Banda Elástica", muscle: "Espalda", videoIds: [""], tips: ["Espalda recta", "Aprieta omóplatos", "Control al extender"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
-      { id: "band_chest", name: "Press de Pecho con Banda", muscle: "Pectoral", videoIds: [""], tips: ["Banda detrás de la espalda", "Empuje firme", "Control al volver"], muscles_worked: ["Pectoral", "Tríceps"] },
-      { id: "band_curl", name: "Curl de Bíceps con Banda", muscle: "Bíceps", videoIds: [""], tips: ["Pisa la banda", "Sube controlado", "Sin balanceo"], muscles_worked: ["Bíceps braquial"] },
-      { id: "band_lateral", name: "Caminata Lateral con Banda", muscle: "Abductores / Glúteos", videoIds: [""], tips: ["Banda en tobillos o rodillas", "Posición de semi-sentadilla", "Pasos controlados"], muscles_worked: ["Glúteo medio", "Abductores"] },
-      { id: "band_warmup", name: "Calentamiento con Banda (rotaciones)", muscle: "Movilidad", videoIds: [""], tips: ["Movimientos lentos y amplios", "Sin tensión excesiva", "Ideal para el inicio"], muscles_worked: ["Hombros", "Cadera", "Columna"] },
+      { id: "band_squat", name: "Sentadilla con Banda", muscle: "Piernas / Glúteos", videoId: "ultWZbUMPL8", tips: ["Banda en rodillas", "Rodillas hacia afuera", "Activa glúteos"], muscles_worked: ["Cuádriceps", "Glúteo medio", "Aductores"] },
+      { id: "band_hip_thrust", name: "Hip Thrust con Banda", muscle: "Glúteos", videoId: "LM8XHLYJoYs", tips: ["Banda en caderas", "Empuje desde talones", "Contrae al tope"], muscles_worked: ["Glúteo mayor", "Isquiotibiales"] },
+      { id: "band_row", name: "Remo con Banda Elástica", muscle: "Espalda", videoId: "G8l_8chR5BE", tips: ["Espalda recta", "Aprieta omóplatos", "Control al extender"], muscles_worked: ["Dorsal", "Romboides", "Bíceps"] },
+      { id: "band_chest", name: "Press de Pecho con Banda", muscle: "Pectoral", videoId: "xUm0BiZCWlQ", tips: ["Banda detrás de la espalda", "Empuje firme", "Control al volver"], muscles_worked: ["Pectoral", "Tríceps"] },
+      { id: "band_curl", name: "Curl de Bíceps con Banda", muscle: "Bíceps", videoId: "pY1eUygY3rY", tips: ["Pisa la banda", "Sube controlado", "Sin balanceo"], muscles_worked: ["Bíceps braquial"] },
+      { id: "band_lateral", name: "Caminata Lateral con Banda", muscle: "Abductores / Glúteos", videoId: "A12uKYg-Kuo", tips: ["Banda en tobillos o rodillas", "Posición de semi-sentadilla", "Pasos controlados"], muscles_worked: ["Glúteo medio", "Abductores"] },
+      { id: "band_warmup", name: "Calentamiento con Banda (rotaciones)", muscle: "Movilidad", videoId: "EA7u4Q_8HQ0", tips: ["Movimientos lentos y amplios", "Sin tensión excesiva", "Ideal para el inicio"], muscles_worked: ["Hombros", "Cadera", "Columna"] },
     ]
   },
   {
@@ -215,12 +215,12 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "🏃",
     color: "#06b6d4",
     items: [
-      { id: "treadmill", name: "Cinta / Trotadora", muscle: "Cardio", videoIds: [""], tips: ["Postura erguida", "Brazos relajados", "Empieza lento y aumenta"], muscles_worked: ["Cardio", "Piernas", "Core"] },
-      { id: "bike", name: "Bicicleta Estática", muscle: "Cardio", videoIds: [""], tips: ["Asiento a altura de cadera", "Pedaleado fluido", "Resistencia progresiva"], muscles_worked: ["Cardio", "Cuádriceps", "Glúteos"] },
-      { id: "elliptical", name: "Elíptica", muscle: "Cardio", videoIds: [""], tips: ["Espalda recta", "Usa los brazos también", "Ritmo constante"], muscles_worked: ["Cardio", "Cuerpo completo"] },
-      { id: "rowing_machine", name: "Remo (máquina)", muscle: "Cardio / Espalda", videoIds: [""], tips: ["Empuje con las piernas primero", "Luego inclináte atrás", "Finaliza con los brazos"], muscles_worked: ["Cardio", "Espalda", "Piernas"] },
-      { id: "jump_rope", name: "Cuerda de Saltar", muscle: "Cardio", videoIds: [""], tips: ["Muñecas hacen el movimiento", "Aterrizás suave", "Empieza 30 seg y aumenta"], muscles_worked: ["Cardio", "Gemelos", "Coordinación"] },
-      { id: "stair_climber", name: "Escaladora / Stepper", muscle: "Cardio / Glúteos", videoIds: [""], tips: ["No te apoyes demasiado", "Pasos completos", "Ritmo constante"], muscles_worked: ["Glúteos", "Cuádriceps", "Cardio"] },
+      { id: "treadmill", name: "Cinta / Trotadora", muscle: "Cardio", videoId: "tTej59yPYIo", tips: ["Postura erguida", "Brazos relajados", "Empieza lento y aumenta"], muscles_worked: ["Cardio", "Piernas", "Core"] },
+      { id: "bike", name: "Bicicleta Estática", muscle: "Cardio", videoId: "dieOsJlsvpM", tips: ["Asiento a altura de cadera", "Pedaleado fluido", "Resistencia progresiva"], muscles_worked: ["Cardio", "Cuádriceps", "Glúteos"] },
+      { id: "elliptical", name: "Elíptica", muscle: "Cardio", videoId: "hV4ezxXuhHw", tips: ["Espalda recta", "Usa los brazos también", "Ritmo constante"], muscles_worked: ["Cardio", "Cuerpo completo"] },
+      { id: "rowing_machine", name: "Remo (máquina)", muscle: "Cardio / Espalda", videoId: "GZbfZ033f74", tips: ["Empuje con las piernas primero", "Luego inclináte atrás", "Finaliza con los brazos"], muscles_worked: ["Cardio", "Espalda", "Piernas"] },
+      { id: "jump_rope", name: "Cuerda de Saltar", muscle: "Cardio", videoId: "O0ZTgiJrn08", tips: ["Muñecas hacen el movimiento", "Aterrizás suave", "Empieza 30 seg y aumenta"], muscles_worked: ["Cardio", "Gemelos", "Coordinación"] },
+      { id: "stair_climber", name: "Escaladora / Stepper", muscle: "Cardio / Glúteos", videoId: "Zz_9Hx82RLo", tips: ["No te apoyes demasiado", "Pasos completos", "Ritmo constante"], muscles_worked: ["Glúteos", "Cuádriceps", "Cardio"] },
     ]
   },
   {
@@ -229,13 +229,13 @@ const EQUIPMENT_CATEGORIES = [
     emoji: "⚡",
     color: "#e84a2e",
     items: [
-      { id: "trx", name: "TRX / Suspensión", muscle: "Cuerpo completo", videoIds: [""], tips: ["Ajustá el ángulo para dificultad", "Core siempre activado", "Movimientos lentos y controlados"], muscles_worked: ["Core", "Cuerpo completo"] },
-      { id: "kettlebell", name: "Kettlebell", muscle: "Funcional", videoIds: [""], tips: ["Swing desde cadera", "Espalda neutral", "Explosividad controlada"], muscles_worked: ["Glúteos", "Core", "Espalda"] },
-      { id: "bosu", name: "BOSU / Plataforma inestable", muscle: "Equilibrio / Core", videoIds: [""], tips: ["Activa el core para estabilizar", "Movimientos controlados", "Ideal para movilidad"], muscles_worked: ["Core", "Equilibrio", "Estabilizadores"] },
-      { id: "medicine_ball", name: "Pelota Medicinal", muscle: "Core / Explosivo", videoIds: [""], tips: ["Lanzamientos explosivos", "Contrae el core", "Variá los ejercicios"], muscles_worked: ["Core", "Hombros", "Pectoral"] },
-      { id: "box_jump", name: "Cajón Pliométrico", muscle: "Explosividad", videoIds: [""], tips: ["Aterrizá suave", "Flexión de rodillas al caer", "Completá la extensión arriba"], muscles_worked: ["Cuádriceps", "Glúteos", "Core"] },
-      { id: "ab_wheel", name: "Rueda Abdominal", muscle: "Core / Abdomen", videoIds: [""], tips: ["Espalda neutral", "Extensión gradual", "Empezá con rango corto"], muscles_worked: ["Recto abdominal", "Oblicuos", "Hombros"] },
-      { id: "foam_roller", name: "Foam Roller (recuperación)", muscle: "Recuperación", videoIds: [""], tips: ["Rueda despacio", "Pausa en puntos tensos", "Ideal post-entreno"], muscles_worked: ["Recuperación muscular", "Fascia"] },
+      { id: "trx", name: "TRX / Suspensión", muscle: "Cuerpo completo", videoId: "eGo4IYlbE5g", tips: ["Ajustá el ángulo para dificultad", "Core siempre activado", "Movimientos lentos y controlados"], muscles_worked: ["Core", "Cuerpo completo"] },
+      { id: "kettlebell", name: "Kettlebell", muscle: "Funcional", videoId: "op9kVnSso6Q", tips: ["Swing desde cadera", "Espalda neutral", "Explosividad controlada"], muscles_worked: ["Glúteos", "Core", "Espalda"] },
+      { id: "bosu", name: "BOSU / Plataforma inestable", muscle: "Equilibrio / Core", videoId: "pSHjTRCQxIw", tips: ["Activa el core para estabilizar", "Movimientos controlados", "Ideal para movilidad"], muscles_worked: ["Core", "Equilibrio", "Estabilizadores"] },
+      { id: "medicine_ball", name: "Pelota Medicinal", muscle: "Core / Explosivo", videoId: "ph3pddpKzzw", tips: ["Lanzamientos explosivos", "Contrae el core", "Variá los ejercicios"], muscles_worked: ["Core", "Hombros", "Pectoral"] },
+      { id: "box_jump", name: "Cajón Pliométrico", muscle: "Explosividad", videoId: "ultWZbUMPL8", tips: ["Aterrizá suave", "Flexión de rodillas al caer", "Completá la extensión arriba"], muscles_worked: ["Cuádriceps", "Glúteos", "Core"] },
+      { id: "ab_wheel", name: "Rueda Abdominal", muscle: "Core / Abdomen", videoId: "Xyd_fa5zoEU", tips: ["Espalda neutral", "Extensión gradual", "Empezá con rango corto"], muscles_worked: ["Recto abdominal", "Oblicuos", "Hombros"] },
+      { id: "foam_roller", name: "Foam Roller (recuperación)", muscle: "Recuperación", videoId: "ELOCsoDSmrg", tips: ["Rueda despacio", "Pausa en puntos tensos", "Ideal post-entreno"], muscles_worked: ["Recuperación muscular", "Fascia"] },
     ]
   },
 ];
@@ -444,7 +444,6 @@ function Input({ label, type = "text", value, onChange, placeholder, prefix }) {
 // ─── YOUTUBE VIDEO EMBED ──────────────────────────────────────────────────────
 function ExerciseVideo({ machine, onClose }) {
   const [tab, setTab] = useState("video");
-  const videoId = machine.videoIds?.[0] || machine.videoId;
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 100, display: "flex", flexDirection: "column", backdropFilter: "blur(8px)" }}>
       {/* Header */}
@@ -469,7 +468,7 @@ function ExerciseVideo({ machine, onClose }) {
             {/* YouTube embed */}
             <div style={{ position: "relative", paddingBottom: "56.25%", borderRadius: 14, overflow: "hidden", background: "#000", marginBottom: 16 }}>
               <iframe
-                src={videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=es&hl=es` : ""}
+                src={`https://www.youtube.com/embed/${machine.videoId}?autoplay=0&rel=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=es&hl=es`}
                 title={machine.name}
                 style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
                 frameBorder="0"
@@ -1653,8 +1652,8 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
                     onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"; }}
                   >
                     {/* Thumbnail / ícono del ejercicio */}
-                    {(altMachineData?.videoIds?.[0] || altMachineData?.videoId)
-                      ? <img src={`https://img.youtube.com/vi/${altMachineData.videoIds?.[0] || altMachineData.videoId}/mqdefault.jpg`} style={{ width: 56, height: 42, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+                    {altMachineData?.videoId
+                      ? <img src={`https://img.youtube.com/vi/${altMachineData.videoId}/mqdefault.jpg`} style={{ width: 56, height: 42, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
                       : <div style={{ width: 56, height: 42, borderRadius: 8, flexShrink: 0, background: "rgba(232,74,46,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
                           {MUSCLE_GROUPS.find(g => g.muscles.some(m => alt.muscle?.toLowerCase().includes(m.toLowerCase())))?.emoji || "💪"}
                         </div>
@@ -1724,8 +1723,8 @@ function SmartExerciseCard({ ex, index, done, onToggle, onVideoClick, onSubstitu
         </div>
 
         {/* Thumbnail */}
-        {(machineData?.videoIds?.[0] || machineData?.videoId)
-          ? <img src={`https://img.youtube.com/vi/${machineData.videoIds?.[0] || machineData.videoId}/mqdefault.jpg`} style={{ width: 56, height: 42, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+        {machineData?.videoId
+          ? <img src={`https://img.youtube.com/vi/${machineData.videoId}/mqdefault.jpg`} style={{ width: 56, height: 42, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
           : <div style={{ width: 56, height: 42, borderRadius: 8, flexShrink: 0, background: "rgba(232,74,46,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
               {MUSCLE_GROUPS.find(g => g.muscles.some(m => ex.muscle?.toLowerCase().includes(m.toLowerCase())))?.emoji || "💪"}
             </div>

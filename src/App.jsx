@@ -1821,17 +1821,17 @@ function ProteinCalculator({ user }) {
   const generateDayPlan = async () => {
     setLoadingDayPlan(true);
     setShowDayPlan(true);
+    setDayPlan(null);
     const goalInfo = GOALS.find(g => g.id === user.goal);
     const favFoods = favoriteFoods.length > 0 ? favoriteFoods : PROTEIN_FOODS.map(f => f.name);
-    const prompt = `Sos un nutricionista deportivo especializado en alimentación paraguaya. El usuario es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}. Meta proteína: ${daily}g/día. Alimentos disponibles que consume: ${favFoods.join(", ")}. Generá un plan de 4 comidas (Desayuno, Almuerzo, Merienda, Cena) con platos reales y accesibles en Paraguay. Usá principalmente los alimentos disponibles. SOLO JSON sin backticks: {"comidas":[{"nombre":"Desayuno","hora":"7:00","plato":"descripción concreta del plato","proteina":25,"calorias":350,"ingredientes":["ingrediente 1","ingrediente 2"]}],"total_proteina":150,"nota":"consejo personalizado del día"}`;
+    const prompt = `Soy ${user.nombre}, peso ${user.weight}kg, objetivo ${goalInfo?.label}, meta proteína ${daily}g/día. Mis alimentos disponibles: ${favFoods.join(", ")}. Sugerirme 4 comidas del día con platos reales paraguayos que lleguen a mi meta. Formato: Desayuno, Almuerzo, Merienda, Cena. Cada comida con nombre del plato, ingredientes simples y gramos de proteína.`;
     try {
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 900, messages: [{ role: "user", content: prompt }] })
       });
       const d = await r.json();
-      const text = d.content?.find(b => b.type === "text")?.text || "";
-      setDayPlan(JSON.parse(text.replace(/```json|```/g, "").trim()));
+      setDayPlan(d.content?.find(b => b.type === "text")?.text || null);
     } catch {
       setDayPlan(null);
     } finally {
@@ -1940,6 +1940,30 @@ function ProteinCalculator({ user }) {
         </div>
       </div>
 
+      {/* ── BOTÓN SUGERIR PLATOS — siempre visible ── */}
+      <button onClick={generateDayPlan} disabled={loadingDayPlan} style={{ width: "100%", background: loadingDayPlan ? "rgba(255,255,255,0.04)" : "linear-gradient(135deg,rgba(232,74,46,0.15),rgba(232,74,46,0.08))", border: `1px solid ${loadingDayPlan ? "rgba(255,255,255,0.08)" : "rgba(232,74,46,0.3)"}`, color: loadingDayPlan ? "rgba(255,255,255,0.3)" : "#e8a090", borderRadius: 12, padding: "12px 0", fontSize: 14, fontWeight: 700, cursor: loadingDayPlan ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}>
+        {loadingDayPlan ? "⏳ Generando platos…" : "🍽️ Sugerirme platos del día"}
+      </button>
+
+      {showDayPlan && (
+        <div style={{ ...card, padding: 16, marginBottom: 14, background: "rgba(232,74,46,0.04)", borderColor: "rgba(232,74,46,0.15)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: "#e8a090" }}>🍽️ Platos del día</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={generateDayPlan} disabled={loadingDayPlan} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.25)", color: "#e8a090", borderRadius: 8, padding: "4px 10px", fontSize: 12, cursor: loadingDayPlan ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 700 }}>🔄 Regenerar</button>
+              <button onClick={() => setShowDayPlan(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 16 }}>✕</button>
+            </div>
+          </div>
+          {loadingDayPlan ? (
+            <div style={{ textAlign: "center", padding: "20px 0", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>✦ Generando tu plan personalizado…</div>
+          ) : dayPlan ? (
+            <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{dayPlan}</div>
+          ) : (
+            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center" }}>No se pudo generar el plan. Tocá Regenerar.</div>
+          )}
+        </div>
+      )}
+
       {/* ── TABS ── */}
       <div style={{ display: "flex", gap: 6, marginBottom: 14, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4 }}>
         {[["foods", "🥘 Mis alimentos"], ["plan", `📋 Mi plan${planCount > 0 ? ` (${planCount})` : ""}`], ["browse", "🔍 Explorar"]].map(([id, label]) => (
@@ -1994,46 +2018,9 @@ function ProteinCalculator({ user }) {
       {tab === "plan" && (
         <div>
           {/* Botón regenerar plan */}
-          <button onClick={() => setMealPlan(generateSuggestedPlan(daily, excluded, favoriteFoods))} style={{ width: "100%", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 12, padding: "11px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <button onClick={() => setMealPlan(generateSuggestedPlan(daily, excluded, favoriteFoods))} style={{ width: "100%", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 12, padding: "11px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             ✨ Regenerar plan sugerido
           </button>
-          <button onClick={generateDayPlan} disabled={loadingDayPlan} style={{ width: "100%", background: loadingDayPlan ? "rgba(255,255,255,0.04)" : "rgba(232,74,46,0.1)", border: `1px solid ${loadingDayPlan ? "rgba(255,255,255,0.08)" : "rgba(232,74,46,0.25)"}`, color: loadingDayPlan ? "rgba(255,255,255,0.3)" : "#e8a090", borderRadius: 12, padding: "11px 0", fontSize: 13, fontWeight: 700, cursor: loadingDayPlan ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {loadingDayPlan ? "⏳ Generando distribución…" : "🍽️ Sugerirme distribución del día"}
-          </button>
-
-          {showDayPlan && (
-            <div style={{ ...card, padding: 16, marginBottom: 14, background: "rgba(232,74,46,0.04)", borderColor: "rgba(232,74,46,0.15)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "#e8a090" }}>🍽️ Distribución del día</div>
-                <button onClick={() => setShowDayPlan(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 16 }}>✕</button>
-              </div>
-              {loadingDayPlan ? (
-                <div style={{ textAlign: "center", padding: "20px 0", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>✦ Generando tu plan personalizado…</div>
-              ) : dayPlan ? (
-                <div>
-                  {dayPlan.comidas?.map((comida, i) => (
-                    <div key={i} style={{ marginBottom: 12, paddingBottom: 12, borderBottom: i < dayPlan.comidas.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                        <div style={{ fontWeight: 700, fontSize: 13 }}>{comida.nombre} <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 400, fontSize: 12 }}>{comida.hora}</span></div>
-                        <div style={{ color: "#10b981", fontSize: 12, fontWeight: 700 }}>{comida.proteina}g · {comida.calorias} kcal</div>
-                      </div>
-                      <div style={{ color: "#fff", fontSize: 14, marginBottom: 4, lineHeight: 1.4 }}>{comida.plato}</div>
-                      {comida.ingredientes?.length > 0 && (
-                        <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{comida.ingredientes.join(" · ")}</div>
-                      )}
-                    </div>
-                  ))}
-                  <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)", marginBottom: dayPlan.nota ? 10 : 0 }}>
-                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Total proteína estimada</span>
-                    <span style={{ color: "#10b981", fontWeight: 800, fontSize: 14 }}>{dayPlan.total_proteina}g</span>
-                  </div>
-                  {dayPlan.nota && <div style={{ padding: "8px 12px", background: "rgba(232,74,46,0.08)", borderRadius: 10, color: "#e8a090", fontSize: 12, lineHeight: 1.5 }}>💡 {dayPlan.nota}</div>}
-                </div>
-              ) : (
-                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center" }}>No se pudo generar el plan. Intentá de nuevo.</div>
-              )}
-            </div>
-          )}
 
           {planCount === 0 ? (
             <div style={{ textAlign: "center", padding: "36px 20px" }}>

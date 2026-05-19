@@ -2447,6 +2447,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [rutinas, setRutinas] = useState([]);
+  const [progreso, setProgreso] = useState([]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -2459,6 +2460,9 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
     supabaseCall("getRutinas", { user_id: uid }).then(res => {
       if (res.rutinas) setRutinas(res.rutinas);
     }).catch(() => {});
+    supabaseCall("getProgreso", { user_id: uid }).then(res => {
+      if (res.progreso) setProgreso(res.progreso);
+    }).catch(() => {});
   }, [user]);
 
   const sendMessage = async () => {
@@ -2470,13 +2474,46 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
     setLoading(true);
     try {
       const selectedGroup = MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
+
+      // Semana actual (lunes a hoy)
+      const now = new Date();
+      const dow = now.getDay();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+      startOfWeek.setHours(0, 0, 0, 0);
+      const rutinasWeek = rutinas.filter(r => new Date(r.fecha) >= startOfWeek);
+
+      // Racha de días consecutivos entrenados
+      let streak = 0;
+      const check = new Date(now);
+      check.setHours(0, 0, 0, 0);
+      while (true) {
+        const ds = check.toISOString().split("T")[0];
+        if (rutinas.some(r => r.fecha === ds)) { streak++; check.setDate(check.getDate() - 1); }
+        else break;
+      }
+
+      // Grupos musculares únicos esta semana
+      const gruposWeek = [...new Set(rutinasWeek.map(r => r.grupo_muscular).filter(Boolean))];
+
+      // Historial
       const histLine = rutinas.length > 0
-        ? `Historial reciente de entrenamientos: ${rutinas.slice(0, 5).map(r => r.fecha + ": " + r.nombre + " (" + r.grupo_muscular + ")").join(", ")}. Último entrenamiento: ${rutinas[0]?.fecha} - ${rutinas[0]?.nombre}.`
+        ? `Historial reciente: ${rutinas.slice(0, 5).map(r => r.fecha + ": " + r.nombre + " (" + r.grupo_muscular + ")").join(", ")}. Último entrenamiento: ${rutinas[0]?.fecha} - ${rutinas[0]?.nombre}.`
         : "Sin historial de entrenamientos registrado aún.";
+
+      // Adherencia
+      const adherenciaLine = `Sesiones esta semana: ${rutinasWeek.length} de ${user.daysPerWeek} planificadas. Grupos trabajados esta semana: ${gruposWeek.length > 0 ? gruposWeek.join(", ") : "ninguno"}. Racha actual: ${streak} día${streak !== 1 ? "s" : ""} consecutivo${streak !== 1 ? "s" : ""}.`;
+
+      // Progreso de peso
+      const pesoLine = progreso.length > 0
+        ? `Progreso de peso (últimas mediciones): ${progreso.slice(0, 4).map(p => p.fecha + ": " + p.peso + "kg").join(", ")}.`
+        : "Sin registros de peso aún.";
+
       const groupLine = selectedGroup
         ? `Grupo muscular de hoy seleccionado: ${selectedGroup.label}.`
         : "Grupo muscular de hoy: no seleccionado.";
-      const systemPrompt = `Sos el coach personal de IA de FROQIA. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}, experiencia: ${user.experience}. Meta proteína: ${daily}g/día. ${histLine} ${groupLine} Podés sugerir qué grupo muscular trabajar hoy basándote en el historial para evitar repetición. Respondé en español rioplatense, de forma motivadora, concisa y personalizada. Podés ayudar con dudas de entrenamiento, nutrición, recuperación y motivación.`;
+
+      const systemPrompt = `Sos el coach personal de IA de FROQIA. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}, experiencia: ${user.experience}. Meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} Podés sugerir qué grupo muscular trabajar hoy basándote en el historial para evitar repetición, y responder preguntas como "¿bajé de peso?", "¿qué grupo me falta trabajar?", "¿voy bien con mi objetivo?". Respondé en español rioplatense, de forma motivadora, concisa y personalizada.`;
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

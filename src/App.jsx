@@ -244,9 +244,12 @@ const EQUIPMENT_CATEGORIES = [
 const ALL_EQUIPMENT = EQUIPMENT_CATEGORIES.flatMap(c => c.items.map(i => ({ ...i, category: c.id, categoryLabel: c.label, categoryColor: c.color })));
 const getMachineData = (name) => {
   if (!name) return null;
-  const exact = ALL_EQUIPMENT.find(m => m.name.toLowerCase() === name.toLowerCase());
+  const nameLower = name.toLowerCase();
+  const exact = ALL_EQUIPMENT.find(m => m.name.toLowerCase() === nameLower);
   if (exact) return exact;
-  return ALL_EQUIPMENT.find(m => name.toLowerCase().includes(m.name.toLowerCase().split("(")[0].trim()) || m.name.toLowerCase().includes(name.toLowerCase().split("(")[0].trim()));
+  const partial = ALL_EQUIPMENT.find(m => nameLower.includes(m.name.toLowerCase().split("(")[0].trim()));
+  if (partial) return partial;
+  return ALL_EQUIPMENT.find(m => m.name.toLowerCase().split("(")[0].trim().includes(nameLower.split("(")[0].trim()));
 };
 
 // Extras de calentamiento, abdominales y cierre
@@ -2577,6 +2580,8 @@ INSTRUCCIONES:
 - weight_suggestion DEBE ser un rango en kg concreto ej: "20-25 kg" o "15 kg" — NUNCA porcentajes. Estimá según fuerza base y músculo trabajado.
 - Para peso corporal escribí "Peso corporal"
 - El tip diario debe incluir gramos de proteína
+- NUNCA repitas el mismo ejercicio en la misma rutina. Cada ejercicio debe ser diferente.
+- Variá el equipamiento: no uses la misma máquina/herramienta más de una vez por sesión.
 SOLO JSON sin backticks:
 {"dayFocus":"string","warmup":"descripción específica","exercises":[{"machine":"nombre","muscle":"músculo","sets":3,"reps":"8-12","rest":"60 seg","weight_suggestion":"20-25 kg","tip":""}],"finisher":{"name":"","desc":""},"cooldown":"string","duration":"string","musclesWorked":[""],"dailyTip":{"category":"Nutrición|Técnica|Recuperación|Motivación","title":"","content":""},"caloriesBurned":"","intensity":""}`;
       try {

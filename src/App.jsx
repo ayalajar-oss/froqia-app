@@ -3092,7 +3092,27 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
         )}
 
         {/* MÉDICO */}
-        {tab === "medical" && <div style={{ paddingTop: 16 }}><h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800 }}>🧪 Análisis Médico</h3><p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, margin: "0 0 16px" }}>Subí tus hemogramas e informes. La IA los analiza y ajusta tu plan.</p><MedicalFiles user={user} isPremium={isPremium} onUpgrade={() => setTab("upgrade")} onNewAnalysis={entry => setMedicalHistory(h => [entry, ...h])} /></div>}
+        {tab === "medical" && (
+          <div style={{ paddingTop: 16 }}>
+            <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800 }}>🧪 Análisis Médico</h3>
+            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, margin: "0 0 16px" }}>Subí tus hemogramas e informes. La IA los analiza y ajusta tu plan.</p>
+            {!isPremium ? (
+              <div style={{ textAlign: "center", padding: "40px 20px", background: "rgba(232,74,46,0.08)", borderRadius: 16, border: "1px solid rgba(232,74,46,0.2)" }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>🔒</div>
+                <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 800 }}>Análisis Médico con IA</h3>
+                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, margin: "0 0 20px", lineHeight: 1.5 }}>
+                  Subí tus hemogramas e informes médicos y la IA los analiza para ajustar tu plan. Disponible en planes de pago.
+                </p>
+                <button onClick={() => setTab("upgrade")} style={{ background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 12, padding: "13px 28px", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 20px rgba(232,74,46,0.35)" }}>
+                  ⭐ Ver planes de suscripción
+                </button>
+                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginTop: 12 }}>Desde ₲ 75.000/mes</p>
+              </div>
+            ) : (
+              <MedicalFiles user={user} isPremium={isPremium} onUpgrade={() => setTab("upgrade")} onNewAnalysis={entry => setMedicalHistory(h => [entry, ...h])} />
+            )}
+          </div>
+        )}
 
         {/* UPGRADE */}
         {tab === "upgrade" && (
@@ -3297,7 +3317,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
 
       {/* Bottom nav */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 520, background: "rgba(8,8,9,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-around", padding: "10px 0 18px" }}>
-        {[["home", "🏠", "Inicio"], ["nutrition", "🥗", "Nutrición"], ["coach", "💬", "Coach"], ["history", "📊", "Historial"], ["profile", "👤", "Perfil"]].map(([id, icon, label]) => (
+        {[["home", "🏠", "Inicio"], ["nutrition", "🥗", "Nutrición"], ["medical", "🧪", "Médico"], ["coach", "💬", "Coach"], ["history", "📊", "Historial"], ["profile", "👤", "Perfil"]].map(([id, icon, label]) => (
           <button key={id} onClick={() => setTab(id)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: tab === id ? "#e8a090" : "rgba(255,255,255,0.3)", fontFamily: "'DM Sans',sans-serif" }}>
             <span style={{ fontSize: 20 }}>{icon}</span>
             <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>

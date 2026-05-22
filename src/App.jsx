@@ -384,8 +384,8 @@ async function sha1(str) {
 }
 
 function calcProtein(user) {
-  const goal = GOALS.find(g => g.id === user.goal);
-  const w = parseFloat(user.weight) || 70;
+  const goal = GOALS.find(g => g.id === (user.goal || user.objetivo));
+  const w = parseFloat(user.weight || user.peso) || 70;
   const baseMult = goal?.proteinMultiplier || 1.8;
   // Mujeres: ligeramente menor multiplicador (masa muscular base menor)
   const sexFactor = user.sex === "female" ? 0.9 : 1.0;
@@ -1791,7 +1791,7 @@ function TermsModal({ onClose }) {
 // ─── PROTEIN CALCULATOR — Plan de comidas con sumatoria en tiempo real ────────
 function ProteinCalculator({ user }) {
   const { daily, perMeal, mult } = calcProtein(user);
-  const goal = GOALS.find(g => g.id === user.goal);
+  const goal = GOALS.find(g => g.id === (user.goal || user.objetivo));
 
   const [excluded, setExcluded] = useState([]);
   const [allergies, setAllergies] = useState([]);
@@ -3045,7 +3045,7 @@ SOLO JSON sin backticks:
             <div>
               <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}>{greeting}</div>
               <div style={{ fontWeight: 800, fontSize: 15 }}>{user.nombre.split(" ")[0]}</div>
-              <div onClick={() => setTab("nutrition")} style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, cursor: "pointer", marginTop: 1 }}>{consumedProtein}g / {daily}g</div>
+              <div onClick={() => setTab(isPremium ? "nutrition" : "upgrade")} style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, cursor: "pointer", marginTop: 1 }}>🥩 {daily}g meta</div>
             </div>
             {showAvatarMenu && (<>
               <div onClick={() => setShowAvatarMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />

@@ -2555,6 +2555,9 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   const [rutinas, setRutinas] = useState([]);
   const [progreso, setProgreso] = useState([]);
   const messagesEndRef = useRef(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -2570,6 +2573,36 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
       if (res.progreso) setProgreso(res.progreso);
     }).catch(() => {});
   }, [user]);
+
+  const speakText = (text, enabled) => {
+    if (!enabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'es-419';
+    const vs = window.speechSynthesis.getVoices();
+    const lv = vs.find(v => v.lang.startsWith('es') && /419|MX|AR|CO|US/.test(v.lang));
+    if (lv) utt.voice = lv;
+    window.speechSynthesis.speak(utt);
+  };
+
+  const startListening = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+    if (listening) { recognitionRef.current?.stop(); return; }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.lang = 'es-419';
+    rec.continuous = false;
+    rec.interimResults = false;
+    recognitionRef.current = rec;
+    rec.onstart = () => setListening(true);
+    rec.onend = () => setListening(false);
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      sendMessage(transcript);
+    };
+    rec.onerror = () => setListening(false);
+    rec.start();
+  };
 
   const sendMessage = async (chipText) => {
     const content = typeof chipText === "string" ? chipText : input.trim();
@@ -2620,7 +2653,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
         ? `Grupo muscular de hoy seleccionado: ${selectedGroup.label}.`
         : "Grupo muscular de hoy: no seleccionado.";
 
-      const systemPrompt = `Sos el coach personal de IA de FROQIA. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight}kg, objetivo: ${goalInfo?.label}, experiencia: ${user.experience}. Meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} Podés sugerir qué grupo muscular trabajar hoy basándote en el historial para evitar repetición, y responder preguntas como "¿bajé de peso?", "¿qué grupo me falta trabajar?", "¿voy bien con mi objetivo?". Respondé en español rioplatense, de forma motivadora, concisa y personalizada.`;
+      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight || user.peso}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine}`;
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2634,6 +2667,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
       const d = await r.json();
       const text = d.content?.find(b => b.type === "text")?.text || "No pude responder, intentá de nuevo.";
       setMessages(prev => [...prev, { role: "assistant", content: text }]);
+      speakText(text, audioEnabled);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "Error al conectar con el coach. Intentá de nuevo." }]);
     } finally {
@@ -2659,20 +2693,24 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 148px)", paddingTop: 16 }}>
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: 0, fontWeight: 800, fontSize: 18 }}>💬 Coach FROQIA</h3>
-        <p style={{ margin: "4px 0 0", color: "rgba(255,255,255,0.4)", fontSize: 12 }}>Tu coach personal con IA · siempre disponible</p>
+      <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <h3 style={{ margin: 0, fontWeight: 800, fontSize: 18 }}>🐸 Froq - Tu Coach Personal</h3>
+          <p style={{ margin: "4px 0 0", color: "rgba(255,255,255,0.4)", fontSize: 12 }}>Tu coach personal con IA · siempre disponible</p>
+        </div>
+        <button onClick={() => setAudioEnabled(v => !v)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", fontSize: 20, cursor: "pointer", padding: 4 }}>{audioEnabled ? "🔊" : "🔇"}</button>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12, paddingBottom: 12 }}>
         {messages.length === 0 && (
           <div style={{ textAlign: "center", paddingTop: 48, color: "rgba(255,255,255,0.25)", fontSize: 13 }}>
-            <div style={{ fontSize: 44, marginBottom: 12 }}>👋</div>
-            <div>¡Hola {user.nombre.split(" ")[0]}! Preguntame lo que quieras sobre tu entrenamiento, nutrición o motivación.</div>
+            <div style={{ fontSize: 44, marginBottom: 12 }}>🐸</div>
+            <div>¡Hola {user.nombre.split(" ")[0]}! 🐸 Soy Froq, tu coach personal. Estoy acá para ayudarte a alcanzar tus metas. ¿En qué te puedo ayudar hoy?</div>
           </div>
         )}
         {messages.map((msg, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 6 }}>
+            {msg.role === "assistant" && <div style={{ fontSize: 22, flexShrink: 0, marginBottom: 2 }}>🐸</div>}
             <div style={{
               maxWidth: "82%",
               padding: "10px 14px",
@@ -2689,7 +2727,8 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
           </div>
         ))}
         {loading && (
-          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+          <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-end", gap: 6 }}>
+            <div style={{ fontSize: 22, flexShrink: 0, marginBottom: 2 }}>🐸</div>
             <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", fontSize: 14 }}>
               ✦ Escribiendo…
             </div>
@@ -2699,7 +2738,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
       </div>
 
       <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8, scrollbarWidth: "none" }}>
-        {["¿Qué como ahora?", "¿Qué entreno hoy?", "Me duele el hombro", "¿Voy bien esta semana?"].map(chip => (
+        {["¿Qué como ahora?", "¿Qué entreno hoy?", "Me duele el hombro", "¿Voy bien esta semana?", "¡Motivame Froq! 🐸"].map(chip => (
           <button key={chip} onClick={() => sendMessage(chip)} disabled={loading} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "6px 14px", color: "rgba(255,255,255,0.8)", fontSize: 12, cursor: loading ? "default" : "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, flexShrink: 0 }}>{chip}</button>
         ))}
       </div>
@@ -2711,6 +2750,12 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
           placeholder="Preguntá a tu coach…"
           style={{ flex: 1, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "12px 14px", color: "#fff", fontSize: 14, fontFamily: "'DM Sans',sans-serif", outline: "none" }}
         />
+        <button
+          onClick={startListening}
+          style={{ background: listening ? "rgba(232,74,46,0.2)" : "rgba(255,255,255,0.08)", border: listening ? "1px solid rgba(232,74,46,0.6)" : "none", borderRadius: 12, padding: "0 14px", cursor: "pointer", color: listening ? "#e84a2e" : "rgba(255,255,255,0.6)", fontSize: 18, transition: "all 0.2s", flexShrink: 0, animation: listening ? "pulse 1s ease-in-out infinite" : "none" }}
+        >
+          🎤
+        </button>
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}

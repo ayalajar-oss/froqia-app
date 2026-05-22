@@ -2857,6 +2857,7 @@ INSTRUCCIONES:
 - El tip diario debe incluir gramos de proteína
 - NUNCA repitas el mismo ejercicio en la misma rutina. Cada ejercicio debe ser diferente.
 - Variá el equipamiento: no uses la misma máquina/herramienta más de una vez por sesión.
+- El campo 'rest' de cada ejercicio NUNCA debe ser inferior a 30 segundos. Mínimo: '30 seg'. Para fuerza máxima usar 90-120 seg. Para hipertrofia 60-90 seg. Para resistencia 30-45 seg.
 SOLO JSON sin backticks:
 {"dayFocus":"string","warmup":"descripción específica","exercises":[{"machine":"nombre","muscle":"músculo","sets":3,"reps":"8-12","rest":"60 seg","weight_suggestion":"20-25 kg","tip":""}],"finisher":{"name":"","desc":""},"cooldown":"string","duration":"string","musclesWorked":[""],"dailyTip":{"category":"Nutrición|Técnica|Recuperación|Motivación","title":"","content":""},"caloriesBurned":"","intensity":""}`;
       try {
@@ -2975,7 +2976,7 @@ SOLO JSON sin backticks:
   // ── Parsear segundos de descanso del string ────────────────────────────────
   function parseRestSecs(restStr) {
     const m = (restStr || "").match(/(\d+)/);
-    return m ? parseInt(m[1]) : 60;
+    return Math.max(30, parseInt(m?.[1] || "60"));
   }
 
   return (

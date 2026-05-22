@@ -2755,6 +2755,7 @@ useEffect(() => {
 }, []);
   const [done, setDone] = useState({});
   const [showFinish, setShowFinish] = useState(false);
+  const [finishQuote, setFinishQuote] = useState(null);
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [upgradeCheckout, setUpgradeCheckout] = useState(null);
   // Timer state
@@ -3122,9 +3123,6 @@ SOLO JSON sin backticks:
               )}
             </div>
 
-            {/* Frase motivadora del día */}
-            <MotivationalQuote />
-
             {/* Calentamiento — pregunta si quiere hacer */}
             {!loading && routine?.warmup && <WarmupCard warmup={routine.warmup} />}
 
@@ -3169,7 +3167,7 @@ SOLO JSON sin backticks:
 
        {!loading && doneCount > 0 && <Btn onClick={() => {
   if (showFinish) return; const newEntry = { date: new Date().toLocaleDateString(), focus: routine?.dayFocus, muscles: routine?.musclesWorked || [], completed: doneCount, total: totalEx }; setHistory(h => [newEntry, ...h]); const userId = JSON.parse(localStorage.getItem("froqia_session"))?.user?.id;; if (userId) { console.log("userId:", userId);
-console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id: userId, nombre: routine?.dayFocus || "Entrenamiento", ejercicios: doneCount, calorias: parseInt(routine?.caloriesBurned) || 0, grupo_muscular: routine?.musclesWorked?.[0] || "" }).catch(() => {}); } setShowFinish(true); }} variant="success" style={{ width: "100%", marginTop: 14, padding: 14, fontSize: 15 }}>✅ Finalizar ({doneCount}/{totalEx})</Btn>}
+console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id: userId, nombre: routine?.dayFocus || "Entrenamiento", ejercicios: doneCount, calorias: parseInt(routine?.caloriesBurned) || 0, grupo_muscular: routine?.musclesWorked?.[0] || "" }).catch(() => {}); } setFinishQuote(MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]); setShowFinish(true); }} variant="success" style={{ width: "100%", marginTop: 14, padding: 14, fontSize: 15 }}>✅ Finalizar ({doneCount}/{totalEx})</Btn>}
             <Btn onClick={() => { setRoutine(null); setSelectedMuscleGroup(null); setDone({}); }} variant="ghost" style={{ width: "100%", marginTop: 10, fontSize: 13 }}>🔄 Nueva rutina</Btn>
           </>
         )}
@@ -3438,6 +3436,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
               <div style={{ fontSize: 50 }}>🎉</div>
               <h3 style={{ margin: "10px 0 3px", fontSize: 20 }}>¡Sesión completada!</h3>
               <p style={{ color: "rgba(255,255,255,0.4)", margin: 0 }}>No olvidés tomar <strong style={{ color: "#10b981" }}>{Math.round(daily * 0.3)}g</strong> de proteína ahora</p>
+              {finishQuote && <div style={{ marginTop: 14 }}><p style={{ margin: 0, fontStyle: "italic", fontSize: 15, color: "rgba(255,255,255,0.8)" }}>"{finishQuote.quote}"</p><p style={{ margin: "4px 0 0", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>— {finishQuote.author}</p></div>}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9, marginBottom: 16 }}>
               {[["Ejercicios", `${doneCount}/${totalEx}`], ["Calorías", `~${routine?.caloriesBurned}`], ["Proteína post", Math.round(daily * 0.3) + "g"], ["Intensidad", routine?.intensity]].map(([k, v]) => <div key={k} style={{ ...card, padding: "11px 13px", textAlign: "center" }}><div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{k}</div><div style={{ fontWeight: 700, fontSize: 14, marginTop: 3 }}>{v}</div></div>)}

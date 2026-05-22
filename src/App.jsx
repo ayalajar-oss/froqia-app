@@ -2577,7 +2577,15 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   const speakText = (text, enabled) => {
     if (!enabled || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
+    const cleanText = text
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/#{1,6}/g, '')
+      .replace(/[🐸💪🔥⚡🎯🏋️🥗🧪💬📊👤]/gu, '')
+      .replace(/\n+/g, '. ')
+      .trim();
+    if (!cleanText) return;
+    const utt = new SpeechSynthesisUtterance(cleanText);
     utt.lang = 'es-419';
     const vs = window.speechSynthesis.getVoices();
     const lv = vs.find(v => v.lang.startsWith('es') && /419|MX|AR|CO|US/.test(v.lang));
@@ -2586,22 +2594,38 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   };
 
   const startListening = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+      if (isIOS) {
+        alert('En iPhone escribí tu mensaje o usá Chrome para voz.');
+      } else {
+        alert('Tu navegador no soporta reconocimiento de voz. Usá Chrome o escribí tu mensaje.');
+      }
+      return;
+    }
     if (listening) { recognitionRef.current?.stop(); return; }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new SR();
-    rec.lang = 'es-419';
-    rec.continuous = false;
-    rec.interimResults = false;
-    recognitionRef.current = rec;
-    rec.onstart = () => setListening(true);
-    rec.onend = () => setListening(false);
-    rec.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      sendMessage(transcript);
-    };
-    rec.onerror = () => setListening(false);
-    rec.start();
+    try {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const rec = new SR();
+      rec.lang = 'es-419';
+      rec.continuous = false;
+      rec.interimResults = false;
+      recognitionRef.current = rec;
+      rec.onstart = () => setListening(true);
+      rec.onend = () => setListening(false);
+      rec.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        sendMessage(transcript);
+      };
+      rec.onerror = (e) => {
+        setListening(false);
+        if (e.error === 'not-allowed') alert('Permiso de micrófono denegado. Habilitalo en la configuración del navegador.');
+      };
+      rec.start();
+    } catch (err) {
+      setListening(false);
+      alert('No se pudo activar el micrófono: ' + err.message);
+    }
   };
 
   const sendMessage = async (chipText) => {

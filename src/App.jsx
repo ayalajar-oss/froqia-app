@@ -2730,7 +2730,7 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan, onUpdateUser }) {
   const [loading, setLoading] = useState(false);
   const [tip, setTip] = useState(null);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
-  const [showGroupSelector, setShowGroupSelector] = useState(false);
+  const [showGroupSelector, setShowGroupSelector] = useState(true);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [savingProfile, setSavingProfile] = useState(false);

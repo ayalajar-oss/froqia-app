@@ -2571,12 +2571,13 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
     }).catch(() => {});
   }, [user]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-    const userMsg = { role: "user", content: input.trim() };
+  const sendMessage = async (chipText) => {
+    const content = typeof chipText === "string" ? chipText : input.trim();
+    if (!content || loading) return;
+    const userMsg = { role: "user", content };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    setInput("");
+    if (typeof chipText !== "string") setInput("");
     setLoading(true);
     try {
       const selectedGroup = MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup);
@@ -2697,6 +2698,11 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
         <div ref={messagesEndRef} />
       </div>
 
+      <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8, scrollbarWidth: "none" }}>
+        {["¿Qué como ahora?", "¿Qué entreno hoy?", "Me duele el hombro", "¿Voy bien esta semana?"].map(chip => (
+          <button key={chip} onClick={() => sendMessage(chip)} disabled={loading} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "6px 14px", color: "rgba(255,255,255,0.8)", fontSize: 12, cursor: loading ? "default" : "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, flexShrink: 0 }}>{chip}</button>
+        ))}
+      </div>
       <div style={{ display: "flex", gap: 10, paddingBottom: 8 }}>
         <input
           value={input}
@@ -2768,6 +2774,7 @@ useEffect(() => {
   const [substituting, setSubstituting] = useState(null);
   // Alternatives panel — { [exIndex]: [{machine,muscle,sets,reps,rest,tip,weight_suggestion}] | "loading" | null }
   const [alternatives, setAlternatives] = useState({});
+  const [showAllExercises, setShowAllExercises] = useState(false);
   const [coachMessages, setCoachMessages] = useState([]);
 
   const goalInfo = GOALS.find(g => g.id === user.goal);
@@ -2779,6 +2786,8 @@ useEffect(() => {
   function toggleMeal(key) { setProteinMeals(prev => { const next = { ...prev, [key]: !prev[key] }; localStorage.setItem('froqia_protein_meals', JSON.stringify({ date: new Date().toLocaleDateString(), meals: next })); return next; }); }
   const mealGrams = { breakfast: Math.round(daily * 0.25), lunch: Math.round(daily * 0.35), snack: Math.round(daily * 0.15), dinner: Math.round(daily * 0.25) };
   const consumedProtein = Object.entries(mealGrams).reduce((sum, [k, g]) => sum + (proteinMeals[k] ? g : 0), 0);
+  const currentExIndex = routine ? routine.exercises.findIndex((_, i) => !done[i]) : -1;
+  const currentEx = currentExIndex >= 0 ? routine.exercises[currentExIndex] : null;
   const _sow = (() => { const d = new Date(); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1)); d.setHours(0,0,0,0); return d; })();
   const _trainedLabels = new Set(history.filter(h => { const p = (h.date||'').split('T')[0].split('-').map(Number); return new Date(p[0],p[1]-1,p[2]) >= _sow; }).flatMap(h => h.muscles||[]).map(x => x.toLowerCase()));
   const nextMuscleLabel = MUSCLE_GROUPS.filter(g => ["chest_biceps","back_triceps","shoulders","quads","hamstrings_glutes"].includes(g.id)).find(g => !_trainedLabels.has(g.label.toLowerCase()))?.label || null;
@@ -3087,14 +3096,13 @@ SOLO JSON sin backticks:
               </div>
             </div>
 
-           {tip?.category && (
+           {!routine && tip?.category && (
   <TipDelDia tip={tip} tipColor={tipColor} goalInfo={goalInfo} bodyInfo={bodyInfo} user={user} daily={daily} setTip={setTip} />
 )}
 
-<WeeklyDashboard history={history} nextMuscle={nextMuscleLabel} />
+{!routine && <WeeklyDashboard history={history} nextMuscle={nextMuscleLabel} />}
 
-            {/* Selector de grupo muscular */}
-            <div style={{ ...card, padding: "14px 16px", marginBottom: 12 }}>
+            {!routine && <div style={{ ...card, padding: "14px 16px", marginBottom: 12 }}>
               <button
                 onClick={() => setShowGroupSelector(!showGroupSelector)}
                 style={{
@@ -3149,17 +3157,46 @@ SOLO JSON sin backticks:
                   ))}
                 </div>
               )}
-            </div>
+            </div>}
 
             {/* Calentamiento — pregunta si quiere hacer */}
             {!loading && routine?.warmup && <WarmupCard warmup={routine.warmup} />}
+
+            {/* Focus mode: progress bar + toggle */}
+            {routine && !loading && (
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700 }}>{doneCount}/{totalEx} ejercicios</div>
+                  <button onClick={() => setShowAllExercises(v => !v)} style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "rgba(255,255,255,0.7)", borderRadius: 8, padding: "4px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 700 }}>{showAllExercises ? "🎯 Modo foco" : "Ver todos ▼"}</button>
+                </div>
+                <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
+                  <div style={{ height: "100%", background: "linear-gradient(90deg,#e84a2e,#f59e0b)", borderRadius: 2, width: `${totalEx > 0 ? Math.round((doneCount / totalEx) * 100) : 0}%`, transition: "width 0.4s" }} />
+                </div>
+              </div>
+            )}
+            {routine && !loading && !showAllExercises && (currentEx ? (
+              <div style={{ ...card, padding: "24px 20px", textAlign: "center", marginBottom: 12, borderColor: "rgba(232,74,46,0.25)", background: "rgba(232,74,46,0.06)" }}>
+                <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, fontWeight: 700, letterSpacing: 1, marginBottom: 8 }}>EJERCICIO {currentExIndex + 1} / {totalEx}</div>
+                <div style={{ fontWeight: 800, fontSize: 24, lineHeight: 1.2, marginBottom: 10 }}>{currentEx.machine}</div>
+                <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 18, fontWeight: 600, marginBottom: 6 }}>{currentEx.sets} × {currentEx.reps}</div>
+                {currentEx.rest && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginBottom: 24 }}>Descanso: {currentEx.rest}</div>}
+                <button onClick={() => { setDone(d => ({ ...d, [currentExIndex]: true })); if (currentExIndex < routine.exercises.length - 1) setTimer({ seconds: parseRestSecs(currentEx.rest), exIndex: currentExIndex }); }} style={{ width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", fontSize: 36, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 28px rgba(16,185,129,0.45)" }}>✓</button>
+                {currentEx.tip && <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginTop: 16, fontStyle: "italic", lineHeight: 1.5 }}>{currentEx.tip}</div>}
+              </div>
+            ) : doneCount === totalEx && totalEx > 0 ? (
+              <div style={{ textAlign: "center", padding: "28px 0 16px" }}>
+                <div style={{ fontSize: 48, marginBottom: 8 }}>🏆</div>
+                <div style={{ fontWeight: 800, fontSize: 20 }}>¡Todos completados!</div>
+                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 6 }}>Podés finalizar tu sesión</div>
+              </div>
+            ) : null)}
 
             {loading ? (
               <div style={{ textAlign: "center", padding: 48 }}>
                 <div style={{ width: 38, height: 38, border: "3px solid rgba(255,255,255,0.07)", borderTopColor: "#e84a2e", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 14px" }} />
                 <div style={{ color: "rgba(255,255,255,0.35)" }}>Preparando tu rutina...</div>
               </div>
-            ) : (
+            ) : (showAllExercises || !routine) ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
                 {routine?.exercises?.map((ex, i) => (
                   <SmartExerciseCard
@@ -3183,7 +3220,7 @@ SOLO JSON sin backticks:
                   />
                 ))}
               </div>
-            )}
+            ) : null}
 
             {!loading && routine?.finisher && (
               <div style={{ ...card, padding: 14, marginTop: 9, borderColor: "rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.06)" }}>
@@ -3445,6 +3482,11 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
           />
         )}
       </div>
+
+      {/* Floating coach button */}
+      {isPremium && tab !== "coach" && (
+        <button onClick={() => setTab("coach")} style={{ position: "fixed", bottom: 80, right: 16, width: 56, height: 56, borderRadius: "50%", background: "#e84a2e", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", zIndex: 40, boxShadow: "0 4px 20px rgba(232,74,46,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>💬</button>
+      )}
 
       {/* Bottom nav */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 520, background: "rgba(8,8,9,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-around", padding: "10px 0 18px" }}>

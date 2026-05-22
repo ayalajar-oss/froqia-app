@@ -2774,7 +2774,7 @@ useEffect(() => {
   const [substituting, setSubstituting] = useState(null);
   // Alternatives panel — { [exIndex]: [{machine,muscle,sets,reps,rest,tip,weight_suggestion}] | "loading" | null }
   const [alternatives, setAlternatives] = useState({});
-  const [showAllExercises, setShowAllExercises] = useState(false);
+  const [showAllExercises, setShowAllExercises] = useState(true);
   const [coachMessages, setCoachMessages] = useState([]);
 
   const goalInfo = GOALS.find(g => g.id === user.goal);
@@ -3045,6 +3045,7 @@ SOLO JSON sin backticks:
             <div>
               <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}>{greeting}</div>
               <div style={{ fontWeight: 800, fontSize: 15 }}>{user.nombre.split(" ")[0]}</div>
+              <div onClick={() => setTab("nutrition")} style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, cursor: "pointer", marginTop: 1 }}>{consumedProtein}g / {daily}g</div>
             </div>
             {showAvatarMenu && (<>
               <div onClick={() => setShowAvatarMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 29 }} />
@@ -3073,28 +3074,7 @@ SOLO JSON sin backticks:
                 <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 4 }}>Que este año estés más fuerte que nunca 💪</div>
               </div>
             )}
-            <div style={{ ...card, padding: "16px 18px", marginTop: 16, marginBottom: 12, borderColor: "rgba(16,185,129,0.3)", background: "rgba(16,185,129,0.08)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-                <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 10, fontWeight: 700 }}>PROTEÍNA HOY</div>
-                <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>meta {daily}g</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-                <span style={{ color: "#10b981", fontWeight: 900, fontSize: 36, lineHeight: 1 }}>{consumedProtein}</span>
-                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 16, fontWeight: 700 }}>/ {daily}g</span>
-              </div>
-              <div style={{ height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 3, marginBottom: 14, overflow: "hidden" }}>
-                <div style={{ height: "100%", background: "linear-gradient(90deg,#10b981,#059669)", borderRadius: 3, width: `${Math.min(100, Math.round((consumedProtein / daily) * 100))}%`, transition: "width 0.3s" }} />
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                {[["☀️","Desayuno","breakfast",mealGrams.breakfast],["🍽️","Almuerzo","lunch",mealGrams.lunch],["🫐","Merienda","snack",mealGrams.snack],["🌙","Cena","dinner",mealGrams.dinner]].map(([emoji,label,key,grams]) => (
-                  <button key={key} onClick={() => toggleMeal(key)} style={{ background: proteinMeals[key] ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.04)", border: `1.5px solid ${proteinMeals[key] ? "rgba(16,185,129,0.4)" : "rgba(255,255,255,0.08)"}`, borderRadius: 12, padding: "8px 6px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flex: 1, fontFamily: "'DM Sans',sans-serif" }}>
-                    <span style={{ fontSize: 20 }}>{emoji}</span>
-                    <span style={{ color: proteinMeals[key] ? "#10b981" : "#fff", fontWeight: 700, fontSize: 12 }}>{grams}g</span>
-                    <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 10 }}>{label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+
 
            {!routine && tip?.category && (
   <TipDelDia tip={tip} tipColor={tipColor} goalInfo={goalInfo} bodyInfo={bodyInfo} user={user} daily={daily} setTip={setTip} />

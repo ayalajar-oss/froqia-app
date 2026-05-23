@@ -2845,6 +2845,7 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan, onUpdateUser }) {
   const [tip, setTip] = useState(null);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [showGroupSelector, setShowGroupSelector] = useState(true);
+  const [showCoachGate, setShowCoachGate] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [savingProfile, setSavingProfile] = useState(false);
@@ -3602,7 +3603,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
               <Avatar photo={user.photo} name={user.nombre} size={76} />
               <h2 style={{ margin: "12px 0 3px", fontSize: 20, fontWeight: 800 }}>{user.nombre}</h2>
               <p style={{ color: "rgba(255,255,255,0.3)", margin: "0 0 10px", fontSize: 13 }}>{user.email || user.phone}</p>
-              <button onClick={() => { setEditForm({ nombre: user.nombre, weight: user.weight, height: user.height, age: user.age, fecha_nacimiento: user.fecha_nacimiento || "", sex: user.sex, daysPerWeek: user.daysPerWeek, experience: user.experience }); setEditingProfile(true); }} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.3)", color: "#e8a090", borderRadius: 10, padding: "7px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>✏️ Editar perfil</button>
+              <button onClick={() => { setEditForm({ nombre: user.nombre, weight: user.weight, height: user.height, age: user.age, fecha_nacimiento: user.fecha_nacimiento || "", sex: user.sex, daysPerWeek: user.daysPerWeek, experience: user.experience, goal: user.goal || "" }); setEditingProfile(true); }} style={{ background: "rgba(232,74,46,0.12)", border: "1px solid rgba(232,74,46,0.3)", color: "#e8a090", borderRadius: 10, padding: "7px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}>✏️ Editar perfil</button>
               <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
                 <Pill color={goalInfo?.color}>{goalInfo?.emoji} {goalInfo?.label}</Pill>
                 <Pill color={bodyInfo?.color}>{bodyInfo?.emoji} {bodyInfo?.sublabel}</Pill>
@@ -3638,6 +3639,18 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
                   <div style={{ display: "flex", gap: 8 }}>
                     {[["male", "Hombre"], ["female", "Mujer"]].map(([v, l]) => (
                       <button key={v} onClick={() => setEditForm(f => ({ ...f, sex: v }))} style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: `1.5px solid ${editForm.sex === v ? "#e84a2e" : "rgba(255,255,255,0.1)"}`, background: editForm.sex === v ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.04)", color: editForm.sex === v ? "#e8a090" : "rgba(255,255,255,0.5)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginBottom: 13 }}>
+                  <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700, display: "block", marginBottom: 8 }}>OBJETIVO</label>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {GOALS.map(g => (
+                      <button key={g.id} onClick={() => setEditForm(f => ({ ...f, goal: g.id }))} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, border: `1.5px solid ${editForm.goal === g.id ? g.color : "rgba(255,255,255,0.1)"}`, background: editForm.goal === g.id ? g.color + "22" : "rgba(255,255,255,0.04)", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left" }}>
+                        <span style={{ fontSize: 18 }}>{g.emoji}</span>
+                        <span style={{ color: editForm.goal === g.id ? "#fff" : "rgba(255,255,255,0.5)", fontWeight: editForm.goal === g.id ? 700 : 500, fontSize: 13 }}>{g.label}</span>
+                        {editForm.goal === g.id && <span style={{ marginLeft: "auto", color: g.color, fontSize: 14, fontWeight: 800 }}>✓</span>}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -3700,13 +3713,28 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
       </div>
 
       {/* Floating coach button */}
-      {isPremium && tab !== "coach" && (
-        <button onClick={() => setTab("coach")} style={{ position: "fixed", bottom: 80, right: 16, width: 56, height: 56, borderRadius: "50%", background: "#e84a2e", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", zIndex: 40, boxShadow: "0 4px 20px rgba(232,74,46,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>💬</button>
+      {tab !== "coach" && (
+        <button onClick={() => isPremium ? setTab("coach") : setShowCoachGate(true)} style={{ position: "fixed", bottom: 80, right: 16, width: 56, height: 56, borderRadius: "50%", background: "#e84a2e", border: "none", color: "#fff", fontSize: 24, cursor: "pointer", zIndex: 40, boxShadow: "0 4px 20px rgba(232,74,46,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>💬</button>
+      )}
+
+      {/* Coach gate modal for non-premium */}
+      {showCoachGate && (
+        <div onClick={() => setShowCoachGate(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 50, backdropFilter: "blur(8px)" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#141416", borderRadius: "22px 22px 0 0", padding: "28px 24px 36px", width: "100%", maxWidth: 520, border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>💬</div>
+              <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 800 }}>Coach Froq Pro</h3>
+              <p style={{ color: "rgba(255,255,255,0.45)", margin: 0, fontSize: 14, lineHeight: 1.6 }}>Coach Froq es exclusivo del plan <strong style={{ color: "#e8a090" }}>Pro</strong> y <strong style={{ color: "#f59e0b" }}>Elite</strong>. Accedé a tu coach personal con IA ilimitado.</p>
+            </div>
+            <button onClick={() => { setShowCoachGate(false); setTab("upgrade"); }} style={{ width: "100%", background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 14, padding: "14px 0", fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10 }}>⭐ Ver planes</button>
+            <button onClick={() => setShowCoachGate(false)} style={{ width: "100%", background: "none", border: "none", color: "rgba(255,255,255,0.3)", fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Cerrar</button>
+          </div>
+        </div>
       )}
 
       {/* Bottom nav */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 520, background: "rgba(8,8,9,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-around", padding: "10px 0 18px" }}>
-        {[["home", "🏠", "Inicio"], ["nutrition", "🥗", "Nutrición"], ["medical", "🧪", "Médico"], ["coach", "💬", "Coach"], ["history", "📊", "Historial"]].map(([id, icon, label]) => (
+        {[["home", "🏋️", "Entreno"], ["nutrition", "🥗", "Nutrición"], ["medical", "🧪", "Médico"], ["history", "📊", "Historial"], ["profile", "👤", "Perfil"]].map(([id, icon, label]) => (
           <button key={id} onClick={() => setTab(id)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, color: tab === id ? "#e8a090" : "rgba(255,255,255,0.3)", fontFamily: "'DM Sans',sans-serif" }}>
             <span style={{ fontSize: 20 }}>{icon}</span>
             <span style={{ fontSize: 10, fontWeight: 700 }}>{label}</span>

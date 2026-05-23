@@ -3324,11 +3324,21 @@ SOLO JSON sin backticks:
                         </div>
                       )}
 
+                      {/* Rest timer button — always available, manual */}
+                      {carEx.rest && (
+                        <button onClick={() => setTimer({ seconds: parseRestSecs(carEx.rest), exIndex: carouselIndex })} style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "10px", color: "rgba(255,255,255,0.55)", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, marginBottom: 10 }}>⏱ Iniciar descanso ({carEx.rest})</button>
+                      )}
+
                       {/* Complete button */}
                       {!carDone ? (
-                        <button onClick={() => { setDone(d => ({ ...d, [carouselIndex]: true })); if (carouselIndex < routine.exercises.length - 1) { setTimer({ seconds: parseRestSecs(carEx.rest), exIndex: carouselIndex }); setCarouselIndex(ci => ci + 1); } }} style={{ width: "100%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", borderRadius: 14, padding: 15, fontWeight: 800, fontSize: 16, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 24px rgba(16,185,129,0.35)" }}>✓ Completar ejercicio</button>
+                        <button onClick={() => setDone(d => ({ ...d, [carouselIndex]: true }))} style={{ width: "100%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", borderRadius: 14, padding: 15, fontWeight: 800, fontSize: 16, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 24px rgba(16,185,129,0.35)" }}>✓ Completar ejercicio</button>
                       ) : (
-                        <div style={{ width: "100%", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 14, padding: 15, fontWeight: 800, fontSize: 16, textAlign: "center" }}>✓ Completado</div>
+                        <div>
+                          <div style={{ width: "100%", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 14, padding: 15, fontWeight: 800, fontSize: 16, textAlign: "center", marginBottom: 8 }}>✓ Completado</div>
+                          {carouselIndex < totalEx - 1 && (
+                            <button onClick={() => setCarouselIndex(ci => ci + 1)} style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.7)", borderRadius: 14, padding: 13, fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Listo para el siguiente →</button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -3363,12 +3373,10 @@ SOLO JSON sin backticks:
                       done={!!done[i]}
                       isSubstituting={substituting === i}
                       alternatives={alternatives[i] || null}
+                      onOpen={() => { setCarouselIndex(i); setShowAllExercises(false); }}
                       onToggle={() => {
                         const nowDone = !done[i];
                         setDone(d => ({ ...d, [i]: nowDone }));
-                        if (nowDone && i < routine.exercises.length - 1) {
-                          setTimer({ seconds: parseRestSecs(ex.rest), exIndex: i });
-                        }
                       }}
                       onVideoClick={() => setSelectedMachine(getMachineData(ex.machine))}
                       onSubstitute={(force) => loadAlternatives(i, force)}

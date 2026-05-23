@@ -283,6 +283,28 @@ const MUSCLE_GROUPS = [
   { id: "surprise", label: "Sorprendeme", emoji: "🎲", muscles: [] },
 ];
 
+const MUSCLE_SECTIONS = [
+  { id: "upper", label: "Tren Superior", muscles: [
+    { id: "Pecho",    name: "Pecho",    subtitle: "Pectoral mayor/menor" },
+    { id: "Espalda",  name: "Espalda",  subtitle: "Dorsal, romboides" },
+    { id: "Hombros",  name: "Hombros",  subtitle: "Deltoides" },
+    { id: "Bíceps",   name: "Bíceps",   subtitle: "Bíceps braquial" },
+    { id: "Tríceps",  name: "Tríceps",  subtitle: "Tríceps braquial" },
+    { id: "Trapecio", name: "Trapecio", subtitle: "Trapecio sup./med." },
+  ]},
+  { id: "lower", label: "Tren Inferior", muscles: [
+    { id: "Cuádriceps", name: "Cuádriceps", subtitle: "Recto femoral, vasto" },
+    { id: "Glúteos",    name: "Glúteos",    subtitle: "Glúteo mayor/medio" },
+    { id: "Femorales",  name: "Femorales",  subtitle: "Isquiotibiales" },
+    { id: "Gemelos",    name: "Gemelos",    subtitle: "Gastrocnemio, sóleo" },
+  ]},
+  { id: "core", label: "Core", muscles: [
+    { id: "Abdomen",  name: "Abdomen",  subtitle: "Recto abdominal" },
+    { id: "Oblicuos", name: "Oblicuos", subtitle: "Oblicuo int./ext." },
+    { id: "Lumbar",   name: "Lumbar",   subtitle: "Erector espinal" },
+  ]},
+];
+
 // ─── PROTEIN FOODS ────────────────────────────────────────────────────────────
 const PROTEIN_FOODS = [
   // unit: "g" = gramos libres | "unit" = contable con nombre
@@ -2845,6 +2867,8 @@ function MainApp({ user, suscripcion, onLogout, onUpgradePlan, onUpdateUser }) {
   const [tip, setTip] = useState(null);
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState(null);
   const [showGroupSelector, setShowGroupSelector] = useState(true);
+  const [selectedMuscles, setSelectedMuscles] = useState([]);
+  const [expandedSection, setExpandedSection] = useState(null);
   const [showCoachGate, setShowCoachGate] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({});
@@ -3218,25 +3242,46 @@ SOLO JSON sin backticks:
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 20 }}>🏋️</span>
                   <span style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>
-                    {selectedMuscleGroup ? MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label : "Elegir grupo muscular"}
+                    {selectedMuscleGroup === "custom" ? (selectedMuscles.length > 0 ? "Personalizado (" + selectedMuscles.length + ")" : "Personalizar") : selectedMuscleGroup ? MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label : "Elegir grupo muscular"}
                   </span>
                 </div>
                 <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>{showGroupSelector ? "▲" : "▼"}</span>
               </button>
 
               {showGroupSelector && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 12 }}>
-                  {MUSCLE_GROUPS.map(g => (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: selectedMuscleGroup === "custom" ? 12 : 0 }}>
+                    {MUSCLE_GROUPS.map(g => (
+                      <button
+                        key={g.id}
+                        onClick={() => {
+                          setSelectedMuscleGroup(g.id);
+                          setShowGroupSelector(false);
+                          generateRoutine(g);
+                        }}
+                        style={{
+                          background: selectedMuscleGroup === g.id ? "linear-gradient(135deg,#e84a2e,#f59e0b)" : "rgba(255,255,255,0.06)",
+                          border: selectedMuscleGroup === g.id ? "1.5px solid #e84a2e" : "1.5px solid rgba(255,255,255,0.08)",
+                          borderRadius: 12,
+                          padding: "10px 8px",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                          fontFamily: "'DM Sans',sans-serif",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 4
+                        }}
+                      >
+                        <div style={{ fontSize: 20 }}>{g.emoji}</div>
+                        <div style={{ color: "#fff", fontSize: 11, fontWeight: selectedMuscleGroup === g.id ? 800 : 600, textAlign: "center", lineHeight: 1.2 }}>{g.label}</div>
+                      </button>
+                    ))}
                     <button
-                      key={g.id}
-                      onClick={() => {
-                        setSelectedMuscleGroup(g.id);
-                        setShowGroupSelector(false);
-                        generateRoutine(g);
-                      }}
+                      onClick={() => setSelectedMuscleGroup(prev => prev === "custom" ? null : "custom")}
                       style={{
-                        background: selectedMuscleGroup === g.id ? "linear-gradient(135deg,#e84a2e,#f59e0b)" : "rgba(255,255,255,0.06)",
-                        border: selectedMuscleGroup === g.id ? "1.5px solid #e84a2e" : "1.5px solid rgba(255,255,255,0.08)",
+                        background: selectedMuscleGroup === "custom" ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.06)",
+                        border: selectedMuscleGroup === "custom" ? "1.5px solid #e84a2e" : "1.5px solid rgba(255,255,255,0.08)",
                         borderRadius: 12,
                         padding: "10px 8px",
                         cursor: "pointer",
@@ -3245,13 +3290,52 @@ SOLO JSON sin backticks:
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
+                        justifyContent: "center",
                         gap: 4
                       }}
                     >
-                      <div style={{ fontSize: 20 }}>{g.emoji}</div>
-                      <div style={{ color: "#fff", fontSize: 11, fontWeight: selectedMuscleGroup === g.id ? 800 : 600, textAlign: "center", lineHeight: 1.2 }}>{g.label}</div>
+                      <div style={{ color: selectedMuscleGroup === "custom" ? "#e8a090" : "rgba(255,255,255,0.55)", fontSize: 11, fontWeight: selectedMuscleGroup === "custom" ? 800 : 600, textAlign: "center", lineHeight: 1.3 }}>
+                        {selectedMuscles.length > 0 && selectedMuscleGroup === "custom" ? selectedMuscles.length + " músc." : "Personalizar"}
+                      </div>
                     </button>
-                  ))}
+                  </div>
+
+                  {selectedMuscleGroup === "custom" && (
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 12 }}>
+                      {MUSCLE_SECTIONS.map(section => (
+                        <div key={section.id} style={{ marginBottom: 8 }}>
+                          <button onClick={() => setExpandedSection(e => e === section.id ? null : section.id)} style={{ width: "100%", background: expandedSection === section.id ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 12px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'DM Sans',sans-serif" }}>
+                            <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 800, letterSpacing: 0.6 }}>{section.label.toUpperCase()}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              {section.muscles.filter(m => selectedMuscles.includes(m.id)).length > 0 && (
+                                <span style={{ background: "rgba(232,74,46,0.2)", color: "#e8a090", fontSize: 10, fontWeight: 700, borderRadius: 4, padding: "2px 6px" }}>{section.muscles.filter(m => selectedMuscles.includes(m.id)).length}</span>
+                              )}
+                              <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{expandedSection === section.id ? "▲" : "▼"}</span>
+                            </div>
+                          </button>
+                          {expandedSection === section.id && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "8px 4px 4px" }}>
+                              {section.muscles.map(m => {
+                                const sel = selectedMuscles.includes(m.id);
+                                return (
+                                  <button key={m.id} onClick={() => setSelectedMuscles(prev => sel ? prev.filter(x => x !== m.id) : [...prev, m.id])} style={{ padding: "6px 12px", borderRadius: 8, border: "1.5px solid " + (sel ? "#e84a2e" : "rgba(255,255,255,0.1)"), background: sel ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.04)", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left" }}>
+                                    <div style={{ color: sel ? "#fff" : "rgba(255,255,255,0.65)", fontWeight: sel ? 700 : 500, fontSize: 12 }}>{m.name}</div>
+                                    <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 10, marginTop: 1 }}>{m.subtitle}</div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {selectedMuscles.length > 0 && (
+                        <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 10, marginTop: 4 }}>
+                          <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, marginBottom: 8 }}>Trabajarás: <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{selectedMuscles.join(", ")}</span></div>
+                          <button onClick={() => { const cg = { id: "custom", label: "Personalizado", muscles: selectedMuscles }; setShowGroupSelector(false); generateRoutine(cg); }} style={{ width: "100%", background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", borderRadius: 12, padding: "12px 0", color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Generar rutina personalizada</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>}

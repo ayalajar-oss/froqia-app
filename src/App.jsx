@@ -1692,7 +1692,7 @@ function ExerciseDetailModal({ ex, index, done, onToggle, onVideoClick, machineD
 }
 
 // ─── SMART EXERCISE CARD — tarjeta compacta que abre el modal ─────────────────
-function SmartExerciseCard({ ex, index, done, onToggle, onVideoClick, onSubstitute, isSubstituting, alternatives, onPickAlternative, onDismissAlternatives }) {
+function SmartExerciseCard({ ex, index, done, onToggle, onVideoClick, onSubstitute, isSubstituting, alternatives, onPickAlternative, onDismissAlternatives, onOpen }) {
   const [showDetail, setShowDetail] = useState(false);
   const machineData = getMachineData(ex.machine);
   const loadingAlts = alternatives === "loading" || isSubstituting;
@@ -3363,7 +3363,6 @@ SOLO JSON sin backticks:
                       done={!!done[i]}
                       isSubstituting={substituting === i}
                       alternatives={alternatives[i] || null}
-                      onOpen={() => { setCarouselIndex(i); setShowAllExercises(false); }}
                       onToggle={() => {
                         const nowDone = !done[i];
                         setDone(d => ({ ...d, [i]: nowDone }));

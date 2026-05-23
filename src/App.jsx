@@ -2555,7 +2555,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   const [rutinas, setRutinas] = useState([]);
   const [progreso, setProgreso] = useState([]);
   const messagesEndRef = useRef(null);
-  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(true);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
 
@@ -2673,11 +2673,14 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
         ? `Progreso de peso (últimas mediciones): ${progreso.slice(0, 4).map(p => p.fecha + ": " + p.peso + "kg").join(", ")}.`
         : "Sin registros de peso aún.";
 
+      const hora = now.getHours();
+      const momentoDia = hora < 12 ? "mañana" : hora < 16 ? "mediodía/tarde temprana" : hora < 20 ? "tarde" : "noche";
+      const comidaSiguiente = hora < 8 ? "desayuno" : hora < 12 ? "almuerzo" : hora < 16 ? "merienda" : hora < 20 ? "cena" : "algo liviano nocturno";
       const groupLine = selectedGroup
-        ? `Grupo muscular de hoy seleccionado: ${selectedGroup.label}.`
-        : "Grupo muscular de hoy: no seleccionado.";
+        ? `Grupo muscular seleccionado hoy: ${selectedGroup.label}. Si pregunta qué entrenar, sugerí ese grupo. Mencioná que puede personalizar tocando '🏋️ Elegir grupo muscular' en el inicio.`
+        : "Grupo muscular de hoy: no seleccionado. Si pregunta qué entrenar, sugerí según historial para evitar repetición. Mencioná que puede personalizar tocando '🏋️ Elegir grupo muscular' en el inicio.";
 
-      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight || user.peso}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine}`;
+      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight || user.peso}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} Hora actual: ${hora}:00 - Es de ${momentoDia}. Próxima comida: ${comidaSiguiente}. Adaptá sugerencias de nutrición al momento del día.`;
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2762,7 +2765,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
       </div>
 
       <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8, scrollbarWidth: "none" }}>
-        {["¿Qué como ahora?", "¿Qué entreno hoy?", "Me duele el hombro", "¿Voy bien esta semana?", "¡Motivame Froq! 🐸"].map(chip => (
+        {["¿Qué como ahora?", "¿Qué entreno hoy? 💪", "Me duele el hombro", "¿Voy bien esta semana?", "¡Motivame Froq! 🐸"].map(chip => (
           <button key={chip} onClick={() => sendMessage(chip)} disabled={loading} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 20, padding: "6px 14px", color: "rgba(255,255,255,0.8)", fontSize: 12, cursor: loading ? "default" : "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans',sans-serif", fontWeight: 600, flexShrink: 0 }}>{chip}</button>
         ))}
       </div>

@@ -3340,6 +3340,11 @@ SOLO JSON sin backticks:
               )}
             </div>}
 
+            {/* Cambiar grupo */}
+            {routine && !loading && (
+              <button onClick={() => { setRoutine(null); setDone({}); setShowGroupSelector(true); }} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.35)", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", padding: "0 0 10px", display: "flex", alignItems: "center", gap: 5 }}>← Cambiar grupo</button>
+            )}
+
             {/* Calentamiento — pregunta si quiere hacer */}
             {!loading && routine?.warmup && <WarmupCard warmup={routine.warmup} />}
 

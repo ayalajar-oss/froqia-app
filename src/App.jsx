@@ -887,7 +887,13 @@ function RegisterScreen({ plan, onBack, onContinue }) {
         </>
       ) : (
         <>
-          <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 4px" }}>Crear tu cuenta</h2>
+          <button onClick={() => { setShowLogin(true); setError(""); }} style={{ width: "100%", padding: "12px 16px", background: "rgba(232,74,46,0.08)", border: "1.5px solid rgba(232,74,46,0.35)", borderRadius: 12, color: "#e84a2e", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 20 }}>¿Ya tenés cuenta? → Iniciá sesión</button>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+            <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, whiteSpace: "nowrap" }}>o creá una cuenta nueva</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+          </div>
+          <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 4px" }}>Crear cuenta nueva</h2>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, margin: "0 0 20px" }}>{plan.trial ? "3 días completos gratis. Cancelás cuando querás." : "Ingresá tus datos para suscribirte."}</p>
           <div style={{ display: "flex", gap: 6, marginBottom: 16, background: "rgba(255,255,255,0.04)", borderRadius: 11, padding: 4 }}>
             {[["email", "📧 Email"], ["phone", "📱 Teléfono"]].map(([v, l]) => (
@@ -905,9 +911,6 @@ function RegisterScreen({ plan, onBack, onContinue }) {
           <Btn onClick={handleSubmit} disabled={loading} variant={plan.trial ? "trial" : "primary"} style={{ width: "100%", marginTop: 20, padding: 15, fontSize: 15 }}>
             {loading ? "Creando cuenta..." : plan.trial ? "🎁 Crear cuenta gratuita →" : "Continuar al pago →"}
           </Btn>
-          <button onClick={() => { setShowLogin(true); setError(""); }} style={{ width: "100%", marginTop: 12, background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 13 }}>
-            ¿Ya tenés cuenta? Iniciar sesión
-          </button>
           <TermsInRegister />
         </>
       )}

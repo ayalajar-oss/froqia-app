@@ -2549,7 +2549,7 @@ SOLO JSON sin backticks ni texto extra:
 }
 
 // ─── COACH SCREEN ─────────────────────────────────────────────────────────────
-function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, setMessages, selectedMuscleGroup }) {
+function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, setMessages, selectedMuscleGroup, routine }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [rutinas, setRutinas] = useState([]);
@@ -2581,8 +2581,12 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
       .replace(/#{1,6}/g, '')
-      .replace(/[🐸💪🔥⚡🎯🏋️🥗🧪💬📊👤]/gu, '')
+      .replace(/[-–—]/g, ', ')
+      .replace(/[🐸💪🔥⚡🎯🏋️🥗🧪💬📊👤🎉✅❌⭐🌟💚💛❤️🧡💙💜🤍🖤💪🦵🍑🏃🎲]/gu, '')
+      .replace(/[\u{1F300}-\u{1FFFF}]/gu, '')
+      .replace(/[^\w\s.,!?¿¡áéíóúüñÁÉÍÓÚÜÑ]/gu, '')
       .replace(/\n+/g, '. ')
+      .replace(/\s+/g, ' ')
       .trim();
     if (!cleanText) return;
     const utt = new SpeechSynthesisUtterance(cleanText);
@@ -2680,7 +2684,11 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
         ? `Grupo muscular seleccionado hoy: ${selectedGroup.label}. Si pregunta qué entrenar, sugerí ese grupo. Mencioná que puede personalizar tocando '🏋️ Elegir grupo muscular' en el inicio.`
         : "Grupo muscular de hoy: no seleccionado. Si pregunta qué entrenar, sugerí según historial para evitar repetición. Mencioná que puede personalizar tocando '🏋️ Elegir grupo muscular' en el inicio.";
 
-      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight || user.peso}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} Hora actual: ${hora}:00 - Es de ${momentoDia}. Próxima comida: ${comidaSiguiente}. Adaptá sugerencias de nutrición al momento del día.`;
+      const routineLine = routine
+        ? `RUTINA ACTIVA DE HOY: ${routine.dayFocus} - Ejercicios: ${routine.exercises?.map(e => e.machine).join(", ")}. Si el usuario pregunta qué entrenar, la respuesta DEBE coincidir exactamente con esta rutina activa.`
+        : `No hay rutina generada aún. Grupo seleccionado: ${selectedMuscleGroup ? MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label : "Sorprendeme"}. Si pregunta qué entrenar, sugerí basándote en el grupo seleccionado o en el historial para evitar repetición.`;
+
+      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight || user.peso}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} ${routineLine} Hora actual: ${hora}:00 - Es de ${momentoDia}. Próxima comida: ${comidaSiguiente}. Adaptá sugerencias de nutrición al momento del día.`;
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3648,6 +3656,7 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
             messages={coachMessages}
             setMessages={setCoachMessages}
             selectedMuscleGroup={selectedMuscleGroup}
+            routine={routine}
           />
         )}
       </div>

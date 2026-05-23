@@ -2549,7 +2549,7 @@ SOLO JSON sin backticks ni texto extra:
 }
 
 // ─── COACH SCREEN ─────────────────────────────────────────────────────────────
-function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, setMessages, selectedMuscleGroup, routine }) {
+function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, setMessages, selectedMuscleGroup, routine, setTab, setSelectedMuscleGroup, setShowGroupSelector, generateRoutine }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [rutinas, setRutinas] = useState([]);
@@ -2558,6 +2558,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+  const [showGoToGroup, setShowGoToGroup] = useState(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -2637,6 +2638,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   const sendMessage = async (chipText) => {
     const content = typeof chipText === "string" ? chipText : input.trim();
     if (!content || loading) return;
+    setShowGoToGroup(null);
     const userMsg = { role: "user", content };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
@@ -2691,7 +2693,7 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
       const w = parseFloat(user.weight || user.peso || 70);
       const supplementsLine = `Sos experto en suplementación deportiva personalizada. Peso del usuario: ${w}kg. CREATINA: ${Math.round(w * 0.07)}g/día (0.07g/kg); carga opcional ${Math.round(w * 0.07 * 4)}g/día x5 días, con agua, cualquier momento. PROTEÍNA WHEY: máx ${Math.round(w * 1.8)}g/día total incluyendo alimentos, no más de 40-50g por toma (exceso sobrecarga renal). BCAA: 5-10g en ayunas o entrenos largos. VITAMINAS clave: D3, Magnesio, Zinc. SIEMPRE aclarás: consultá con médico o nutricionista deportivo antes de empezar suplementación, especialmente con condiciones preexistentes. Nunca recomendás dosis que excedan límites seguros.`;
 
-      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${w}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} ${routineLine} ${supplementsLine} Hora actual: ${hora}:00 - Es de ${momentoDia}. Próxima comida: ${comidaSiguiente}. Adaptá sugerencias de nutrición al momento del día.`;
+      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${w}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} ${routineLine} ${supplementsLine} Hora actual: ${hora}:00 - Es de ${momentoDia}. Próxima comida: ${comidaSiguiente}. Adaptá sugerencias de nutrición al momento del día. IMPORTANTE: Cuando el usuario pregunta qué entrenar hoy o qué grupo muscular hacer, respondé con UN SOLO grupo muscular específico en formato exacto al final de tu mensaje: GRUPO:[id] donde id es uno de: chest_biceps, back_triceps, shoulders, quads, hamstrings_glutes, full_body, core, cardio. Ejemplo: 'Te recomiendo Espalda+Tríceps hoy che! GRUPO:back_triceps'. Solo usá GRUPO:[id] cuando recomendés un grupo muscular específico.`;
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2703,7 +2705,14 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
         })
       });
       const d = await r.json();
-      const text = d.content?.find(b => b.type === "text")?.text || "No pude responder, intentá de nuevo.";
+      let text = d.content?.find(b => b.type === "text")?.text || "No pude responder, intentá de nuevo.";
+      const grupoMatch = text.match(/GRUPO:(\w+)/);
+      if (grupoMatch) {
+        const grupoId = grupoMatch[1];
+        const grupoLabel = MUSCLE_GROUPS.find(g => g.id === grupoId)?.label || grupoId;
+        setShowGoToGroup({ id: grupoId, label: grupoLabel });
+        text = text.replace(/GRUPO:\w+/, '').trim();
+      }
       setMessages(prev => [...prev, { role: "assistant", content: text }]);
       speakText(text, audioEnabled);
     } catch {
@@ -2770,6 +2779,20 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
             <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)", fontSize: 14 }}>
               ✦ Escribiendo…
             </div>
+          </div>
+        )}
+        {showGoToGroup && (
+          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+            <button onClick={() => {
+              const group = MUSCLE_GROUPS.find(g => g.id === showGoToGroup.id);
+              if (setSelectedMuscleGroup) setSelectedMuscleGroup(showGoToGroup.id);
+              if (setShowGroupSelector) setShowGroupSelector(false);
+              if (setTab) setTab('home');
+              if (group && generateRoutine) generateRoutine(group);
+              setShowGoToGroup(null);
+            }} style={{ background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 14, padding: "11px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginLeft: 28 }}>
+              🏋️ Entrenar {showGoToGroup.label} ahora →
+            </button>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -3660,6 +3683,10 @@ console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id:
             setMessages={setCoachMessages}
             selectedMuscleGroup={selectedMuscleGroup}
             routine={routine}
+            setTab={setTab}
+            setSelectedMuscleGroup={setSelectedMuscleGroup}
+            setShowGroupSelector={setShowGroupSelector}
+            generateRoutine={generateRoutine}
           />
         )}
       </div>

@@ -283,28 +283,6 @@ const MUSCLE_GROUPS = [
   { id: "surprise", label: "Sorprendeme", emoji: "🎲", muscles: [] },
 ];
 
-const MUSCLE_SECTIONS = [
-  { id: "upper", label: "Tren Superior", muscles: [
-    { id: "Pecho",    name: "Pecho",    subtitle: "Pectoral mayor/menor" },
-    { id: "Espalda",  name: "Espalda",  subtitle: "Dorsal, romboides" },
-    { id: "Hombros",  name: "Hombros",  subtitle: "Deltoides" },
-    { id: "Bíceps",   name: "Bíceps",   subtitle: "Bíceps braquial" },
-    { id: "Tríceps",  name: "Tríceps",  subtitle: "Tríceps braquial" },
-    { id: "Trapecio", name: "Trapecio", subtitle: "Trapecio sup./med." },
-  ]},
-  { id: "lower", label: "Tren Inferior", muscles: [
-    { id: "Cuádriceps", name: "Cuádriceps", subtitle: "Recto femoral, vasto" },
-    { id: "Glúteos",    name: "Glúteos",    subtitle: "Glúteo mayor/medio" },
-    { id: "Femorales",  name: "Femorales",  subtitle: "Isquiotibiales" },
-    { id: "Gemelos",    name: "Gemelos",    subtitle: "Gastrocnemio, sóleo" },
-  ]},
-  { id: "core", label: "Core", muscles: [
-    { id: "Abdomen",  name: "Abdomen",  subtitle: "Recto abdominal" },
-    { id: "Oblicuos", name: "Oblicuos", subtitle: "Oblicuo int./ext." },
-    { id: "Lumbar",   name: "Lumbar",   subtitle: "Erector espinal" },
-  ]},
-];
-
 // ─── PROTEIN FOODS ────────────────────────────────────────────────────────────
 const PROTEIN_FOODS = [
   // unit: "g" = gramos libres | "unit" = contable con nombre
@@ -2915,10 +2893,6 @@ useEffect(() => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [swipeStartX, setSwipeStartX] = useState(null);
   const [coachMessages, setCoachMessages] = useState([]);
-  const [selectorMode, setSelectorMode] = useState("quick");
-  const [selectedMuscles, setSelectedMuscles] = useState([]);
-  const [expandedSection, setExpandedSection] = useState(null);
-  const [lastGroup, setLastGroup] = useState(null);
 
   const goalInfo = GOALS.find(g => g.id === user.goal);
   const bodyInfo = BODY_TYPES.find(b => b.id === user.bodyType);
@@ -2934,8 +2908,6 @@ useEffect(() => {
   const _sow = (() => { const d = new Date(); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1)); d.setHours(0,0,0,0); return d; })();
   const _trainedLabels = new Set(history.filter(h => { const p = (h.date||'').split('T')[0].split('-').map(Number); return new Date(p[0],p[1]-1,p[2]) >= _sow; }).flatMap(h => h.muscles||[]).map(x => x.toLowerCase()));
   const nextMuscleLabel = MUSCLE_GROUPS.filter(g => ["chest_biceps","back_triceps","shoulders","quads","hamstrings_glutes"].includes(g.id)).find(g => !_trainedLabels.has(g.label.toLowerCase()))?.label || null;
-  const _recentMuscles = new Set(history.slice(-5).flatMap(h => h.muscles || []));
-  const suggestedGroupId = MUSCLE_GROUPS.find(g => !["full_body","cardio","surprise"].includes(g.id) && g.muscles.length > 0 && !g.muscles.some(m => _recentMuscles.has(m)))?.id || null;
   const dayName = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"][new Date().getDay()];
   const greeting = new Date().getHours() < 12 ? "Buenos días" : new Date().getHours() < 19 ? "Buenas tardes" : "Buenas noches";
   const today = new Date();
@@ -2974,7 +2946,6 @@ useEffect(() => {
   }
 
   async function generateRoutine(group = null) {
-    setLastGroup(group);
     setLoading(true); setDone({}); setShowAllExercises(true); setCarouselIndex(0);
     try {
       const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
@@ -3228,87 +3199,62 @@ SOLO JSON sin backticks:
 
 {!routine && <WeeklyDashboard history={history} nextMuscle={nextMuscleLabel} />}
 
-            {/* ── Group selector ─────────────────────────────────────────── */}
-            {!routine && (
-              <div style={{ ...card, padding: "14px 16px", marginBottom: 12 }}>
-                <button onClick={() => setShowGroupSelector(!showGroupSelector)} style={{ width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: showGroupSelector ? 14 : 0 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "rgba(255,255,255,0.4)", letterSpacing: 0.8 }}>GRUPO MUSCULAR</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    {selectorMode === "quick" && selectedMuscleGroup && <span style={{ color: "#e8a090", fontSize: 12, fontWeight: 700 }}>{MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label}</span>}
-                    {selectorMode === "customize" && selectedMuscles.length > 0 && <span style={{ color: "#e8a090", fontSize: 12, fontWeight: 700 }}>Personalizado ({selectedMuscles.length})</span>}
-                    <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>{showGroupSelector ? "▲" : "▼"}</span>
-                  </div>
-                </button>
-
-                {showGroupSelector && (
-                  <div>
-                    {suggestedGroupId && (
-                      <button onClick={() => { const g = MUSCLE_GROUPS.find(x => x.id === suggestedGroupId); setSelectedMuscleGroup(suggestedGroupId); setSelectorMode("quick"); setSelectedMuscles([]); setShowGroupSelector(false); generateRoutine(g); }} style={{ width: "100%", background: "rgba(232,74,46,0.07)", border: "1.5px dashed rgba(232,74,46,0.4)", borderRadius: 10, padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ fontSize: 18 }}>🐸</span>
-                          <div style={{ textAlign: "left" }}>
-                            <div style={{ color: "#fff", fontSize: 13, fontWeight: 700 }}>{MUSCLE_GROUPS.find(g => g.id === suggestedGroupId)?.label}</div>
-                            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>Sugerido por Froq</div>
-                          </div>
-                        </div>
-                        <span style={{ background: "rgba(232,74,46,0.18)", color: "#e8a090", fontSize: 11, fontWeight: 700, borderRadius: 6, padding: "3px 8px" }}>Generar →</span>
-                      </button>
-                    )}
-
-                    <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                      <button onClick={() => { setSelectedMuscleGroup(null); setSelectorMode("quick"); setSelectedMuscles([]); setShowGroupSelector(false); generateRoutine(null); }} style={{ flex: 1, padding: "11px 4px", borderRadius: 10, border: "1.5px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.7)", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>🎲 Sorprendeme</button>
-                      <button onClick={() => { const g = MUSCLE_GROUPS.find(x => x.id === "full_body"); setSelectedMuscleGroup("full_body"); setSelectorMode("quick"); setSelectedMuscles([]); setShowGroupSelector(false); generateRoutine(g); }} style={{ flex: 1, padding: "11px 4px", borderRadius: 10, border: "1.5px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.7)", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>⚡ Full Body</button>
-                      <button onClick={() => setSelectorMode(m => m === "customize" ? "quick" : "customize")} style={{ flex: 1, padding: "11px 4px", borderRadius: 10, border: "1.5px solid " + (selectorMode === "customize" ? "#e84a2e" : "rgba(255,255,255,0.1)"), background: selectorMode === "customize" ? "rgba(232,74,46,0.12)" : "rgba(255,255,255,0.04)", color: selectorMode === "customize" ? "#e8a090" : "rgba(255,255,255,0.7)", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Personalizar {selectorMode === "customize" ? "▲" : "▼"}</button>
-                    </div>
-
-                    {selectorMode === "customize" && (
-                      <div>
-                        {MUSCLE_SECTIONS.map(section => (
-                          <div key={section.id} style={{ marginBottom: 8 }}>
-                            <button onClick={() => setExpandedSection(e => e === section.id ? null : section.id)} style={{ width: "100%", background: expandedSection === section.id ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "9px 12px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'DM Sans',sans-serif" }}>
-                              <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: 700 }}>{section.label}</span>
-                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                {section.muscles.filter(m => selectedMuscles.includes(m.id)).length > 0 && (
-                                  <span style={{ background: "rgba(232,74,46,0.2)", color: "#e8a090", fontSize: 10, fontWeight: 700, borderRadius: 4, padding: "2px 6px" }}>{section.muscles.filter(m => selectedMuscles.includes(m.id)).length}</span>
-                                )}
-                                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}>{expandedSection === section.id ? "▲" : "▼"}</span>
-                              </div>
-                            </button>
-                            {expandedSection === section.id && (
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "10px 4px 4px" }}>
-                                {section.muscles.map(m => {
-                                  const sel = selectedMuscles.includes(m.id);
-                                  return (
-                                    <button key={m.id} onClick={() => setSelectedMuscles(prev => sel ? prev.filter(x => x !== m.id) : [...prev, m.id])} style={{ padding: "7px 12px", borderRadius: 8, border: "1.5px solid " + (sel ? "#e84a2e" : "rgba(255,255,255,0.1)"), background: sel ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.04)", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", textAlign: "left" }}>
-                                      <div style={{ color: sel ? "#fff" : "rgba(255,255,255,0.65)", fontWeight: sel ? 700 : 500, fontSize: 12 }}>{m.name}</div>
-                                      <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 10, marginTop: 1 }}>{m.subtitle}</div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {selectedMuscles.length > 0 && (
-                          <div style={{ marginTop: 8, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10 }}>
-                            <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, marginBottom: 8 }}>Trabajarás: <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{selectedMuscles.join(", ")}</span></div>
-                            <button onClick={() => { const cg = { id: "custom", label: selectedMuscles.join(" + "), muscles: selectedMuscles }; setSelectedMuscleGroup("custom"); setShowGroupSelector(false); generateRoutine(cg); }} style={{ width: "100%", background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", borderRadius: 12, padding: "13px 0", color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>Generar rutina →</button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ── Regenerar (when routine active) ─────────────────────────── */}
-            {routine && !loading && (
-              <button onClick={() => { setRoutine(null); generateRoutine(lastGroup); }} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 10, padding: "9px 14px", color: "rgba(255,255,255,0.45)", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 12, width: "100%" }}>
-                <span>🔄</span><span>Regenerar rutina</span>
-                <span style={{ marginLeft: "auto", fontSize: 11, color: "rgba(255,255,255,0.25)" }}>{lastGroup?.label || "Sorprendeme"}</span>
+            {!routine && <div style={{ ...card, padding: "14px 16px", marginBottom: 12 }}>
+              <button
+                onClick={() => setShowGroupSelector(!showGroupSelector)}
+                style={{
+                  width: "100%",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1.5px solid rgba(255,255,255,0.08)",
+                  borderRadius: 12,
+                  padding: "12px 16px",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans',sans-serif",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 20 }}>🏋️</span>
+                  <span style={{ color: "#fff", fontSize: 14, fontWeight: 700 }}>
+                    {selectedMuscleGroup ? MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label : "Elegir grupo muscular"}
+                  </span>
+                </div>
+                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>{showGroupSelector ? "▲" : "▼"}</span>
               </button>
-            )}
+
+              {showGroupSelector && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginTop: 12 }}>
+                  {MUSCLE_GROUPS.map(g => (
+                    <button
+                      key={g.id}
+                      onClick={() => {
+                        setSelectedMuscleGroup(g.id);
+                        setShowGroupSelector(false);
+                        generateRoutine(g);
+                      }}
+                      style={{
+                        background: selectedMuscleGroup === g.id ? "linear-gradient(135deg,#e84a2e,#f59e0b)" : "rgba(255,255,255,0.06)",
+                        border: selectedMuscleGroup === g.id ? "1.5px solid #e84a2e" : "1.5px solid rgba(255,255,255,0.08)",
+                        borderRadius: 12,
+                        padding: "10px 8px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        fontFamily: "'DM Sans',sans-serif",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 4
+                      }}
+                    >
+                      <div style={{ fontSize: 20 }}>{g.emoji}</div>
+                      <div style={{ color: "#fff", fontSize: 11, fontWeight: selectedMuscleGroup === g.id ? 800 : 600, textAlign: "center", lineHeight: 1.2 }}>{g.label}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>}
 
             {/* Calentamiento — pregunta si quiere hacer */}
             {!loading && routine?.warmup && <WarmupCard warmup={routine.warmup} />}

@@ -2578,12 +2578,14 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
     if (!enabled || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const cleanText = text
-      .replace(/\*\*/g, '')
+      .replace(/\bEy\b/gi, 'Eh')
+      .replace(/\bOk\b/gi, 'okey')
+      .replace(/\bOK\b/g, 'okey')
       .replace(/\*/g, '')
-      .replace(/#{1,6}/g, '')
+      .replace(/\*\*/g, '')
+      .replace(/#{1,6}\s/g, '')
       .replace(/[-–—]/g, ', ')
-      .replace(/[🐸💪🔥⚡🎯🏋️🥗🧪💬📊👤🎉✅❌⭐🌟💚💛❤️🧡💙💜🤍🖤💪🦵🍑🏃🎲]/gu, '')
-      .replace(/[\u{1F300}-\u{1FFFF}]/gu, '')
+      .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
       .replace(/[^\w\s.,!?¿¡áéíóúüñÁÉÍÓÚÜÑ]/gu, '')
       .replace(/\n+/g, '. ')
       .replace(/\s+/g, ' ')
@@ -2684,11 +2686,12 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
         ? `Grupo muscular seleccionado hoy: ${selectedGroup.label}. Si pregunta qué entrenar, sugerí ese grupo. Mencioná que puede personalizar tocando '🏋️ Elegir grupo muscular' en el inicio.`
         : "Grupo muscular de hoy: no seleccionado. Si pregunta qué entrenar, sugerí según historial para evitar repetición. Mencioná que puede personalizar tocando '🏋️ Elegir grupo muscular' en el inicio.";
 
-      const routineLine = routine
-        ? `RUTINA ACTIVA DE HOY: ${routine.dayFocus} - Ejercicios: ${routine.exercises?.map(e => e.machine).join(", ")}. Si el usuario pregunta qué entrenar, la respuesta DEBE coincidir exactamente con esta rutina activa.`
-        : `No hay rutina generada aún. Grupo seleccionado: ${selectedMuscleGroup ? MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label : "Sorprendeme"}. Si pregunta qué entrenar, sugerí basándote en el grupo seleccionado o en el historial para evitar repetición.`;
+      const routineLine = `RUTINA ACTIVA AHORA: ${routine?.dayFocus || 'No generada'}. Ejercicios: ${routine?.exercises?.map(e => e.machine + ' (' + e.muscle + ')').join(' | ') || 'ninguno'}. Grupo elegido: ${MUSCLE_GROUPS.find(g => g.id === selectedMuscleGroup)?.label || 'Sorprendeme'}. Si preguntan qué entrenar, respondé EXACTAMENTE con estos ejercicios.`;
 
-      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${user.weight || user.peso}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} ${routineLine} Hora actual: ${hora}:00 - Es de ${momentoDia}. Próxima comida: ${comidaSiguiente}. Adaptá sugerencias de nutrición al momento del día.`;
+      const w = parseFloat(user.weight || user.peso || 70);
+      const supplementsLine = `Sos experto en suplementación deportiva personalizada. Peso del usuario: ${w}kg. CREATINA: ${Math.round(w * 0.07)}g/día (0.07g/kg); carga opcional ${Math.round(w * 0.07 * 4)}g/día x5 días, con agua, cualquier momento. PROTEÍNA WHEY: máx ${Math.round(w * 1.8)}g/día total incluyendo alimentos, no más de 40-50g por toma (exceso sobrecarga renal). BCAA: 5-10g en ayunas o entrenos largos. VITAMINAS clave: D3, Magnesio, Zinc. SIEMPRE aclarás: consultá con médico o nutricionista deportivo antes de empezar suplementación, especialmente con condiciones preexistentes. Nunca recomendás dosis que excedan límites seguros.`;
+
+      const systemPrompt = `Sos Froq, el coach personal de FROQIA. Sos una rana fitness experta, motivadora y con buen humor. Hablás en español rioplatense con toques paraguayos ocasionales (ej: 'che', 'mba'e', expresiones de aliento). Celebrás cada logro con entusiasmo y animás al usuario cuando falla sin juzgarlo nunca. Sos conciso, directo y siempre positivo. Tu cliente es ${user.nombre}, ${user.age} años, ${w}kg, objetivo: ${goalInfo?.label}, meta proteína: ${daily}g/día. ${histLine} ${adherenciaLine} ${pesoLine} ${groupLine} ${routineLine} ${supplementsLine} Hora actual: ${hora}:00 - Es de ${momentoDia}. Próxima comida: ${comidaSiguiente}. Adaptá sugerencias de nutrición al momento del día.`;
       const r = await fetch("/.netlify/functions/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -2565,6 +2565,10 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
   }, [messages]);
 
   useEffect(() => {
+    return () => { if (window.speechSynthesis) window.speechSynthesis.cancel(); };
+  }, []);
+
+  useEffect(() => {
     const uid = user.id || user._supabaseUser?.id;
     if (!uid) return;
     supabaseCall("getRutinas", { user_id: uid }).then(res => {
@@ -2709,8 +2713,13 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
       const grupoMatch = text.match(/GRUPO:(\w+)/);
       if (grupoMatch) {
         const grupoId = grupoMatch[1];
-        const grupoLabel = MUSCLE_GROUPS.find(g => g.id === grupoId)?.label || grupoId;
-        setShowGoToGroup({ id: grupoId, label: grupoLabel });
+        const group = MUSCLE_GROUPS.find(g => g.id === grupoId);
+        const grupoLabel = group?.label || grupoId;
+        if (setSelectedMuscleGroup) setSelectedMuscleGroup(grupoId);
+        if (setShowGroupSelector) setShowGroupSelector(false);
+        if (setTab) setTab('home');
+        if (group && generateRoutine) generateRoutine(group);
+        setShowGoToGroup({ id: grupoId, label: grupoLabel, ready: true });
         text = text.replace(/GRUPO:\w+/, '').trim();
       }
       setMessages(prev => [...prev, { role: "assistant", content: text }]);
@@ -2784,14 +2793,10 @@ function CoachScreen({ user, goalInfo, daily, isPremium, onUpgrade, messages, se
         {showGoToGroup && (
           <div style={{ display: "flex", justifyContent: "flex-start" }}>
             <button onClick={() => {
-              const group = MUSCLE_GROUPS.find(g => g.id === showGoToGroup.id);
-              if (setSelectedMuscleGroup) setSelectedMuscleGroup(showGoToGroup.id);
-              if (setShowGroupSelector) setShowGroupSelector(false);
               if (setTab) setTab('home');
-              if (group && generateRoutine) generateRoutine(group);
               setShowGoToGroup(null);
-            }} style={{ background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 14, padding: "11px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginLeft: 28 }}>
-              🏋️ Entrenar {showGoToGroup.label} ahora →
+            }} style={{ background: showGoToGroup.ready ? "linear-gradient(135deg,#22a86e,#1a8a5a)" : "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 14, padding: "11px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginLeft: 28 }}>
+              {showGoToGroup.ready ? `✅ Rutina generada - Ver en inicio →` : `🏋️ Entrenar ${showGoToGroup.label} ahora →`}
             </button>
           </div>
         )}

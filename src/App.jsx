@@ -1244,8 +1244,7 @@ function getDailyQuote() {
 function WeeklyDashboard({ history, nextMuscle }) {
   const today = new Date();
   const todayIdx = today.getDay() === 0 ? 6 : today.getDay() - 1;
-  const ayerIdx = todayIdx === 0 ? 6 : todayIdx - 1;
-  const [selectedDay, setSelectedDay] = useState(ayerIdx);
+  const [selectedDay, setSelectedDay] = useState(null);
 
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - todayIdx);
@@ -1270,6 +1269,7 @@ function WeeklyDashboard({ history, nextMuscle }) {
   const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
   const rutinasDeDia = selectedDay !== null ? thisWeek.filter(h => getDateIdx(h) === selectedDay) : [];
+  const isExpanded = selectedDay !== null;
 
   return (
     <div style={{ ...card, padding: "14px 16px", marginBottom: 12, background: "linear-gradient(135deg,rgba(232,74,46,0.06),rgba(245,158,11,0.03))", borderColor: "rgba(232,74,46,0.15)" }}>
@@ -1283,7 +1283,7 @@ function WeeklyDashboard({ history, nextMuscle }) {
           {nextMuscle && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}>Sig: {nextMuscle}</div>}
         </div>
       </div>
-      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+      <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
         {diasSemana.map((dia, i) => {
           const entrenado = diasEntrenados.has(i);
           const esHoy = todayIdx === i;
@@ -1291,20 +1291,23 @@ function WeeklyDashboard({ history, nextMuscle }) {
           return (
             <div key={dia} onClick={() => setSelectedDay(prev => prev === i ? null : i)} style={{ flex: 1, textAlign: "center", cursor: "pointer" }}>
               <div style={{ fontSize: 10, color: esHoy ? "#e84a2e" : seleccionado ? "#fff" : "rgba(255,255,255,0.3)", fontWeight: seleccionado ? 800 : 500, marginBottom: 4 }}>{dia}</div>
-              <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: entrenado ? "#10b981" : seleccionado ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${entrenado ? "#10b981" : seleccionado ? "#e84a2e" : esHoy ? "#e84a2e44" : "rgba(255,255,255,0.08)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", transition: "all 0.2s" }}>
+              <div style={{ width: "100%", aspectRatio: "1", borderRadius: 8, background: entrenado ? "#10b981" : seleccionado ? "rgba(232,74,46,0.15)" : "rgba(255,255,255,0.06)", border: `1.5px solid ${entrenado ? (seleccionado ? "#0d9668" : "#10b981") : seleccionado ? "#e84a2e" : esHoy ? "#e84a2e44" : "rgba(255,255,255,0.08)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#fff", transition: "all 0.2s" }}>
                 {entrenado ? "✓" : esHoy ? "●" : ""}
+              </div>
+              <div style={{ height: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {entrenado && <span style={{ fontSize: 8, color: seleccionado ? "#10b981" : "rgba(255,255,255,0.2)", transition: "color 0.2s, transform 0.2s", display: "inline-block", transform: seleccionado ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>}
               </div>
             </div>
           );
         })}
       </div>
-      {selectedDay !== null && (
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10 }}>
+      <div style={{ overflow: "hidden", maxHeight: isExpanded ? 400 : 0, opacity: isExpanded ? 1 : 0, transition: "max-height 0.28s ease, opacity 0.2s ease" }}>
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10, paddingBottom: 2 }}>
           <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, fontWeight: 700, marginBottom: 8 }}>
-            {diasSemana[selectedDay].toUpperCase()}
+            {selectedDay !== null ? diasSemana[selectedDay].toUpperCase() : ""}
           </div>
           {rutinasDeDia.length === 0 ? (
-            <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 13 }}>
+            <div style={{ color: "rgba(255,255,255,0.25)", fontSize: 13, paddingBottom: 6 }}>
               {selectedDay === todayIdx ? "Aún no entrenaste hoy 💪" : "Sin entrenamiento este día"}
             </div>
           ) : (
@@ -1315,13 +1318,13 @@ function WeeklyDashboard({ history, nextMuscle }) {
                     <div style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>{r.focus || r.nombre}</div>
                     <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 2 }}>{r.grupo_muscular || (r.muscles || [])[0]} · {r.ejercicios || r.completed} ejercicios</div>
                   </div>
-                  <div style={{ color: "#10b981", fontWeight: 800, fontSize: 13 }}>✓</div>
+                  <div style={{ color: "#10b981", fontWeight: 800, fontSize: 16 }}>✓</div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

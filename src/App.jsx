@@ -1718,7 +1718,7 @@ function SmartExerciseCard({ ex, index, done, onToggle, onVideoClick, onSubstitu
       )}
 
       {/* Compact card */}
-      <div onClick={() => setShowDetail(true)} style={{ padding: "13px 14px", borderRadius: 13, cursor: "pointer", background: done ? "rgba(16,185,129,0.07)" : "rgba(255,255,255,0.03)", border: `1.5px solid ${done ? "rgba(16,185,129,0.28)" : "rgba(255,255,255,0.07)"}`, opacity: done ? 0.75 : 1, transition: "all 0.2s", display: "flex", alignItems: "center", gap: 12 }}>
+      <div onClick={() => onOpen ? onOpen() : setShowDetail(true)} style={{ padding: "13px 14px", borderRadius: 13, cursor: "pointer", background: done ? "rgba(16,185,129,0.07)" : "rgba(255,255,255,0.03)", border: `1.5px solid ${done ? "rgba(16,185,129,0.28)" : "rgba(255,255,255,0.07)"}`, opacity: done ? 0.75 : 1, transition: "all 0.2s", display: "flex", alignItems: "center", gap: 12 }}>
 
         {/* Check */}
         <div onClick={e => { e.stopPropagation(); onToggle(); }} style={{ width: 30, height: 30, borderRadius: 9, flexShrink: 0, background: done ? "#10b981" : "rgba(232,74,46,0.1)", border: `2px solid ${done ? "#10b981" : "#e84a2e44"}`, display: "flex", alignItems: "center", justifyContent: "center", color: done ? "#fff" : "#e8a090", fontWeight: 800, fontSize: 13, transition: "all 0.2s" }}>
@@ -2844,6 +2844,8 @@ useEffect(() => {
   // Alternatives panel — { [exIndex]: [{machine,muscle,sets,reps,rest,tip,weight_suggestion}] | "loading" | null }
   const [alternatives, setAlternatives] = useState({});
   const [showAllExercises, setShowAllExercises] = useState(true);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [swipeStartX, setSwipeStartX] = useState(null);
   const [coachMessages, setCoachMessages] = useState([]);
 
   const goalInfo = GOALS.find(g => g.id === user.goal);
@@ -2898,7 +2900,7 @@ useEffect(() => {
   }
 
   async function generateRoutine(group = null) {
-    setLoading(true); setDone({});
+    setLoading(true); setDone({}); setShowAllExercises(true); setCarouselIndex(0);
     try {
       const equipment = ALL_EQUIPMENT.filter(m => (user.machines || []).includes(m.id));
       const warmupExtras = WARMUP_EXTRAS.filter(e => (user.machines || []).includes(e.id));
@@ -3213,32 +3215,67 @@ SOLO JSON sin backticks:
 
             {/* Focus mode: progress bar + toggle */}
             {routine && !loading && (
-              <div style={{ marginBottom: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700 }}>{doneCount}/{totalEx} ejercicios</div>
-                  <button onClick={() => setShowAllExercises(v => !v)} style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "rgba(255,255,255,0.7)", borderRadius: 8, padding: "4px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 700 }}>{showAllExercises ? "🎯 Modo foco" : "Ver todos ▼"}</button>
-                </div>
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ marginBottom: 8 }}><div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 700 }}>{doneCount}/{totalEx} ejercicios</div></div>
                 <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
                   <div style={{ height: "100%", background: "linear-gradient(90deg,#e84a2e,#f59e0b)", borderRadius: 2, width: `${totalEx > 0 ? Math.round((doneCount / totalEx) * 100) : 0}%`, transition: "width 0.4s" }} />
                 </div>
               </div>
             )}
-            {routine && !loading && !showAllExercises && (currentEx ? (
-              <div style={{ ...card, padding: "24px 20px", textAlign: "center", marginBottom: 12, borderColor: "rgba(232,74,46,0.25)", background: "rgba(232,74,46,0.06)" }}>
-                <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, fontWeight: 700, letterSpacing: 1, marginBottom: 8 }}>EJERCICIO {currentExIndex + 1} / {totalEx}</div>
-                <div style={{ fontWeight: 800, fontSize: 24, lineHeight: 1.2, marginBottom: 10 }}>{currentEx.machine}</div>
-                <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 18, fontWeight: 600, marginBottom: 6 }}>{currentEx.sets} × {currentEx.reps}</div>
-                {currentEx.rest && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginBottom: 24 }}>Descanso: {currentEx.rest}</div>}
-                <button onClick={() => { setDone(d => ({ ...d, [currentExIndex]: true })); if (currentExIndex < routine.exercises.length - 1) setTimer({ seconds: parseRestSecs(currentEx.rest), exIndex: currentExIndex }); }} style={{ width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", fontSize: 36, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 28px rgba(16,185,129,0.45)" }}>✓</button>
-                {currentEx.tip && <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginTop: 16, fontStyle: "italic", lineHeight: 1.5 }}>{currentEx.tip}</div>}
-              </div>
-            ) : doneCount === totalEx && totalEx > 0 ? (
-              <div style={{ textAlign: "center", padding: "28px 0 16px" }}>
-                <div style={{ fontSize: 48, marginBottom: 8 }}>🏆</div>
-                <div style={{ fontWeight: 800, fontSize: 20 }}>¡Todos completados!</div>
-                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 6 }}>Podés finalizar tu sesión</div>
-              </div>
-            ) : null)}
+            {routine && !loading && !showAllExercises && (() => {
+              const carEx = routine.exercises[carouselIndex];
+              if (!carEx) return null;
+              const carDone = !!done[carouselIndex];
+              return (
+                <div>
+                  {/* Carousel header: back + dots + counter */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                    <button onClick={() => setShowAllExercises(true)} style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "rgba(255,255,255,0.7)", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 700 }}>☰ Ver plan</button>
+                    <div style={{ display: "flex", gap: 4, alignItems: "center", flex: 1, justifyContent: "center", paddingLeft: 8, paddingRight: 8, overflow: "hidden" }}>
+                      {routine.exercises.map((_, di) => (
+                        <div key={di} onClick={() => setCarouselIndex(di)} style={{ width: di === carouselIndex ? 18 : 7, height: 7, borderRadius: 4, background: done[di] ? "#10b981" : di === carouselIndex ? "#e84a2e" : "rgba(255,255,255,0.15)", cursor: "pointer", transition: "all 0.2s", flexShrink: 0 }} />
+                      ))}
+                    </div>
+                    <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, fontWeight: 700 }}>{carouselIndex + 1}/{totalEx}</div>
+                  </div>
+
+                  {/* Swipeable exercise card */}
+                  <div
+                    onTouchStart={e => setSwipeStartX(e.touches[0].clientX)}
+                    onTouchEnd={e => {
+                      if (swipeStartX === null) return;
+                      const diff = swipeStartX - e.changedTouches[0].clientX;
+                      if (diff > 40 && carouselIndex < totalEx - 1) setCarouselIndex(ci => ci + 1);
+                      if (diff < -40 && carouselIndex > 0) setCarouselIndex(ci => ci - 1);
+                      setSwipeStartX(null);
+                    }}
+                  >
+                    <div style={{ ...card, padding: "28px 20px", textAlign: "center", borderColor: carDone ? "rgba(16,185,129,0.35)" : "rgba(232,74,46,0.3)", background: carDone ? "rgba(16,185,129,0.08)" : "rgba(232,74,46,0.05)", minHeight: 260, transition: "background 0.25s, border-color 0.25s" }}>
+                      {carDone && <div style={{ color: "#10b981", fontSize: 11, fontWeight: 800, letterSpacing: 0.5, marginBottom: 8 }}>✓ COMPLETADO</div>}
+                      <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>EJERCICIO {carouselIndex + 1} / {totalEx}</div>
+                      <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1.2, marginBottom: 12 }}>{carEx.machine}</div>
+                      <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 20, fontWeight: 600, marginBottom: 6 }}>{carEx.sets} × {carEx.reps}</div>
+                      {carEx.weight_suggestion && <div style={{ color: "#f59e0b", fontSize: 14, fontWeight: 600, marginBottom: 6 }}>🏋️ {carEx.weight_suggestion}</div>}
+                      {carEx.rest && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginBottom: 20 }}>⏱ Descanso: {carEx.rest}</div>}
+                      {!carDone ? (
+                        <button onClick={() => { setDone(d => ({ ...d, [carouselIndex]: true })); if (carouselIndex < routine.exercises.length - 1) { setTimer({ seconds: parseRestSecs(carEx.rest), exIndex: carouselIndex }); setCarouselIndex(ci => ci + 1); } }} style={{ width: 88, height: 88, borderRadius: "50%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", fontSize: 38, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 32px rgba(16,185,129,0.45)" }}>✓</button>
+                      ) : (
+                        <div style={{ width: 88, height: 88, borderRadius: "50%", background: "rgba(16,185,129,0.15)", border: "2px solid rgba(16,185,129,0.4)", color: "#10b981", fontSize: 38, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>✓</div>
+                      )}
+                      {carEx.tip && <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, fontStyle: "italic", lineHeight: 1.5, marginTop: 14 }}>{carEx.tip}</div>}
+                    </div>
+                  </div>
+
+                  {/* Prev / Next navigation */}
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
+                    <button onClick={() => { if (carouselIndex > 0) setCarouselIndex(ci => ci - 1); }} disabled={carouselIndex === 0} style={{ background: "rgba(255,255,255,0.07)", border: "none", color: carouselIndex === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)", borderRadius: 10, padding: "8px 16px", fontSize: 13, cursor: carouselIndex === 0 ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 700 }}>← Anterior</button>
+                    {carouselIndex < totalEx - 1 ? (
+                      <button onClick={() => setCarouselIndex(ci => ci + 1)} style={{ background: "rgba(255,255,255,0.07)", border: "none", color: "rgba(255,255,255,0.7)", borderRadius: 10, padding: "8px 16px", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 700 }}>Siguiente →</button>
+                    ) : <div />}
+                  </div>
+                </div>
+              );
+            })()}
 
             {loading ? (
               <div style={{ textAlign: "center", padding: 48 }}>
@@ -3246,28 +3283,34 @@ SOLO JSON sin backticks:
                 <div style={{ color: "rgba(255,255,255,0.35)" }}>Preparando tu rutina...</div>
               </div>
             ) : (showAllExercises || !routine) ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                {routine?.exercises?.map((ex, i) => (
-                  <SmartExerciseCard
-                    key={`${i}-${ex.machine}`}
-                    ex={ex}
-                    index={i}
-                    done={!!done[i]}
-                    isSubstituting={substituting === i}
-                    alternatives={alternatives[i] || null}
-                    onToggle={() => {
-                      const nowDone = !done[i];
-                      setDone(d => ({ ...d, [i]: nowDone }));
-                      if (nowDone && i < routine.exercises.length - 1) {
-                        setTimer({ seconds: parseRestSecs(ex.rest), exIndex: i });
-                      }
-                    }}
-                    onVideoClick={() => setSelectedMachine(getMachineData(ex.machine))}
-                    onSubstitute={(force) => loadAlternatives(i, force)}
-                    onPickAlternative={(alt) => pickAlternative(i, alt)}
-                    onDismissAlternatives={() => setAlternatives(a => ({ ...a, [i]: null }))}
-                  />
-                ))}
+              <div>
+                {routine && (
+                  <button onClick={() => { const first = routine.exercises.findIndex((_, fi) => !done[fi]); setCarouselIndex(first >= 0 ? first : 0); setShowAllExercises(false); }} style={{ width: "100%", background: "linear-gradient(135deg,#e84a2e,#c53d25)", border: "none", color: "#fff", borderRadius: 12, padding: 13, fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>▶ Iniciar entrenamiento</button>
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                  {routine?.exercises?.map((ex, i) => (
+                    <SmartExerciseCard
+                      key={`${i}-${ex.machine}`}
+                      ex={ex}
+                      index={i}
+                      done={!!done[i]}
+                      isSubstituting={substituting === i}
+                      alternatives={alternatives[i] || null}
+                      onOpen={() => { setCarouselIndex(i); setShowAllExercises(false); }}
+                      onToggle={() => {
+                        const nowDone = !done[i];
+                        setDone(d => ({ ...d, [i]: nowDone }));
+                        if (nowDone && i < routine.exercises.length - 1) {
+                          setTimer({ seconds: parseRestSecs(ex.rest), exIndex: i });
+                        }
+                      }}
+                      onVideoClick={() => setSelectedMachine(getMachineData(ex.machine))}
+                      onSubstitute={(force) => loadAlternatives(i, force)}
+                      onPickAlternative={(alt) => pickAlternative(i, alt)}
+                      onDismissAlternatives={() => setAlternatives(a => ({ ...a, [i]: null }))}
+                    />
+                  ))}
+                </div>
               </div>
             ) : null}
 
@@ -3282,7 +3325,7 @@ SOLO JSON sin backticks:
        {!loading && doneCount > 0 && <Btn onClick={() => {
   if (showFinish) return; const newEntry = { date: new Date().toLocaleDateString(), focus: routine?.dayFocus, muscles: routine?.musclesWorked || [], completed: doneCount, total: totalEx }; setHistory(h => [newEntry, ...h]); const userId = JSON.parse(localStorage.getItem("froqia_session"))?.user?.id;; if (userId) { console.log("userId:", userId);
 console.log("routine:", routine?.dayFocus);supabaseCall("saveRutina", { user_id: userId, nombre: routine?.dayFocus || "Entrenamiento", ejercicios: doneCount, calorias: parseInt(routine?.caloriesBurned) || 0, grupo_muscular: routine?.musclesWorked?.[0] || "" }).catch(() => {}); } setFinishQuote(MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]); setShowFinish(true); }} variant="success" style={{ width: "100%", marginTop: 14, padding: 14, fontSize: 15 }}>✅ Finalizar ({doneCount}/{totalEx})</Btn>}
-            <Btn onClick={() => { setRoutine(null); setSelectedMuscleGroup(null); setDone({}); }} variant="ghost" style={{ width: "100%", marginTop: 10, fontSize: 13 }}>🔄 Nueva rutina</Btn>
+            <Btn onClick={() => { setRoutine(null); setSelectedMuscleGroup(null); setDone({}); setShowAllExercises(true); setCarouselIndex(0); setShowGroupSelector(true); }} variant="ghost" style={{ width: "100%", marginTop: 10, fontSize: 13 }}>🔄 Nueva rutina</Btn>
           </>
         )}
 

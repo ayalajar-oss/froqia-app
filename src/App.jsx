@@ -3226,6 +3226,10 @@ SOLO JSON sin backticks:
               const carEx = routine.exercises[carouselIndex];
               if (!carEx) return null;
               const carDone = !!done[carouselIndex];
+              const carMachineData = getMachineData(carEx.machine);
+              const carAlts = alternatives[carouselIndex];
+              const carLoadingAlts = carAlts === "loading" || substituting === carouselIndex;
+              const carShowAlts = carAlts && Array.isArray(carAlts);
               return (
                 <div>
                   {/* Carousel header: back + dots + counter */}
@@ -3250,19 +3254,82 @@ SOLO JSON sin backticks:
                       setSwipeStartX(null);
                     }}
                   >
-                    <div style={{ ...card, padding: "28px 20px", textAlign: "center", borderColor: carDone ? "rgba(16,185,129,0.35)" : "rgba(232,74,46,0.3)", background: carDone ? "rgba(16,185,129,0.08)" : "rgba(232,74,46,0.05)", minHeight: 260, transition: "background 0.25s, border-color 0.25s" }}>
-                      {carDone && <div style={{ color: "#10b981", fontSize: 11, fontWeight: 800, letterSpacing: 0.5, marginBottom: 8 }}>✓ COMPLETADO</div>}
-                      <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>EJERCICIO {carouselIndex + 1} / {totalEx}</div>
-                      <div style={{ fontWeight: 800, fontSize: 26, lineHeight: 1.2, marginBottom: 12 }}>{carEx.machine}</div>
-                      <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 20, fontWeight: 600, marginBottom: 6 }}>{carEx.sets} × {carEx.reps}</div>
-                      {carEx.weight_suggestion && <div style={{ color: "#f59e0b", fontSize: 14, fontWeight: 600, marginBottom: 6 }}>🏋️ {carEx.weight_suggestion}</div>}
-                      {carEx.rest && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginBottom: 20 }}>⏱ Descanso: {carEx.rest}</div>}
-                      {!carDone ? (
-                        <button onClick={() => { setDone(d => ({ ...d, [carouselIndex]: true })); if (carouselIndex < routine.exercises.length - 1) { setTimer({ seconds: parseRestSecs(carEx.rest), exIndex: carouselIndex }); setCarouselIndex(ci => ci + 1); } }} style={{ width: 88, height: 88, borderRadius: "50%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", fontSize: 38, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 32px rgba(16,185,129,0.45)" }}>✓</button>
-                      ) : (
-                        <div style={{ width: 88, height: 88, borderRadius: "50%", background: "rgba(16,185,129,0.15)", border: "2px solid rgba(16,185,129,0.4)", color: "#10b981", fontSize: 38, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>✓</div>
+                    <div style={{ ...card, padding: "20px 16px", borderColor: carDone ? "rgba(16,185,129,0.35)" : "rgba(232,74,46,0.3)", background: carDone ? "rgba(16,185,129,0.08)" : "rgba(232,74,46,0.05)", transition: "background 0.25s, border-color 0.25s" }}>
+                      {/* Status + counter */}
+                      <div style={{ textAlign: "center", marginBottom: 10 }}>
+                        {carDone && <div style={{ color: "#10b981", fontSize: 11, fontWeight: 800, letterSpacing: 0.5, marginBottom: 4 }}>✓ COMPLETADO</div>}
+                        <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>EJERCICIO {carouselIndex + 1} / {totalEx}</div>
+                      </div>
+
+                      {/* YouTube thumbnail */}
+                      {carMachineData?.videoId && (
+                        <div onClick={() => setSelectedMachine(carMachineData)} style={{ cursor: "pointer", marginBottom: 14, position: "relative", borderRadius: 10, overflow: "hidden" }}>
+                          <img src={`https://img.youtube.com/vi/${carMachineData.videoId}/mqdefault.jpg`} style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }} />
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.28)" }}>
+                            <div style={{ background: "rgba(0,0,0,0.72)", borderRadius: "50%", width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>▶</div>
+                          </div>
+                        </div>
                       )}
-                      {carEx.tip && <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, fontStyle: "italic", lineHeight: 1.5, marginTop: 14 }}>{carEx.tip}</div>}
+
+                      {/* Name + muscle */}
+                      <div style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.2, marginBottom: 4, textAlign: "center" }}>{carEx.machine}</div>
+                      {carEx.muscle && <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, marginBottom: 14, textAlign: "center" }}>{carEx.muscle}</div>}
+
+                      {/* Stats chips */}
+                      <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginBottom: 12 }}>
+                        <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "8px 14px", textAlign: "center", minWidth: 80 }}>
+                          <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, marginBottom: 3 }}>SERIES × REPS</div>
+                          <div style={{ fontWeight: 800, fontSize: 15 }}>{carEx.sets} × {carEx.reps}</div>
+                        </div>
+                        {carEx.rest && <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 10, padding: "8px 14px", textAlign: "center", minWidth: 80 }}>
+                          <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, marginBottom: 3 }}>DESCANSO</div>
+                          <div style={{ fontWeight: 800, fontSize: 15 }}>{carEx.rest}</div>
+                        </div>}
+                        {carEx.weight_suggestion && <div style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 10, padding: "8px 14px", textAlign: "center", minWidth: 80 }}>
+                          <div style={{ color: "rgba(245,158,11,0.7)", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, marginBottom: 3 }}>PESO</div>
+                          <div style={{ fontWeight: 800, fontSize: 15, color: "#f59e0b" }}>{carEx.weight_suggestion}</div>
+                        </div>}
+                      </div>
+
+                      {/* Tip */}
+                      {carEx.tip && <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, fontStyle: "italic", lineHeight: 1.5, marginBottom: 14, textAlign: "center" }}>{carEx.tip}</div>}
+
+                      {/* Action buttons */}
+                      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                        {carMachineData?.videoId && <button onClick={() => setSelectedMachine(carMachineData)} style={{ flex: 1, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "9px 12px", color: "rgba(255,255,255,0.7)", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600 }}>▶ Ver video</button>}
+                        <button onClick={() => loadAlternatives(carouselIndex, false)} disabled={carLoadingAlts} style={{ flex: 1, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)", borderRadius: 10, padding: "9px 12px", color: "#a78bfa", fontSize: 13, cursor: carLoadingAlts ? "default" : "pointer", fontFamily: "'DM Sans',sans-serif", fontWeight: 600 }}>{carLoadingAlts ? "Buscando..." : "↔ Alternativa"}</button>
+                      </div>
+
+                      {/* Alternatives */}
+                      {carShowAlts && (
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={{ color: "#8b5cf6", fontSize: 11, fontWeight: 800, marginBottom: 8 }}>ALTERNATIVAS</div>
+                          {carAlts.map((alt, ai) => {
+                            const altMd = getMachineData(alt.machine);
+                            return (
+                              <div key={ai} style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.18)", borderRadius: 10, padding: "10px 12px", marginBottom: 7, cursor: "pointer" }} onClick={() => { pickAlternative(carouselIndex, alt); setAlternatives(a => ({ ...a, [carouselIndex]: null })); }}>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                  {altMd?.videoId && <img src={`https://img.youtube.com/vi/${altMd.videoId}/mqdefault.jpg`} style={{ width: 44, height: 33, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />}
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 700, fontSize: 13, color: "#fff" }}>{alt.machine}</div>
+                                    <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>{alt.sets}×{alt.reps} · {alt.weight_suggestion}</div>
+                                    {alt.reason && <div style={{ color: "#a78bfa", fontSize: 11, marginTop: 2 }}>{alt.reason}</div>}
+                                  </div>
+                                  <div style={{ color: "#a78bfa", fontSize: 16 }}>›</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <button onClick={() => setAlternatives(a => ({ ...a, [carouselIndex]: null }))} style={{ width: "100%", background: "none", border: "none", color: "rgba(255,255,255,0.3)", fontSize: 12, cursor: "pointer", padding: "4px 0", fontFamily: "'DM Sans',sans-serif" }}>✕ Cerrar alternativas</button>
+                        </div>
+                      )}
+
+                      {/* Complete button */}
+                      {!carDone ? (
+                        <button onClick={() => { setDone(d => ({ ...d, [carouselIndex]: true })); if (carouselIndex < routine.exercises.length - 1) { setTimer({ seconds: parseRestSecs(carEx.rest), exIndex: carouselIndex }); setCarouselIndex(ci => ci + 1); } }} style={{ width: "100%", background: "linear-gradient(135deg,#10b981,#059669)", border: "none", color: "#fff", borderRadius: 14, padding: 15, fontWeight: 800, fontSize: 16, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", boxShadow: "0 4px 24px rgba(16,185,129,0.35)" }}>✓ Completar ejercicio</button>
+                      ) : (
+                        <div style={{ width: "100%", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", borderRadius: 14, padding: 15, fontWeight: 800, fontSize: 16, textAlign: "center" }}>✓ Completado</div>
+                      )}
                     </div>
                   </div>
 
